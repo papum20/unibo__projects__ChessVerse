@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ChessVerse</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('../web/login/background2.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+        }
+
+        .h1 {
+            font-size: 3rem;
+            color: #d9d9d9;
+        }
+
+        .h2 {
+            color: #d9d9d9;
+        }
+
+        .custom-btn {
+            background-color: #9a815b;
+            border-color: #9a815b;
+            color: #fff;
+            font-size: 1.5rem;
+        }
+
+        .custom-btn:hover {
+            background-color: #7a6448;
+            border-color: #7a6448;
+        }
+
+        .center-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding-top: 2%;
+            color: #d9d9d9;
+        }
+
+        .center-buttons{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo {
+            width: 90px;
+            height: 90px;
+        }
+        .custom-btn {
+            background-color: #9a815b;
+            border-color: #9a815b;
+            color: #fff;
+            font-size: 1.5rem;
+        }
+
+        .custom-btn:hover {
+            background-color: #7a6448;
+            border-color: #7a6448;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-content">
+        <div class="d-flex align-items-center ">
+            <img src="../web/login/logo.png" alt="Image" class="logo mr-3">  
+            <p class="h1 ml-1 mt-4" style="font-size: 5rem;">ChessVerse</p>
+        </div>
+        <p class="h2"> Challenge yourself, Challenge the world</p>
+    </div>
+    <div class="container text-center" style="padding-top: 10%;">
+        <div class="row">
+          <div class="col">
+            <button type="button" class="btn btn-lg custom-btn">Download for MacOS</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-lg custom-btn">Download for Windows</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-lg custom-btn ">Download for Linux</button>
+          </div>
+        </div>
+      </div>
+    <script type="text/javascript" src="/eel.js"></script>
+    <script src="script.js"></script>
+    <script>
+        function downloadFile(filePath) {
+            var a = document.createElement('a');
+            a.href = filePath;
+            a.download = filePath.substring(filePath.lastIndexOf('/')+1);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+    </script>
+</body>
+</html>
