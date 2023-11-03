@@ -1,0 +1,7 @@
+# vscode
+.vscode/
+
+# node/js
+build/
+dist/
+node_modules/

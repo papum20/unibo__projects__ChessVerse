@@ -1,0 +1,16 @@
+
+server {
+	server_name ${DOMAIN};
+	listen 80;
+
+	location / {
+		proxy_pass http://chessverse-website:${CHESSVERSE_WEB_PORT};
+		include proxy_params;
+	}
+
+	location /api/ {
+		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT}/api/;
+		include proxy_params;
+	}
+
+}
