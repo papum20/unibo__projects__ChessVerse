@@ -5,8 +5,8 @@
 - Luca Gabellini (Dev) - 001020370
 - Nico Wu (Dev) - 0001028979
 - Francesco Licchelli (Dev) - 0001041426
-- Daniele D'Ugo (Dev) - 0001027741
-- Cono Cirone (SM) - 0001029785
+- Daniele D'Ugo (SM) - 0001027741
+- Cono Cirone (Dev) - 0001029785
 
 ---
 
@@ -21,5 +21,5 @@ Inoltre, l'app fornirà una classifica generale (leaderboard) per tenere traccia
 **Sviluppo:**
 - Modalità di comunicazione intergruppo: Telegram e Mattermost
 - Riunioni Scrum: 3 volte alla settimana
-- Linguaggio di Programmazione: Python
+- Linguaggio di Programmazione: Python, javascript
 - Database: MySQL
