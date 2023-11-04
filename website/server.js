@@ -1,12 +1,10 @@
-const http = require('http');
+require('dotenv').config();
+const express = require('express');
+const path = require('path');
+const app = express();
 
-const server = http.createServer((req, res) => {
-  if (req.method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write('<h1>ChessVerse!</h1>');
-    res.end();
-  }
-});
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 const port = process.env.PORT || 3000;
-server.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));

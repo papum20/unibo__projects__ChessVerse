@@ -1,10 +1,16 @@
-# vscode
+# editor
+##vscode
 .vscode/
+##mac
+.DS_Store
 
 # node/js
 build/
 dist/
 node_modules/
 
-.idea
+# env/private
 .env
+
+# misc
+.idea
