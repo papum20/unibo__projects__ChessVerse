@@ -19,6 +19,8 @@ services:
     build:
       context: ./website
       dockerfile: Dockerfile
+    env_file:
+      - ./env/chessverse-web.env
     networks:
       chessverse:
       default:
