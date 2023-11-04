@@ -3,7 +3,7 @@
 ## Install
 
 Clone this repo and launch the provided `docker-compose.yml`.  
-You first need to setup environment variables: `server-nginx/chessverse.env` and `env/credentials.env` (there's a script for generating random ones).  
+You first need to setup environment variables: `server-nginx/chessverse.env`, `env/credentials.env` (there's a script for generating random ones), `.env`.  
 We also provide a `chessverse.conf.template` file for a nginx server; note that it contaians some variables: our approach is to use `envsubst` and the env file `chessverse.env`.  
 This setup doesn't expose any port, but assumes the use of a proxy server (e.g. nginx), which would communicate with the chessverse containers on the `default` network; change it if you use another network.  
 

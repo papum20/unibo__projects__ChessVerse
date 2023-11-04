@@ -5,4 +5,4 @@ set -a
 source .env
 
 # start
-docker compose -f $(ls docker-compose*.yml | awk '{printf "-f %s ", $0}') up -d
+docker compose $(ls docker-compose*.yml | awk '{printf "-f %s ", $0}') up -d
