@@ -3,7 +3,15 @@ import mysql.connector
 import requests
 from screeninfo import get_monitors
 import random
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+DATABASE_HOST = os.getenv("DATABASE_HOST")
+DATABASE_USER = os.getenv("DATABASE_USER")
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
+DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 def get_full_screen_size():
     monitors = get_monitors()
@@ -14,10 +22,10 @@ def get_full_screen_size():
 screen_width, screen_height = get_full_screen_size()
 
 conn = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='OsamaMilan123',
-    database='Users'
+    host=DATABASE_HOST,
+    user=DATABASE_USER,
+    password=DATABASE_PASSWORD,
+    database=DATABASE_NAME
 )
 
 cursor = conn.cursor()
