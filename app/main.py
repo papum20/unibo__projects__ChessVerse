@@ -50,8 +50,6 @@ def add_guest():
    insert_query = "INSERT INTO Guest (Username) VALUES (%s)"
    cursor.execute(insert_query, (guest_nickname,))
    conn.commit()
-   cursor.close()
-   conn.close()
 
 @eel.expose
 def get_guest_name():
@@ -64,3 +62,5 @@ def get_guest_name():
 
 eel.start('login/login.html', size=(screen_width, screen_height))
 
+cursor.close()
+conn.close()
