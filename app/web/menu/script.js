@@ -73,8 +73,8 @@ function multiplayer(){
 }
 
  async function updateName(){
-    var current_usere = await eel.get_guest_name()();
+    var current_user = await eel.frontend_get_guest_name()();
     var user = document.getElementById('userName');
-    user.innerHTML = `Welcome, ${current_usere}`;
+    user.innerHTML = `Welcome, ${current_user}`;
 }
 
