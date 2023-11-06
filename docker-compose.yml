@@ -1,28 +1,33 @@
 version: '3.7'
 
 services:
-#  chessverse-back:
-#    build:
-#      context: ./backend
-#      dockerfile: Dockerfile
-#      network:
-#        chessverse:
-#        default:
-#
-#  chessverse-db:
-#    networks:
-#      chessverse:
-#    volumes:
-#      - taiga_db_data:/var/lib/mysql
+  chessverse-back:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network:
+        chessverse:
+        default:
+
+  chessverse-db:
+    image: mysql:8.2.0
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    command: mysqld --default-authentication-plugin=caching_sha2_password
+    restart: always
+    env_file:
+      - ./env/chessverse-db.env
+    networks:
+      chessverse:
+    volumes:
+      ${VOLUME_MYSQL_DATA}:/var/lib/mysql
 
   chessverse-website:
     build:
-      context: ./website
+      context: ./code/website
       dockerfile: Dockerfile
     env_file:
       - ./env/chessverse-web.env
     networks:
-      chessverse:
       default:
 
 
@@ -31,6 +36,3 @@ networks:
     name: chessverse-network
   default:
     external: true
-
-volumes:
-  taiga_db_data:
