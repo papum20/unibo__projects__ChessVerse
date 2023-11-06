@@ -1,13 +1,13 @@
 version: '3.7'
 
 services:
-  chessverse-back:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      network:
-        chessverse:
-        default:
+  #chessverse-back:
+  #  build:
+  #    context: ./code/backend
+  #    dockerfile: Dockerfile
+  #    network:
+  #      chessverse:
+  #      default:
 
   chessverse-db:
     image: mysql:8.2.0

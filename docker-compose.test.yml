@@ -1,9 +1,0 @@
-services:
-  a:
-    image: ubuntu-ccit
-    networks:
-      - default
-  b:
-    image: ubuntu-ccit
-    networks:
-      - default
