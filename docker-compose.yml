@@ -19,7 +19,7 @@ services:
     networks:
       chessverse:
     volumes:
-      ${VOLUME_MYSQL_DATA}:/var/lib/mysql
+      - ${VOLUME_MYSQL_DATA}:/var/lib/mysql
 
   chessverse-website:
     build:
