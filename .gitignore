@@ -4,10 +4,14 @@
 ##mac
 .DS_Store
 
-# node/js
+# languages
+## node/js
 build/
 dist/
 node_modules/
+
+## python
+__pycache__/
 
 # env/private
 .env
