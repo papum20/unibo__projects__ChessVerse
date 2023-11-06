@@ -1,7 +1,20 @@
-# vscode
+# editor
+##vscode
 .vscode/
+##mac
+.DS_Store
 
-# node/js
+# languages
+## node/js
 build/
 dist/
 node_modules/
+
+## python
+__pycache__/
+
+# env/private
+.env
+
+# misc
+.idea

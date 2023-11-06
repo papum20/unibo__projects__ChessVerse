@@ -1,24 +1,26 @@
 version: '3.7'
 
 services:
-  chessverse-back:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      network:
-        chessverse:
-        default:
-
-  chessverse-db:
-    networks:
-      chessverse:
-    volumes:
-      - taiga_db_data:/var/lib/mysql
+#  chessverse-back:
+#    build:
+#      context: ./backend
+#      dockerfile: Dockerfile
+#      network:
+#        chessverse:
+#        default:
+#
+#  chessverse-db:
+#    networks:
+#      chessverse:
+#    volumes:
+#      - taiga_db_data:/var/lib/mysql
 
   chessverse-website:
     build:
       context: ./website
       dockerfile: Dockerfile
+    env_file:
+      - ./env/chessverse-web.env
     networks:
       chessverse:
       default:

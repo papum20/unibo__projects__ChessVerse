@@ -5,12 +5,12 @@ server {
 
 	location / {
 		proxy_pass http://chessverse-website:${CHESSVERSE_WEB_PORT};
-		include proxy_params;
+		include chessverse_params;
 	}
 
-	location /api/ {
-		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT}/api/;
-		include proxy_params;
-	}
+#	location /api/ {
+#		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT}/api/;
+#		include chessverse_params;
+#	}
 
 }
