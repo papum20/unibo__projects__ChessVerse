@@ -1,0 +1,10 @@
+Metodo: add_guest
+    Endpoint: /add_guest/
+    GET: Aggiunge un nuovo guest e ritorna un messaggio in caso avvenga con successo
+
+Metodo: get_guest_name
+    Endpoint: /get_guest_name/
+    GET: Questo endpoint permette di ottenere il nome dell'ultimo guest aggiunto.
+
+Per lanciare Django da terminale andare nella cartella 'backend-api' ed eseguire: 
+    python3.12  manage.py runserver 127.0.0.1:8080
