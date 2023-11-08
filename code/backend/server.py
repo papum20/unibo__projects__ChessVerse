@@ -24,6 +24,7 @@ class EventType(IntEnum):
     ACK = 3
     CONFIG = 4
     END = 5
+    SELECT = 6
     START = 999
 
 
@@ -90,6 +91,9 @@ class Player:
 
     async def send_pop(self):
         await self.send(EventType.POP)
+
+    async def send_select(self, moves: list):
+        await self.send(EventType.SELECT, {"value": moves})
 
 
 class Game:
@@ -245,6 +249,20 @@ class PVEGame(Game):
                     await self.current().send_ack(AckType.NOK, True)
                 else:
                     await self.current().send_ack(AckType.OK, True)
+        elif msg["event"] == EventType.SELECT:
+            if not self.current().has_time():
+                await self.current().send_end(False)
+            try:
+                selected_square = chess.parse_square(msg["data"]["value"])
+                piece_moves = list(
+                    filter(
+                        lambda move: move.from_square == selected_square,
+                        self.board.legal_moves,
+                    )
+                )
+                await self.current().send_select(piece_moves)
+            except (ValueError, KeyError):
+                await self.current().send_select([])
         else:
             await self.current().send_ack(AckType.UNKNOWN_ACTION)
 

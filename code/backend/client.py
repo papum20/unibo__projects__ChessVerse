@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from websockets.sync.client import connect
 import json
 import argparse

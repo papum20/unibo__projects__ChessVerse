@@ -81,16 +81,27 @@
             </div>
         </div>
     </nav>
-      <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
         <div id="board" style="width: 400px;"></div>
-      </div>
-        
+    </div>
+
+    <script type="text/javascript" src="/eel.js"></script>
+
+    <!--<script src="../../../backend/client.js"></script>-->
+
+    <script>
+
+    </script>
+
     <script>
         const config = {
             draggable: true,
+            showNotation: false,
             position: 'start'
         }
         const board = ChessBoard('board', config)
+
 
         function goBack() {
     var confirmPopup = document.createElement('div');
@@ -126,6 +137,5 @@ function closePopup() {
 }
 
     </script>
-     <script type="text/javascript" src="/eel.js"></script>
 </body>
 </html>
