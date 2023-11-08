@@ -1,3 +1,4 @@
+from env import Api
 import eel
 from screeninfo import get_monitors
 import requests
@@ -13,12 +14,12 @@ screen_width, screen_height = get_full_screen_size()
 eel.init('web')
 @eel.expose
 def frontend_add_guest():
-    response = requests.get('http://localhost:8080/backend_django/add_guest/')
+    response = requests.get(Api.API_ADD_GUEST)
     return response.json()
 
 @eel.expose
 def frontend_get_guest_name():
-    response = requests.get('http://localhost:8080/backend_django/get_guest_name/')
+    response = requests.get(Api.API_GET_GUEST_NAME)
     data = response.json()
     return data['guest_nickname']
 
