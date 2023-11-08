@@ -173,12 +173,14 @@ const handleConfig = (msg) => {
     const fen = msg.data.fen;
     const color = msg.data.color;
     const gameId = msg.data.id;
+    config.position = fen;
 }
 
 const handleMove = (msg) => {
     const opponentMove = msg.data.value;
     ready = true;
-    //metti la mossa avversaria sulla board graficamente e sul chess.js
+    game.move(opponentMove) // chess.js
+    board.move(opponentMove) // chessboard.js
 }
 
 const handlePop = (msg) => {

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await updateName();
 });
 
-eel.expose
+eel.expose(clicked)
 function clicked(){
     window.location.href='../play/index.html';
 }
@@ -40,7 +40,8 @@ function openPopup() {
         var gameImbalance = gameImbalanceInput.value;
 
         if (botDifficulty >= 1 && botDifficulty <= 20 && gameImbalance >= 1 && gameImbalance <= 100) {
-            startGame(botDifficulty, gameImbalance);
+            // startGame(botDifficulty, gameImbalance);
+            eel.game(botDifficulty, gameImbalance);
             closePopup();
         } else {
             alert('Inserire valori corretti per Bot Difficulty e Game Imbalance.');

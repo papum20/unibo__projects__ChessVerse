@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import eel
 from websockets.sync.client import connect
 import json
 import argparse
@@ -155,6 +156,7 @@ class Player:
     def handle_end(message):
         print(f"hai {"vinto" if message["data"]["value"] else "perso"}")
 
+    @eel.expose
     def handle_move(self, message):
         self.board.push(chess.Move.from_uci(message["data"]["value"]))
         print(self.board)
