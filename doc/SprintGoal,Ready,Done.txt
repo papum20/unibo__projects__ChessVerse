@@ -1,0 +1,26 @@
+DICHIARAZIONE DI SPRINT GOAL
+    Il nostro focus è di sviluppare una pagina di accesso per gli utenti ospiti e una pagina di gioco per ReallyBadChess che consenta agli utenti di interagire con la scacchiera, 
+    spostare i pezzi e giocare contro un bot.
+
+    Crediamo che questo porti a un'esperienza utente coinvolgente e accessibile per gli appassionati di scacchi che desiderano giocare a ReallyBadChess.
+
+    Questo sarà confermato quando gli utenti potranno accedere come ospiti, visualizzare la scacchiera, spostare i pezzi e iniziare a giocare contro il bot senza problemi.
+
+DEFINIZIONE DI READY
+    Una User Story si considera "PRONTA" quando soddisfa determinati criteri e condizioni che la rendono pronta per essere pianificata, sviluppata e implementata. 
+    Le caratteristiche di una User Story "PRONTA" includono:
+    - Indipendente: La User Story è indipendente da altre storie e può essere sviluppata in qualsiasi ordine.
+    - Negoziabile: La User Story è aperta a discussioni e modifiche, ma le sue principali funzionalità sono ben comprese e definite.
+    - Valorizzante: La User Story fornisce valore al cliente.
+    - Stimabile: È possibile stimare il lavoro richiesto per completare la User Story.
+    - Piccola: La User Story è abbastanza piccola da poter essere completata in uno o in pochi sprint.
+    - Comprensibile: La User Story è stata discussa e compresa da tutti i membri del team e dal Product Owner.
+    - Testabile: È dettagliata abbastanza da poter essere poi testata 
+
+DEFINIZIONE DI FATTO
+    Una User Story si considera "FATTA" quando è stata sviluppata, testata e soddisfa tutti i criteri di accettazione definiti. Le caratteristiche di una User Story "FATTA" includono:
+    - Sviluppata: La funzionalità descritta dalla User Story è stata implementata nel codice.
+    - Testata: La User Story è stata sottoposta a test per garantire che funzioni correttamente e che soddisfi tutti i criteri di accettazione.
+    - Pronta per il Rilascio: La User Story è pronta per essere rilasciata in produzione, se necessario.
+    - Documentata: La User Story è stata documentata, se necessario, in modo che il team e gli stakeholder siano informati.
+    - Revisione e Approvazione: La User Story è stata revisionata e approvata dal Product Owner.
