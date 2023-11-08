@@ -39,6 +39,7 @@ services:
     build:
       context: ./code/app-ia
       dockerfile: Dockerfile
+    env_file: ./env/webapp.env
     networks:
       default:
 

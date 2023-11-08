@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import chess
+import os
 
 app = Flask(__name__)
 
@@ -27,4 +28,4 @@ def move():
     return print_board(board)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=int(os.getenv('PORT', 5000)) )
