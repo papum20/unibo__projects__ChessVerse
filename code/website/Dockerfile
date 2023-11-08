@@ -12,6 +12,7 @@ RUN npm ci --only=production
 # don't run as root #2
 USER node
 # node isn't suitable to be run as pid 1, dumb-init is like a wrapper
-CMD ["dumb-init", "npm", "start"]
+RUN chmod +x /usr/src/app/entrypoint.sh
+CMD ["/usr/src/app/entrypoint.sh"]
 
 # https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/

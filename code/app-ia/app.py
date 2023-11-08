@@ -1,8 +1,9 @@
-from flask import Flask, Blueprint, render_template, request
+from flask import Flask, Blueprint, render_template, redirect, request, session, url_for
 import chess
 import os
 
 app = Flask(__name__)
+app.secret_key = 'your secret key'  # replace with your secret key
 webapp = Blueprint(os.getenv('SUBPATH', '/'), __name__)
 
 def print_board(board):
@@ -15,22 +16,21 @@ def print_board(board):
 
 @webapp.route('/')
 def index():
-    board = chess.Board()
-    return render_template('index.html', board=print_board(board))
-@webapp.route('/webapp/')
-def index():
-    board = chess.Board()
-    return render_template('index.html', board=print_board(board))
+    fen = session.get('fen', chess.STARTING_FEN)
+    board = chess.Board(fen)
+    return render_template('index.html', board=print_board(board), fen=fen)
 
 @webapp.route('/move', methods=['POST'])
 def move():
     uci_move = request.form.get('move')
-    board = chess.Board(request.form.get('board'))
+    fen = session.get('fen', chess.STARTING_FEN)
+    board = chess.Board(fen)
     if chess.Move.from_uci(uci_move) in board.legal_moves:
         board.push_uci(uci_move)
+        session['fen'] = board.fen()
     else:
         return "Illegal move. Try again.", 400
-    return print_board(board)
+    return redirect(url_for('/webapp.index'))
 
 app.register_blueprint(webapp, url_prefix=os.getenv('SUBPATH', '/'))
 

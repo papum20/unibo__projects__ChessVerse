@@ -4,9 +4,10 @@
     <title>Chess Game</title>
 </head>
 <body>
-    <form action="/move" method="post">
+    <form action="/webapp/move" method="post">
         <pre>{{ board }}</pre>
         <input type="hidden" name="board" value="{{ board }}">
+        <input type="hidden" name="fen" value="{{ fen }}">
         <input type="text" name="move" placeholder="Enter your move">
         <input type="submit" value="Make move">
     </form>

@@ -90,6 +90,10 @@
           </div>
 		</div>
 	</div>
+	<div>
+		<h3>webapp made by copilot</h3>
+		<a href="http://${DOMAIN}/${PATH_WEBAPP}" target="_blank">Play Chess</a>
+	</div>
     <script>
         function downloadFile(filePath) {
             alert("still to implement");
