@@ -12,6 +12,7 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY requirements.txt .
+RUN apt-get update -y && apt-get install gcc -y
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
