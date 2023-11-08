@@ -34,6 +34,14 @@ services:
     networks:
       default:
 
+  chessverse-ia:
+    container_name: chessverse-ia
+    build:
+      context: ./code/app-ia
+      dockerfile: Dockerfile
+    networks:
+      default:
+
 
 networks:
   chessverse:

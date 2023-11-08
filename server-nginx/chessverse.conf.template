@@ -8,6 +8,11 @@ server {
 		include chessverse_params;
 	}
 
+	location /webapp/ {
+		proxy_pass http://chessverse-ia:${CHESSVERSE_WEBAPP_PORT};
+		include chessverse_params;
+	}
+
 #	location /api/ {
 #		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT}/api/;
 #		include chessverse_params;
