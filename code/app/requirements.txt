@@ -1,0 +1,6 @@
+Package                   Version
+------------------------- ------------
+Eel                       0.16.0
+requests                  2.31.0
+screeninfo                0.8.1
+
