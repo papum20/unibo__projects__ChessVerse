@@ -3,7 +3,6 @@ from screeninfo import get_monitors
 import requests
 from websockets.sync.client import connect
 import json
-import argparse
 import chess
 from enum import IntEnum
 
@@ -60,8 +59,9 @@ class AckType(IntEnum):
 class Player:
     last_move = None
 
-    def __init__(self, websocket, color=None, board=None, remaining_time=None):
+    def __init__(self, websocket, game_type, color=None, board=None, remaining_time=None):
         self.game_id = None
+        self.game_type = game_type
         self.ws = websocket
         self.color = color
         self.board = board
@@ -87,7 +87,7 @@ class Player:
         print(self.board)
 
     def resign(self):
-        return {"event": 0, "data": {"id": self.game_id, "type": gameType}}
+        return {"event": 0, "data": {"id": self.game_id, "type": self.gameType}}
 
     def move(self):
         uci = input("Enter UCI move:")
@@ -95,14 +95,14 @@ class Player:
         if validated_move is not None:
             return {
                 "event": EventType.MOVE.value,
-                "data": {"value": uci, "id": self.game_id, "type": gameType},
+                "data": {"value": uci, "id": self.game_id, "type": self.gameType},
             }
         else:
             print("Invalid move. Try again.")
             return None
 
     def pop(self):
-        return {"event": EventType.POP.value, "data": {"id": self.game_id, "type": gameType}}
+        return {"event": EventType.POP.value, "data": {"id": self.game_id, "type": self.gameType}}
 
     def select(self):
         try:
@@ -183,7 +183,8 @@ class Player:
 
     @staticmethod
     def handle_end(message):
-        print(f"hai {"vinto" if message["data"]["value"] else "perso"}")
+        # print(f"hai {"vinto" if message["data"]["value"] else "perso"}")
+        pass
 
     @eel.expose
     def handle_move(self, message):
@@ -209,19 +210,20 @@ class Player:
   4) se non mio turno, aspetta messaggio dal server
 """
 
+
 @eel.expose
-def game(depth, rank, type="PVE", time=10):
+def game(depth, rank, game_type="PVE", time=10):
     infos = dict(
         event=EventType.START,
         data=dict(
-            type=1 if type == "PVE" else 0,
+            type=1 if game_type == "PVE" else 0,
             depth=max(min(depth, 20), 1),
             rank=max(min(rank, 100), 0),
             time=time,
         ),
     )
     with connect("ws://localhost:8766") as websocket:
-        player = Player(websocket)
+        player = Player(websocket, 1 if game_type == "PVE" else 0)
         player.ws.send(json.dumps(infos))
         print("successo")
         while True:
@@ -233,29 +235,27 @@ def game(depth, rank, type="PVE", time=10):
         player.ws.close()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-m",
-        choices=["PVE", "PVP"],
-        required=True,
-        help="Play against Stockfish v16 (PvE) or against another player (PvP)",
-    )
-    parser.add_argument("-l", type=int, default=5, help="Bot strength level [1,20]")
-    parser.add_argument("-r", type=int, default=50, help="Game rank [0, 100]")
-    parser.add_argument("-t", type=int, default=5, help="Game time [5, 10, 15, -1]")
-    args = parser.parse_args()
-
-    gameType = 1 if args.m == "PVE" else 0
-
-    infos = dict(
-        event=EventType.START,
-        data=dict(
-            type=1 if args.m == "PVE" else 0,
-            depth=max(min(args.l, 20), 1),
-            rank=max(min(args.r, 100), 0),
-            time=args.t,
-        ),
-    )
-
-    game()
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument(
+#         "-m",
+#         choices=["PVE", "PVP"],
+#         required=True,
+#         help="Play against Stockfish v16 (PvE) or against another player (PvP)",
+#     )
+#     parser.add_argument("-l", type=int, default=5, help="Bot strength level [1,20]")
+#     parser.add_argument("-r", type=int, default=50, help="Game rank [0, 100]")
+#     parser.add_argument("-t", type=int, default=5, help="Game time [5, 10, 15, -1]")
+#     args = parser.parse_args()
+#
+#     gameType = 1 if args.m == "PVE" else 0
+#
+#     infos = dict(
+#         event=EventType.START,
+#         data=dict(
+#             type=1 if args.m == "PVE" else 0,
+#             depth=max(min(args.l, 20), 1),
+#             rank=max(min(args.r, 100), 0),
+#             time=args.t,
+#         ),
+#     )

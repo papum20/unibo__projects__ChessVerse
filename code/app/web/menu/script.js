@@ -40,8 +40,6 @@ function openPopup() {
         var gameImbalance = gameImbalanceInput.value;
 
         if (botDifficulty >= 1 && botDifficulty <= 20 && gameImbalance >= 1 && gameImbalance <= 100) {
-            // startGame(botDifficulty, gameImbalance);
-            eel.game(botDifficulty, gameImbalance);
             closePopup();
         } else {
             alert('Inserire valori corretti per Bot Difficulty e Game Imbalance.');
@@ -66,6 +64,7 @@ function closePopup() {
 
 function startGame(botDifficulty, gameImbalance) {
     console.log('Starting game with botDifficulty:', botDifficulty, 'and gameImbalance:', gameImbalance);
+    eel.game(botDifficulty, gameImbalance);
     window.location.href='../play/index.html';
 }
 

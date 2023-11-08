@@ -217,30 +217,30 @@ const handleACK = (msg) => {
     }
 }
 
-ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-
-    switch (msg.type) {
-        case EventType.MOVE:
-            handleMove(msg);
-            break;
-        case EventType.POP:
-            handlePop(msg);
-            break;
-        case EventType.ACK:
-            handleACK(msg);
-            break;
-        case EventType.CONFIG:
-            handleConfig(msg);
-            break;
-        case EventType.END:
-            handleEnd(msg);
-            break;
-        case EventType.ERROR:
-            handleError(msg);
-            break;
-        default:
-            ws.close()
-            break;
-    }
-}
+// ws.onmessage = (event) => {
+//     const msg = JSON.parse(event.data);
+//
+//     switch (msg.type) {
+//         case EventType.MOVE:
+//             handleMove(msg);
+//             break;
+//         case EventType.POP:
+//             handlePop(msg);
+//             break;
+//         case EventType.ACK:
+//             handleACK(msg);
+//             break;
+//         case EventType.CONFIG:
+//             handleConfig(msg);
+//             break;
+//         case EventType.END:
+//             handleEnd(msg);
+//             break;
+//         case EventType.ERROR:
+//             handleError(msg);
+//             break;
+//         default:
+//             ws.close()
+//             break;
+//     }
+// }
