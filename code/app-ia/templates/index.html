@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Game</title>
+</head>
+<body>
+    <form action="/move" method="post">
+        <pre>{{ board }}</pre>
+        <input type="hidden" name="board" value="{{ board }}">
+        <input type="text" name="move" placeholder="Enter your move">
+        <input type="submit" value="Make move">
+    </form>
+</body>
+</html>
