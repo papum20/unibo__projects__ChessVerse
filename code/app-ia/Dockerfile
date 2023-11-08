@@ -20,4 +20,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run the command to start uWSGI
-CMD ["python", "app.py", "0.0.0.0:5000"]
+CMD ["python", "app.py"]
