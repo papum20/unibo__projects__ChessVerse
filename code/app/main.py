@@ -23,4 +23,4 @@ def frontend_get_guest_name():
     data = response.json()
     return data['guest_nickname']
 
-eel.start('login/login.html', size=(screen_width, screen_height))
+eel.start('login/login.html', size=(screen_width, screen_height), port=8080)
