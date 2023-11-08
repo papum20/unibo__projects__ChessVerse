@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 import os
 import shutil
-import subprocess
 
 
 command1 = "python3.12 -m eel main.py web --name ChessVerse --icon=logo.png -w"
