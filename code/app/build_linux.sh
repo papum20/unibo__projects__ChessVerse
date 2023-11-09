@@ -1,11 +1,8 @@
 #!/bin/bash
 
 set -a
-source ../../env/app.py
+source ../../env/app.env
 
-python3.12 -m eel main.py web --name ChessVerse --icon=logo.png -w
-create-dmg dist/Chessverse.App
+python3 -m eel main.py web --name ChessVerse --icon=logo.png -w
 
-mkdir versions
-
-mv ChessVerse 0.0.0.dmg versions/Chessverse_v1.0.dmg
+zip -r chessverse_debian.zip dist/ChessVerse

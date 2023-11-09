@@ -13,9 +13,9 @@ server {
 		include chessverse_params;
 	}
 
-#	location /api/ {
-#		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT}/api/;
-#		include chessverse_params;
-#	}
+	location /api/ {
+		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT};
+		include chessverse_params;
+	}
 
 }

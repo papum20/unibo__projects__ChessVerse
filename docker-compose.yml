@@ -10,6 +10,19 @@ services:
   #      chessverse:
   #      default:
 
+  chessverse-back:
+    container_name: chessverse-back
+    build:
+      context: ./code/backend
+      dockerfile: Dockerfile
+    env_file: ./env/backend.env
+    networks:
+      default:
+        ipv4_address: ${DFLT_IP_BACKEND}
+    volumes:
+      - ./database/dist:/usr/src/dist
+
+
   chessverse-db:
     image: mysql:8.2.0
     container_name: chessverse-db
@@ -34,7 +47,6 @@ services:
     networks:
       default:
         ipv4_address: ${DFLT_IP_WEBSITE}
-
 
   chessverse-ia:
     container_name: chessverse-ia

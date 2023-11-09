@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/eel/eel.js', 'eel'), ('web', 'web')],
+    datas=[('/home/danie/miniconda3/envs/chessverse/lib/python3.11/site-packages/eel/eel.js', 'eel'), ('web', 'web')],
     hiddenimports=['bottle_websocket'],
     hookspath=[],
     hooksconfig={},
@@ -41,10 +41,4 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name='ChessVerse',
-)
-app = BUNDLE(
-    coll,
-    name='ChessVerse.app',
-    icon='logo.png',
-    bundle_identifier=None,
 )

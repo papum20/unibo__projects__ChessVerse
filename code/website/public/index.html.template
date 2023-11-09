@@ -80,13 +80,13 @@
     <div class="container text-center" style="padding-top: 10%;">
         <div class="row">
           <div class="col">
-            <button type="button" class="btn btn-lg custom-btn" onclick="downloadFile('../../app/versions/macOS/ChessVersev1.dmg')">Download for MacOS</button>
+            <button type="button" class="btn btn-lg custom-btn" onclick="downloadFile('macos_latest')">Download for MacOS</button>
           </div>
           <div class="col">
-            <button type="button" class="btn btn-lg custom-btn" onclick="downloadFile('../../app/versions/Windows/ChessVerse_window.exe')">Download for Windows</button>
+            <button type="button" class="btn btn-lg custom-btn" onclick="downloadFile('windows11_latest')">Download for Windows</button>
           </div>
           <div class="col">
-            <button type="button" class="btn btn-lg custom-btn " onclick="downloadFile('../dist/ChessVerse')">Download for Linux</button>
+            <button type="button" class="btn btn-lg custom-btn " onclick="downloadFile('debian_latest')">Download for Linux</button>
           </div>
 		</div>
 	</div>
@@ -97,7 +97,7 @@
     <script>
         function downloadFile(filePath) {
             var link = document.createElement('a');
-            link.href = filePath;
+            link.href = '/api/download/' + filePath;
             link.download = filePath.split('/').pop();
             document.body.appendChild(link);
             link.click();
