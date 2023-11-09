@@ -31,3 +31,20 @@ def add_guest(requests):
 def get_guest_name(requests):
     print('Guest nickname:' + guest_nickname)
     return JsonResponse({"guest_nickname": guest_nickname})
+
+def download_file(request, operating_system):
+    if operating_system == 'macos':
+        file_path = 'Desktop/t4-chessverse/code/app/versions/Chessverse_v1.0.dmg'
+    elif operating_system == 'windows':
+        file_path = 'Desktop/t4-chessverse/code/app/versions/Chessverse_v1.0.dmg'
+    elif operating_system == 'linux':
+        file_path = 'Desktop/t4-chessverse/code/app/versions/Chessverse_v1.0.dmg'
+    else:
+        return HttpResponseBadRequest("Sistema operativo non supportato")
+
+    if os.path.exists(file_path):
+        response = FileResponse(open(file_path, 'rb'))
+        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+        return response
+    else:
+        return HttpResponseNotFound("File non trovato")

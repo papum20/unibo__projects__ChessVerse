@@ -1,6 +1,24 @@
-Package                   Version
-------------------------- ------------
-Eel                       0.16.0
-requests                  2.31.0
-screeninfo                0.8.1
-
+bottle==0.12.25
+bottle-websocket==0.2.9
+chess==1.10.0
+chess-board==0.4.1
+chessboard==1.5.4
+Django==4.2.7
+Eel==0.16.0
+gevent==23.9.1
+gevent-websocket==0.10.1
+mysql-connector-python==8.2.0
+mysqlclient==2.2.0
+packaging==23.2
+pyinstaller==6.1.0
+pyinstaller-hooks-contrib==2023.10
+PyMySQL==1.1.0
+pyparsing==3.1.1
+python-dateutil==2.8.2
+python-dotenv==1.0.0
+requests==2.31.0
+rpyc==5.3.1
+screeninfo==0.8.1
+setuptools==68.2.2
+sqlparse==0.4.4
+python==3.12.0
