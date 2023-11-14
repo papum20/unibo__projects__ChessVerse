@@ -4,7 +4,7 @@ import Alert from "./components/Alert.jsx";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 //caricamento Lazy
@@ -16,11 +16,13 @@ const Game = loadable(() => import('./components/Game.jsx'));
 function App() {
 
     var location = useLocation();
-    const navigator = useNavigate();
+    //const navigator = useNavigate();
 
     const [isSinglePlayer, setIsSinglePlayer] = useState(false);
     const [gameImb, setGameImb] = useState(0);
     const [botDiff, setBotDiff] = useState(1);
+    const [gameTime, setGameTime] = useState(1);
+
 
 
 
@@ -28,11 +30,12 @@ function App() {
     <>  
             <Alert/> 
                 <Routes location={location} key={location.pathname}>
-                    <Route path={`/`} element={<Start setIsSinglePlayer={setIsSinglePlayer} gameImb={gameImb} setGameImb={setGameImb} botDiff={botDiff} setBotDiff={setBotDiff}/>} />
+                    <Route path={`/`} element={<Start setIsSinglePlayer={setIsSinglePlayer} gameImb={gameImb} setGameImb={setGameImb} botDiff={botDiff} setBotDiff={setBotDiff}
+                                                gameTime={gameTime} setGameTime={setGameTime}/>} />
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff}/>}/>
+                    <Route path={`/game`} element={<Game  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
                     
                     <Route path="*" element={<NoRoute />}/>
 

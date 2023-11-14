@@ -7,7 +7,7 @@ import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
 import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
 import { Image, Nav, Modal, Form, FloatingLabel, CloseButton} from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 
@@ -47,7 +47,7 @@ function Start(props){
                 <CloseButton style={{marginRight: "10px", marginTop: "5px"}} onClick={()=> setShowModal(false)}/>
             </Modal.Title>
             <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} >
                     <FloatingLabel
                         controlId="floatingInput"
                         label="Bot Difficult"
@@ -61,6 +61,13 @@ function Start(props){
                         className="mb-3"
                     >
                         <Form.Control required value={props.gameImb} onChange={(e)=>{if(e.target.value > 100 || e.target.value < 0) props.setGameImb(0); else props.setGameImb(e.target.value); }}  type="number" min={0} max={100}  placeholder="value from 0 to 100" />
+                    </FloatingLabel>
+                    <FloatingLabel
+                        controlId="floatingInput1"
+                        label="Game Time in sec"
+                        className="mb-3"
+                    >
+                        <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value > 100 || e.target.value < 0) props.setGameTime(1); else props.setGameTime(e.target.value);}}  type="number" min={1} max={100}  placeholder="value from 1 to 100" />
                     </FloatingLabel>
                     <div style={{display: "flex", justifyContent: "flex-end"}}>
                         <Button size="large" color="primary" type="submit" variant="contained">invia</Button>
