@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Chess } from 'chess.js';
 import {createTheme,ThemeProvider} from '@mui/material/styles';
 import { Button  } from "@mui/material";
-import {Gear, Clock} from 'react-bootstrap-icons';
+import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
 import "./Game.css";
 
 
@@ -57,6 +57,7 @@ function Game (props) {
       });
 
     const [showModalMenu, setShowModalMenu] = useState(false);
+    const [showGameOver, setShowGameOver] = useState(false);
 
     const [time, setTime] = useState(props.gameTime || 1);
 
@@ -68,10 +69,37 @@ function Game (props) {
         return () => clearInterval(timerInterval);
       }, []);
 
-    
+    useEffect(()=>{
+        if(time <= 0){
+            setShowGameOver(true);
+        }
+    },[time])
 
     return (
         <>
+
+            <Modal show={showGameOver} centered dialogClassName="my-modal">
+                <Modal.Body style={{backgroundColor: "#b6884e"}}>
+                    <div style={{display: "flex", justifyContent: "center", fontSize: "1.7rem"}}>
+                        <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
+                        <ExclamationDiamond size={40} color="red" />
+                    </div>
+                    { time <=0 &&
+                            <div style={{display: "flex", justifyContent: "center", fontSize: "1.3rem", marginTop: "20px"}}>
+                                <p>The time has run out</p>
+                            </div>
+                        }
+                    
+                    <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
+                        <ThemeProvider theme={theme}>
+                            <Nav.Link as={Link} to="/" style={{display: "flex", justifyContent: "center"}}>
+                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown"  variant="contained">Return to the menu</Button>
+                            </Nav.Link>
+                        </ThemeProvider>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
             <Modal show={showModalMenu} centered dialogClassName="my-modal">
                 <Modal.Body style={{backgroundColor: "#b6884e", fontSize: "1.5rem"}}>
                     <div style={{display: "flex", justifyContent: "center"}}>
