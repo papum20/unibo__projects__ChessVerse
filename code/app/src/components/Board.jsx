@@ -1,13 +1,10 @@
+import { Chessboard } from "react-chessboard";
+
 function Board() {
-    const config = {
-        draggable: true,
-        position: 'start',
-    };
-
-    const board = Chessboard('board', config);
-
     return (
-        <div id="board" style={{ width: 400 }} />
+        <>
+          <Chessboard />
+        </>
     )
 }
 export default Board;
