@@ -6,12 +6,12 @@ import ChessBoardImg from "../assets/background2.jpg";
 import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
 import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
-import {Row, Col, Image, Nav} from "react-bootstrap";
-import { useState } from "react";
+import {Row, Col, Image, Nav, Modal, Container} from "react-bootstrap";
+import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 
-function Start(){
+function Start(props){
 
     const theme = createTheme({
         palette: {
@@ -27,68 +27,77 @@ function Start(){
     
     const [showOptions, setShowOptions] = useState(false);
 
+    const [showModal, setShowModal] = useState(false);
 
     return (
         <>
+
+        <Modal show={showModal} centered size="lg">
+                <Modal.Title>
+                
+                </Modal.Title>
+                <Modal.Body>
+                    
+                </Modal.Body>
+        </Modal>
+
         <ThemeProvider theme={theme}>
 
-            <div style={{backgroundImage: `url(${ChessBoardImg})`, backgroundSize: "cover", backgroundAttachment: "fixed", backgroundRepeat: "no-repeat", width: "100vw", height: "100vh"}}> 
+            
+            <div style={{fontFamily: "'Open Sans', sans-serif", backgroundImage: `${!showOptions ?  `url(${ChessBoardImg})` : "" }`, backgroundSize: "cover", backgroundAttachment: "fixed", backgroundRepeat: "no-repeat", backgroundColor: `${showOptions ? "#b99b69" : ""}`, width: "100vw", height: "100vh"}}> 
                 <div style={{ paddingTop: "20vh"}}>
                     {!showOptions ? 
                     <>
-                        <Row style={{display: "flex", justifyContent: "center"}}>
-                            <Col>
+                        <div style={{display: "flex", justifyContent: "center"}}>
+                            <div>
                                 <Image src={`${ImageScacchi}`} style={{width: "100px", height: "100px", opacity: 0.8, marginBottom: "-10px"}} alt="immagine di scacchi" />
                                 <span style={{color: "white", fontSize: "5rem"}}>ChessVerse</span>
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
                         
-                        <Row style={{display: "flex", justifyContent: "center"}}>
-                            <Col>
+                        <div style={{display: "flex", justifyContent: "center"}}>
+                            <div>
                                 <p style={{color: "white", fontSize: "3rem"}}>Challenge yourself, Challenge the world</p>
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
                         
-                        <Row style={{display: "flex", justifyContent: "center", marginTop: "40px"}}>
-                            <Col>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "40px"}}>
+                            <div>
                                 <Nav.Link as={Link} to="/login">
-                                    <Button disabled={true} color="brown" style={{fontSize: "1.5rem"}}  variant="contained" >
+                                    <Button color="brown" disabled={true}  style={{fontSize: "1.5rem"}}  variant="contained" >
                                     Log In
                                     </Button>
                                 </Nav.Link>
-                            </Col>
-                        </Row>
-                        <Row style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
-                            <Col>
-                                <Button color="brown" style={{fontSize: "1.5rem"}} onClick={()=>{setShowOptions(true)}}  variant="contained" >
+                            </div>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <div>
+                                <Button color="brown"  style={{fontSize: "1.5rem"}} onClick={()=>{setShowOptions(true)}}  variant="contained" >
                                     Play as guest
                                 </Button>
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
                     </>
                     : 
                     <>
-                        <Row style={{display: "flex", justifyContent: "center"}}>
-                            <Col>
+                        <div style={{display: "flex", justifyContent: "center"}}>
+                            <div>
                                 <p style={{color: "white", fontSize: "5rem"}}>Choose an option:</p>
-                            </Col>
-                        </Row>
-                        <Row style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
-                            <Col>
-                                <Nav.Link as={Link} to="/singlePlayer">
-                                    <Button color="brown" style={{fontSize: "1.5rem", borderRadius: "20px"}}  variant="contained" >
+                            </div>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <div>
+                                    <Button color="brown"  onClick={()=>{props.setIsSinglePlayer(true); setShowModal(true)}} style={{fontSize: "1.5rem", borderRadius: "20px"}}  variant="contained" >
                                         <div style={{marginTop: "5px", marginBottom: "5px", marginRight: "30px", marginLeft: "30px"}}>
                                             <Image src={`${ImageSinglePlayer}`} style={{width: "30px", height: "30px", marginBottom: "-5px", marginRight: "5px"}} alt="immagine di scacchi SinglePlayer" />
                                             <span>Single Player</span>
-                                        </div>
-                                        
-                                    </Button>
-                                </Nav.Link>
-                            </Col>
-                        </Row>
-                        <Row style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
-                            <Col>
-                                <Nav.Link as={Link} to="/multiPlayer">
+                                        </div> 
+                                    </Button>     
+                            </div>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <div>
+                                <Nav.Link as={Link} to="/game" onClick={()=>props.setIsSinglePlayer(false)}>
                                     <Button color="brown" style={{fontSize: "1.5rem", borderRadius: "20px"}}  variant="contained" >
                                         <div style={{marginTop: "5px", marginBottom: "5px"}}>
                                             <Image src={`${ImageMultiPlayer}`} style={{width: "50px", height: "30px", marginBottom: "-5px", marginRight: "10px"}} alt="immagine di scacchi SinglePlayer" />
@@ -96,10 +105,10 @@ function Start(){
                                         </div>  
                                     </Button>
                                 </Nav.Link>
-                            </Col>
-                        </Row>
-                        <Row style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
-                            <Col>
+                            </div>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <div>
                                 <Button color="brown" style={{fontSize: "1.5rem", borderRadius: "20px"}} onClick={()=>setShowOptions(false)} variant="contained" >
                                     <div style={{marginTop: "5px", marginBottom: "5px"}}>
                                         <HighlightOffIcon style={{marginRight: "10px", marginBottom: "-8px"}} fontSize="large"/>
@@ -107,15 +116,18 @@ function Start(){
                                     </div>
                                     
                                 </Button>
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
                     </>
                     }
                 </div>
             </div>
-        </ThemeProvider>
+       </ThemeProvider>
+                
         </>
     )
 }
 
 export default Start;
+
+
