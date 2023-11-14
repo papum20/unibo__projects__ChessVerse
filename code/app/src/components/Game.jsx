@@ -78,26 +78,28 @@ function Game (props) {
     return (
         <>
 
-            <Modal show={showGameOver} centered dialogClassName="my-modal">
-                <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                    <div style={{display: "flex", justifyContent: "center", fontSize: "1.7rem"}}>
-                        <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
-                        <ExclamationDiamond size={40} color="red" />
-                    </div>
-                    { time <=0 &&
-                            <div style={{display: "flex", justifyContent: "center", fontSize: "1.3rem", marginTop: "20px"}}>
-                                <p>The time has run out</p>
-                            </div>
-                        }
-                    
-                    <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
-                        <ThemeProvider theme={theme}>
-                            <Nav.Link as={Link} to="/" style={{display: "flex", justifyContent: "center"}}>
-                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown"  variant="contained">Return to the menu</Button>
-                            </Nav.Link>
-                        </ThemeProvider>
-                    </div>
-                </Modal.Body>
+            <Modal  show={showGameOver} centered dialogClassName="my-modal">
+                <div style={{border: "4px solid red"}}>
+                    <Modal.Body style={{backgroundColor: "#b6884e"}}>
+                        <div style={{display: "flex", justifyContent: "center", fontSize: "1.7rem"}}>
+                            <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
+                            <ExclamationDiamond size={40} color="red" />
+                        </div>
+                        { time <=0 &&
+                                <div style={{display: "flex", justifyContent: "center", fontSize: "1.3rem", marginTop: "20px"}}>
+                                    <p>The time has run out</p>
+                                </div>
+                            }
+                        
+                        <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
+                            <ThemeProvider theme={theme}>
+                                <Nav.Link as={Link} to="/" style={{display: "flex", justifyContent: "center"}}>
+                                    <Button style={{fontSize: "1.2rem"}} size="large" color="brown"  variant="contained">Return to the menu</Button>
+                                </Nav.Link>
+                            </ThemeProvider>
+                        </div>
+                    </Modal.Body>
+                </div>
             </Modal>
 
             <Modal show={showModalMenu} centered dialogClassName="my-modal">
