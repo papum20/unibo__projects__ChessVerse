@@ -18,3 +18,8 @@ __pycache__/
 
 # misc
 .idea
+
+# logging data
+## grafana
+prometheus/prometheus.env
+prometheus/wal_data/

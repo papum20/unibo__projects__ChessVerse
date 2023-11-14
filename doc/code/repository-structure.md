@@ -54,8 +54,7 @@ It's included in the same folder, being a very simple js+html app.
 Code to start the database.  
 It's a mysql database run with the standard docker image.  
 Service:
-*	volumes:
-		- ${VOLUME_MYSQL_DATA}:/var/lib/mysql
+*	volumes: `${VOLUME_MYSQL_DATA}:/var/lib/mysql`
 
 
 ## /database
