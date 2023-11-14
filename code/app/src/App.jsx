@@ -19,16 +19,20 @@ function App() {
     const navigator = useNavigate();
 
     const [isSinglePlayer, setIsSinglePlayer] = useState(false);
+    const [gameImb, setGameImb] = useState(0);
+    const [botDiff, setBotDiff] = useState(1);
+
+
 
   return (
     <>  
             <Alert/> 
                 <Routes location={location} key={location.pathname}>
-                    <Route path={`/`} element={<Start setIsSinglePlayer={setIsSinglePlayer}/>} />
+                    <Route path={`/`} element={<Start setIsSinglePlayer={setIsSinglePlayer} gameImb={gameImb} setGameImb={setGameImb} botDiff={botDiff} setBotDiff={setBotDiff}/>} />
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game  isSinglePlayer={isSinglePlayer}/>}/>
+                    <Route path={`/game`} element={<Game  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff}/>}/>
                     
                     <Route path="*" element={<NoRoute />}/>
 
