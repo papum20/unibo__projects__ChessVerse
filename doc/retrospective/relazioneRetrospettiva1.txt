@@ -1,0 +1,8 @@
+Durante la valutazione del primo sprint, abbiamo riconosciuto che uno dei principali punti di attenzione per il 
+prossimo sprint è il miglioramento della comunicazione all'interno del team. Abbiamo effettivamente completato 
+le User Stories e i task che ci eravamo prefissati, ma abbiamo riscontrato difficoltà nella fase di integrazione 
+del codice. 
+La mancanza di comunicazione ha portato a situazioni in cui, nonostante i singoli pezzi di codice fossero funzionanti,
+non siamo riusciti a metterli insieme entro i tempi prestabiliti. Affronteremo questo problema con un focus particolare 
+sulla comunicazione efficace e sulla collaborazione per garantire un'implementazione più coerente e un'integrazione 
+tempestiva dei componenti sviluppati.
