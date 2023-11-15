@@ -22,4 +22,5 @@ __pycache__/
 # logging data
 ## grafana
 prometheus/prometheus.env
+prometheus/prometheus.yaml
 prometheus/wal_data/
