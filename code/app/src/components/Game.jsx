@@ -213,8 +213,8 @@ function Game (props) {
                     </Row>
                     
                 </div>
-                <Row style={{marginTop: "5vh"}}>
-                    <Col xs={3}>
+                <Row >
+                    <Col xs={3} sm={3} lg={3}>
                         <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: "3rem"}}>Storico Mosse</p>
@@ -231,20 +231,23 @@ function Game (props) {
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col xs={6}>
+                    <Col xs={6} sm={6} lg={6}>
                         <div style={{marginLeft: "5vw", marginRight: "5vw"}}>
                             <div style={{marginBottom: "30px", display: "flex", justifyContent: "center"}}>
                                 <Clock size={30}/>
                                 <p style={{marginLeft: "10px"}}>{timer}</p>
                             </div>
+                            <div style={{display: "flex", justifyContent: "center"}}>
                                 <Board socket={props.socket}/>
-                        </div>
-                        <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
-                            <Button color="brown"   style={{fontSize: "1.5rem"}}  variant="contained" >Undo</Button>
+                            </div>
+                            <div style={{display: "flex", justifyContent: "center", paddingTop: "30px"}}>
+                                <Button color="brown"   style={{fontSize: "1.5rem"}}  variant="contained" >Undo</Button>
+                            </div>
                         </div>
                         
+                        
                     </Col>
-                    <Col xs={3}>
+                    <Col xs={3} sm={3} lg={3}>
                         <Card style={{marginRight: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: "3rem"}}>Chat</p>

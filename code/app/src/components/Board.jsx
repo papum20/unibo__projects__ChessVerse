@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
+import useWindowDimensions from "./useWindowDimensions.jsx";
 
 function Board(props) {
+
+  const { width } = useWindowDimensions();
+
   const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -51,7 +55,7 @@ function Board(props) {
     const possibleMoves = game.moves();
     
     // exit if the game is over
-    if (game.game_over() || game.isDraw() || possibleMoves.length === 0)
+    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
       return;
 
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
@@ -173,6 +177,7 @@ function Board(props) {
       }}
       promotionToSquare={moveTo}
       showPromotionDialog={showPromotionDialog}
+      boardWidth={width/2.7}
     />
   );
 }
