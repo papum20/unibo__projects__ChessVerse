@@ -193,7 +193,7 @@ class PVEGame(Game):
         self.depth = depth
 
     async def initialize_bot(self):
-        self.bot = (await chess.engine.popen_uci("./stockfish"))[1]
+        self.bot = (await chess.engine.popen_uci("./stockfish/stockfish-ubuntu-x86-64-modern"))[1]
 
     async def end_game(self, winner: bool):
         await self.current().send_end(winner)
