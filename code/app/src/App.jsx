@@ -31,8 +31,20 @@ function App() {
     <>  
             <Alert/> 
                 <Routes location={location} key={location.pathname}>
-                    <Route path={`/`} element={<Start setIsSinglePlayer={setIsSinglePlayer} gameImb={gameImb} setGameImb={setGameImb} botDiff={botDiff} setBotDiff={setBotDiff}
-                                                gameTime={gameTime} setGameTime={setGameTime} setSocket={setSocket} />} />
+                    <Route path={`/`} element={
+                      <Start
+                        isSinglePlayer={isSinglePlayer}
+                        setIsSinglePlayer={setIsSinglePlayer}
+                        gameImb={gameImb}
+                        setGameImb={setGameImb}
+                        botDiff={botDiff}
+                        setBotDiff={setBotDiff}
+                        gameTime={gameTime}
+                        setGameTime={setGameTime}
+                        setSocket={setSocket}
+                        socket={socket}
+                        />
+                    }/> 
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
