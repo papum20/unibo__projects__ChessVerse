@@ -29,21 +29,39 @@ function Game (props) {
     const [showModalMenu, setShowModalMenu] = useState(false);
     const [showGameOver, setShowGameOver] = useState(false);
 
-    const [time, setTime] = useState(props.gameTime || 1);
+    const [timer, setTimer] = useState(props.gameTime || 1);
+    const [timerId, setTimerId] = useState(null);
+
+    const startTimer = () => {
+        const newTimerId = setInterval(() => {
+          setTimer((prevTime) => prevTime - 1);
+        }, 1000);
+        setTimerId(newTimerId);
+      };
+
+    const stopTimer = () => {
+        clearInterval(timerId);
+        setTimerId(null);
+    };
+
+    const resumeTimer = () => {
+        if (timerId === null) {
+          startTimer();
+        }
+      };
 
     useEffect(() => {
-        const timerInterval = setInterval(() => {
-          setTime((prevTime) => prevTime - 1);
-        }, 1000);
+
+        startTimer();
     
-        return () => clearInterval(timerInterval);
+        return () => clearInterval(timerId);
       }, []);
 
     useEffect(()=>{
-        if(time <= 0){
+        if(timer <= 0){
             setShowGameOver(true);
         }
-    },[time])
+    },[timer])
 
     return (
         <>
@@ -55,7 +73,7 @@ function Game (props) {
                             <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
                             <ExclamationDiamond size={40} color="red" />
                         </div>
-                        { time <=0 &&
+                        { timer <=0 &&
                                 <div style={{display: "flex", justifyContent: "center", fontSize: "1.3rem", marginTop: "20px"}}>
                                     <p>The time has run out</p>
                                 </div>
@@ -127,7 +145,7 @@ function Game (props) {
                         <div style={{marginLeft: "5vw", marginRight: "5vw"}}>
                             <div style={{marginBottom: "30px", display: "flex", justifyContent: "center"}}>
                                 <Clock size={30}/>
-                                <p style={{marginLeft: "10px"}}>{time}</p>
+                                <p style={{marginLeft: "10px"}}>{timer}</p>
                             </div>
                           <Board setShowGameOver={setShowGameOver} setMoves={setMoves}/>
                         </div>
