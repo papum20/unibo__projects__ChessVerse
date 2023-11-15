@@ -51,7 +51,7 @@ function Board() {
     const possibleMoves = game.moves();
 
     // exit if the game is over
-    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0)
+    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
       return;
 
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
