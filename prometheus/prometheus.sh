@@ -44,5 +44,6 @@ docker run -d -t \
 	-p ${PORT_EXPOSED}9090 \
 	-v ${WAL_DATA_DIR}:/prometheus \
 	-v ./prometheus.yaml:/etc/prometheus/prometheus.yml \
+	--restart ${RESTART_POLICY} \
 	${PROMETHEUS_AGENT_IMAGE_NAME}
 	
