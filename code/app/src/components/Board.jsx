@@ -50,16 +50,13 @@ function Board() {
   function makeRandomMove() {
     const possibleMoves = game.moves();
     console.log("testo il game over")
-    console.log(game)
-    console.log(game.game_over())
-    console.log("draw")
-    console.log(game.in_draw())
     // exit if the game is over
-    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
+    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0)
       return;
 
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
     safeGameMutate((game) => {
+        
       game.move(possibleMoves[randomIndex]);
     });
   }
