@@ -49,7 +49,11 @@ function Board() {
 
   function makeRandomMove() {
     const possibleMoves = game.moves();
-
+    console.log("testo il game over")
+    console.log(game)
+    console.log(game.game_over())
+    console.log("draw")
+    console.log(game.in_draw())
     // exit if the game is over
     if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
       return;
@@ -102,9 +106,10 @@ function Board() {
         setShowPromotionDialog(true);
         return;
       }
-
+      console.log(game);
       // is normal move
-      const gameCopy = { ...game };
+      //const gameCopy = { ...game };
+      const gameCopy = game;
       const move = gameCopy.move({
         from: moveFrom,
         to: square,
@@ -130,7 +135,8 @@ function Board() {
   function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
-      const gameCopy = { ...game };
+      //const gameCopy = { ...game };
+      const gameCopy = game;
       gameCopy.move({
         from: moveFrom,
         to: moveTo,
