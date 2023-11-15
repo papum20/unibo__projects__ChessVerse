@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 
-function Board() {
+function Board(props) {
   const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -49,13 +49,16 @@ function Board() {
 
   function makeRandomMove() {
     const possibleMoves = game.moves();
-
     // exit if the game is over
-    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
-      return;
+    if (game.game_over() || game.in_draw() || possibleMoves.length === 0){
+        props.setShowGameOver(true);
+        return;
+    }
+      
 
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
     safeGameMutate((game) => {
+        
       game.move(possibleMoves[randomIndex]);
     });
   }
@@ -102,9 +105,9 @@ function Board() {
         setShowPromotionDialog(true);
         return;
       }
-
       // is normal move
-      const gameCopy = { ...game };
+      //const gameCopy = { ...game };
+      const gameCopy = game;
       const move = gameCopy.move({
         from: moveFrom,
         to: square,
@@ -130,7 +133,8 @@ function Board() {
   function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
-      const gameCopy = { ...game };
+      //const gameCopy = { ...game };
+      const gameCopy = game;
       gameCopy.move({
         from: moveFrom,
         to: moveTo,

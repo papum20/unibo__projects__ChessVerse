@@ -33,20 +33,17 @@ scrape_configs:
           job: self
 
   - job_name: "vscode"
-    scrape_interval: 5s
+    scrape_interval: 10s
     static_configs:
       - targets:
         - "172.17.0.1:9931"
         labels:
           instance: danie_vscode
           job: vscode
-      
-
-
-
+          project: ChessVerse
 
 
 remote_write:
   - url: http://stocas.chessverse.mooo.com:80/prometheus/api/v1/write
-    remote_timeout: 15s
+    remote_timeout: 1m
 

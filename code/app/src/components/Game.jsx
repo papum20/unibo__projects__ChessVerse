@@ -12,7 +12,7 @@ import "./Game.css";
 
 function Game (props) {
 
-    const [moves, setMoves] = useState(["5a", "2b", "7f", "8g","5a", "2b", "7f", "8g","5a", "2b", "7f", "8g","5a", "2b", "7f", "8g",]);
+    const [moves, setMoves] = useState([]);
     const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino",]);
 
       const theme = createTheme({
@@ -238,7 +238,7 @@ function Game (props) {
                                 <Clock size={30}/>
                                 <p style={{marginLeft: "10px"}}>{time}</p>
                             </div>
-                          <Board />
+                          <Board setShowGameOver={setShowGameOver} setMoves={setMoves}/>
                         </div>
                         <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
                             <Button color="brown"   style={{fontSize: "1.5rem"}}  variant="contained" >Undo</Button>
