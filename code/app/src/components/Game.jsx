@@ -26,6 +26,30 @@ function Game (props) {
         },
       });
 
+    class EventType {
+        static ERROR = new EventType(-1);
+        static RESIGN = new EventType(0);
+        static MOVE = new EventType(1);
+        static POP = new EventType(2);
+        static ACK = new EventType(3);
+        static CONFIG = new EventType(4);
+        static END = new EventType(5);
+        static START = new EventType(999);
+        #val
+
+        constructor(val) {
+            this.#val = val;
+        }
+
+        get value() {
+            return this.#val;
+        }
+
+        toString() {
+            return this.#val;
+        }
+    }
+
     const [showModalMenu, setShowModalMenu] = useState(false);
     const [showGameOver, setShowGameOver] = useState(false);
 
@@ -44,6 +68,91 @@ function Game (props) {
             setShowGameOver(true);
         }
     },[time])
+
+    const websocket = new WebSocket("ws://localhost:8766");
+
+    const handleMessage = (msg) => {
+        switch (msg.data) {
+            case EventType.MOVE.value:
+            handleMove();
+            break;
+          case EventType.POP.value:
+            handlePop();
+            break;
+          case EventType.ACK.value:
+            handleAck();
+            break;
+          case EventType.CONFIG.value:
+            handleConfig();
+            break;
+          case EventType.END.value:
+            handleEnd();
+            break;
+          default:
+            handleError();
+            break;
+        }
+   }
+
+    function handlePop() {
+        /* Pops twice */
+        console.log("sono pop")
+    }
+
+     function handleAck() {
+     /* ... */
+        console.log("sono ack")
+     }
+
+    function handleConfig() {
+    /* ... */
+       console.log("sono config")
+    }
+
+    function handleEnd() {
+    /* ... */
+       console.log("sono end")
+    }
+
+    function handleError() {
+    /* ... */
+       console.log("sono error")
+    }
+
+    function handleMove(){
+        console.log("sono move")
+    }
+
+
+    websocket.onopen = () => {
+        console.log("WebSocket connection established");
+
+        // Send your message after the connection is open
+        websocket.send(JSON.stringify({
+            event: 999,
+            data: {
+                type: 1,
+                depth: 10,
+                rank: 10,
+                time: 10
+            }
+        }));
+    };
+
+    websocket.onmessage = (event) => {
+        console.log("Received message:", event.data);
+        handleMessage(event.data);
+    };
+
+    websocket.onclose = (event) => {
+        console.log("WebSocket connection closed:", event);
+    };
+
+    websocket.onerror = (event) => {
+        console.error("WebSocket error:", event);
+    };
+
+
 
     return (
         <>
