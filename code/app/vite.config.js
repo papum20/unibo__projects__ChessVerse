@@ -9,5 +9,6 @@ export default defineConfig({
     outDir: "build",
     assetsDir: "",
     assetsInlineLimit: 0,
+    minify: "terser",
   },
 });
