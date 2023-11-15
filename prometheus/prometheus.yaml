@@ -40,10 +40,7 @@ scrape_configs:
         labels:
           instance: danie_vscode
           job: vscode
-      
-
-
-
+          project: ChessVerse
 
 
 remote_write:

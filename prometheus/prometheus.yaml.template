@@ -40,10 +40,7 @@ scrape_configs:
         labels:
           instance: ${INSTANCE_NAME}_vscode
           job: vscode
-      
-
-
-
+          project: ${PROJECT_NAME}
 
 
 remote_write:
