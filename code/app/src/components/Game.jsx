@@ -8,11 +8,11 @@ import {createTheme,ThemeProvider} from '@mui/material/styles';
 import { Button  } from "@mui/material";
 import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
 import "./Game.css";
-
+import io from 'socket.io-client';
 
 function Game (props) {
 
-    const [moves, setMoves] = useState([]);
+    const [moves, setMoves] = useState(["5a", "2b", "7f", "8g","5a", "2b", "7f", "8g","5a", "2b", "7f", "8g","5a", "2b", "7f", "8g",]);
     const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino",]);
 
       const theme = createTheme({
@@ -26,6 +26,12 @@ function Game (props) {
         },
       });
 
+    const [showModalMenu, setShowModalMenu] = useState(false);
+    const [showGameOver, setShowGameOver] = useState(false);
+
+
+
+    //inizio
     class EventType {
         static ERROR = new EventType(-1);
         static RESIGN = new EventType(0);
@@ -50,8 +56,6 @@ function Game (props) {
         }
     }
 
-    const [showModalMenu, setShowModalMenu] = useState(false);
-    const [showGameOver, setShowGameOver] = useState(false);
 
     const [timer, setTimer] = useState(props.gameTime || 1);
     const [timerId, setTimerId] = useState(null);
@@ -87,7 +91,7 @@ function Game (props) {
         }
     },[timer])
 
-    const websocket = new WebSocket("ws://localhost:8766");
+   
 
     const handleMessage = (msg) => {
         switch (msg.data) {
@@ -142,35 +146,12 @@ function Game (props) {
     }
 
 
-    websocket.onopen = () => {
-        console.log("WebSocket connection established");
+  
 
-        // Send your message after the connection is open
-        websocket.send(JSON.stringify({
-            event: 999,
-            data: {
-                type: 1,
-                depth: 10,
-                rank: 10,
-                time: 10
-            }
-        }));
-    };
+    
+    
 
-    websocket.onmessage = (event) => {
-        console.log("Received message:", event.data);
-        handleMessage(event.data);
-    };
-
-    websocket.onclose = (event) => {
-        console.log("WebSocket connection closed:", event);
-    };
-
-    websocket.onerror = (event) => {
-        console.error("WebSocket error:", event);
-    };
-
-
+    
 
     return (
         <>
@@ -256,7 +237,7 @@ function Game (props) {
                                 <Clock size={30}/>
                                 <p style={{marginLeft: "10px"}}>{timer}</p>
                             </div>
-                          <Board setShowGameOver={setShowGameOver} setMoves={setMoves}/>
+                                <Board socket={props.socket}/>
                         </div>
                         <div style={{display: "flex", justifyContent: "center", marginTop: "20px"}}>
                             <Button color="brown"   style={{fontSize: "1.5rem"}}  variant="contained" >Undo</Button>

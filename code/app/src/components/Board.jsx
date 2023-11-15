@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 
@@ -49,12 +49,10 @@ function Board(props) {
 
   function makeRandomMove() {
     const possibleMoves = game.moves();
+    
     // exit if the game is over
-    if (game.game_over() || game.in_draw() || possibleMoves.length === 0){
-        props.setShowGameOver(true);
-        return;
-    }
-      
+    if (game.game_over() || game.isDraw() || possibleMoves.length === 0)
+      return;
 
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
     safeGameMutate((game) => {
@@ -105,6 +103,7 @@ function Board(props) {
         setShowPromotionDialog(true);
         return;
       }
+      
       // is normal move
       //const gameCopy = { ...game };
       const gameCopy = game;
@@ -113,6 +112,8 @@ function Board(props) {
         to: square,
         promotion: "q",
       });
+
+      console.log(move);
 
       // if invalid, setMoveFrom and getMoveOptions
       if (move === null) {
@@ -150,6 +151,9 @@ function Board(props) {
     setOptionSquares({});
     return true;
   }
+
+  //useEffect(()=>{console.log(moveTo)},[moveTo])
+
 
   return (
     <Chessboard

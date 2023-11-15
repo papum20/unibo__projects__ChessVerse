@@ -7,9 +7,9 @@ import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
 import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
 import { Image, Nav, Modal, Form, FloatingLabel, CloseButton} from "react-bootstrap";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-
+import io from 'socket.io-client';
 
 function Start(props){
 
@@ -39,6 +39,18 @@ function Start(props){
         navigator(`./game`, { relative: "path" });
     }
 
+
+    useEffect(()=>{
+        props.setSocket(io("ws://localhost:8766"));
+        /*
+        socket.on('message', (message) => {
+            
+        });
+*/
+        //socket.emit('notifica', {name: "pippo"});
+
+    },[])
+
     return (
         <>
 
@@ -67,7 +79,7 @@ function Start(props){
                         label="Game Time in sec"
                         className="mb-3"
                     >
-                        <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value < 0) props.setGameTime(1); else props.setGameTime(e.target.value);}}  type="number" min={1}   placeholder="value from 1 to 100" />
+                        <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value < 0) props.setGameTime(3000); else props.setGameTime(e.target.value);}}  type="number" min={1}   placeholder="value from 1 " />
                     </FloatingLabel>
                     <div style={{display: "flex", justifyContent: "flex-end"}}>
                         <Button size="large" color="primary" type="submit" variant="contained">invia</Button>
