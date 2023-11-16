@@ -3,6 +3,9 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 
 function Board(props) {
+
+  
+
   const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -183,6 +186,7 @@ function Board(props) {
       }}
       promotionToSquare={moveTo}
       showPromotionDialog={showPromotionDialog}
+      boardWidth={props.width/2.7}
     />
   );
 }
