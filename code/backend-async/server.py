@@ -16,15 +16,15 @@ import chess.engine
 configs = {}
 
 
-class EventType(IntEnum):
-    ERROR = -1
-    RESIGN = 0
-    MOVE = 1
-    POP = 2
-    ACK = 3
-    CONFIG = 4
-    END = 5
-    START = 999
+class EventType(StrEnum):
+    ERROR = "error"
+    RESIGN = "resign"
+    MOVE = "move"
+    POP = "pop"
+    ACK = "ack"
+    CONFIG = "config"
+    END = "end"
+    START = "start"
 
 
 class AckType(IntEnum):

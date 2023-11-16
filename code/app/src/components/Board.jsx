@@ -61,7 +61,7 @@ function Board(props) {
     });
   }
 
-  function onSquareClick(square) {
+  async function onSquareClick(square) {
     // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -101,7 +101,6 @@ function Board(props) {
           square[1] === "1")
       ) {
         setShowPromotionDialog(true);
-        console.log("cioaissdh")
         return;
       }
       
@@ -114,7 +113,6 @@ function Board(props) {
         promotion: "q",
       });
 
-      console.log(move);
 
       // if invalid, setMoveFrom and getMoveOptions
       if (move === null) {
@@ -122,7 +120,7 @@ function Board(props) {
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-
+      await sendMove(move);
       setGame(gameCopy);
 
       setTimeout(makeRandomMove, 300);
@@ -130,7 +128,7 @@ function Board(props) {
     }
   }
 
-  function onPromotionPieceSelect(piece) {
+  async function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
       //const gameCopy = { ...game };
@@ -142,11 +140,21 @@ function Board(props) {
       });
       setGame(gameCopy);
       setTimeout(makeRandomMove, 300);
+      await sendMove(move);
     }
 
     setShowPromotionDialog(false);
     resetMove();
     return true;
+  }
+
+  async function sendMove(move){
+    console.log(move);
+    console.log(props.socket);
+    if (props.socket.connected)
+      await props.socket.emit("move", move);
+    else
+      console.error("Socket not connected");
   }
 
   function resetMove() {
