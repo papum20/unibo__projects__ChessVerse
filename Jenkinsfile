@@ -43,10 +43,12 @@ pipeline {
             steps {
                 dir('code/app') {
                     nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-                        def scannerHome = tool 'SonarScanner4'
-                        withSonarQubeEnv("sonarqube") {
-                            sh "${scannerHome}/bin/sonar-scanner"
-                        }
+						script {
+							def scannerHome = tool 'SonarScanner4'
+							withSonarQubeEnv("sonarqube") {
+								sh "${scannerHome}/bin/sonar-scanner"
+							}
+						}
                     }
                 }
             }
