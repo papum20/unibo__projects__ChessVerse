@@ -10,9 +10,6 @@ pipeline {
         }
 
         stage('Build and Test Frontend') {
-            agent {
-                label 'node'
-            }
             steps {
                 dir('code/app') {
                     nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
