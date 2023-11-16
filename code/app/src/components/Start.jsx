@@ -36,19 +36,17 @@ function Start(props){
         if(props.botDiff === 0)
             props.setBotDiff(1);
         setShowModal(false);
+        props.socket.emit('start', {
+            type: props.setIsSinglePlayer,
+            rank: props.setGameImb, // qual' e' il rank?
+            time: props.setGameTime
+        });
         navigator(`./game`, { relative: "path" });
     }
 
 
     useEffect(()=>{
         props.setSocket(io("ws://localhost:8766"));
-        /*
-        socket.on('message', (message) => {
-            
-        });
-*/
-        //socket.emit('notifica', {name: "pippo"});
-
     },[])
 
     return (
@@ -60,13 +58,15 @@ function Start(props){
             </Modal.Title>
             <Modal.Body style={{backgroundColor: "#b6884e"}}>
                 <Form onSubmit={handleSubmit} >
-                    <FloatingLabel
-                        controlId="floatingInput1"
-                        label="Bot Difficult"
-                        className="mb-3"
-                    >
-                        <Form.Control value={props.botDiff} onChange={(e)=>{if(e.target.value > 20 || e.target.value < 0) props.setBotDiff(1); else props.setBotDiff(e.target.value); }} required type="number" min={1} max={20}  placeholder="value from 1 to 20" />
-                    </FloatingLabel>
+                    {props.isSinglePlayer &&
+                        <FloatingLabel
+                            controlId="floatingInput1"
+                            label="Bot Difficult"
+                            className="mb-3"
+                        >
+                            <Form.Control value={props.botDiff} onChange={(e)=>{if(e.target.value > 20 || e.target.value < 0) props.setBotDiff(1); else props.setBotDiff(e.target.value); }} required type="number" min={1} max={20}  placeholder="value from 1 to 20" />
+                        </FloatingLabel>
+                    }
                     <FloatingLabel
                         controlId="floatingInput2"
                         label="Game Imbalance"
@@ -74,17 +74,18 @@ function Start(props){
                     >
                         <Form.Control required value={props.gameImb} onChange={(e)=>{if(e.target.value > 100 || e.target.value < 0) props.setGameImb(0); else props.setGameImb(e.target.value); }}  type="number" min={0} max={100}  placeholder="value from 0 to 100" />
                     </FloatingLabel>
-                    <FloatingLabel
-                        controlId="floatingInput3"
-                        label="Game Time in sec"
-                        className="mb-3"
-                    >
-                        <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value < 0) props.setGameTime(3000); else props.setGameTime(e.target.value);}}  type="number" min={1}   placeholder="value from 1 " />
-                    </FloatingLabel>
-                    <div style={{display: "flex", justifyContent: "flex-end"}}>
-                        <Button size="large" color="primary" type="submit" variant="contained">invia</Button>
-                    </div>
-
+                    {!props.isSinglePlayer &&
+                        <FloatingLabel
+                            controlId="floatingInput3"
+                            label="Game Time in sec"
+                            className="mb-3"
+                        >
+                            <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value < 0) props.setGameTime(3000); else props.setGameTime(e.target.value);}}  type="number" min={1}   placeholder="value from 1 " />
+                        </FloatingLabel>
+                    }
+                        <div style={{display: "flex", justifyContent: "flex-end"}}>
+                            <Button size="large" color="primary" type="submit" variant="contained">avvia</Button>
+                        </div>
                 </Form>
             </Modal.Body>
         </Modal>

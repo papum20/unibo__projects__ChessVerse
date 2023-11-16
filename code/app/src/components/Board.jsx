@@ -104,6 +104,7 @@ function Board(props) {
           square[1] === "1")
       ) {
         setShowPromotionDialog(true);
+        console.log("cioaissdh")
         return;
       }
       
@@ -128,9 +129,7 @@ function Board(props) {
       setGame(gameCopy);
 
       setTimeout(makeRandomMove, 300);
-      setMoveFrom("");
-      setMoveTo(null);
-      setOptionSquares({});
+      resetMove();
     }
   }
 
@@ -139,7 +138,7 @@ function Board(props) {
     if (piece) {
       //const gameCopy = { ...game };
       const gameCopy = game;
-      gameCopy.move({
+      const move = gameCopy.move({
         from: moveFrom,
         to: moveTo,
         promotion: piece[1].toLowerCase() ?? "q",
@@ -148,13 +147,16 @@ function Board(props) {
       setTimeout(makeRandomMove, 300);
     }
 
-    setMoveFrom("");
-    setMoveTo(null);
     setShowPromotionDialog(false);
-    setOptionSquares({});
+    resetMove();
     return true;
   }
 
+  function resetMove() {
+    setMoveFrom("");
+    setMoveTo(null);
+    setOptionSquares({});
+  }
   //useEffect(()=>{console.log(moveTo)},[moveTo])
 
 

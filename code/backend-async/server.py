@@ -85,8 +85,8 @@ class Player:
         await self.send(EventType.END, {"value": int(won)})
         await self.ws.close()
 
-    async def send_move(self, move: str):
-        await self.send(EventType.MOVE, {"value": move})
+    async def send_move(self, move: str, success: bool = True):
+        await self.send(EventType.MOVE, {"value": move, "success": success})
 
     async def send_pop(self):
         await self.send(EventType.POP)
@@ -120,6 +120,14 @@ class Game:
     def opponent(self):
         return self.players[1 - self.turn]
 
+    # @property
+    # def current(self):
+    #     return self.players[self.turn]
+    
+    # @property
+    # def opponent(self):
+    #     return self.players[1 - self.turn]
+
 
 class PVPGame(Game):
     def __init__(self, players, rank, key, timer):
@@ -151,14 +159,14 @@ class PVPGame(Game):
                 await self.end_game(self.opponent())
             else:
                 while (
-                        chess.Move.from_uci(msg["data"]["value"])
+                        chess.Move.from_san(msg["data"]["value"])
                         not in self.board.legal_moves
                 ):
-                    await self.current().send_ack(AckType.NOK, True)
-                self.board.push_uci(msg["data"]["value"])
+                    await self.current().send_move(msg["data"]["value"], False)
+                self.board.push_san(msg["data"]["value"])
                 self.popped = False
                 if self.board.outcome() is None:
-                    await self.current().send_ack(AckType.OK, True)
+                    await self.current().send_move(msg["data"]["value"])
                     await self.opponent().send_move(msg["data"]["value"])
                     self.swap()
                 else:
@@ -193,7 +201,7 @@ class PVEGame(Game):
         self.depth = depth
 
     async def initialize_bot(self):
-        self.bot = (await chess.engine.popen_uci("./stockfish/stockfish-ubuntu-x86-64-modern"))[1]
+        self.bot = (await chess.engine.popen_uci("./stockfish"))[1]
 
     async def end_game(self, winner: bool):
         await self.current().send_end(winner)
@@ -208,11 +216,11 @@ class PVEGame(Game):
                 await self.end_game(False)
             else:
                 while (
-                        chess.Move.from_uci(msg["data"]["value"])
+                        chess.Move.from_san(msg["data"]["value"])
                         not in self.board.legal_moves
                 ):
                     await self.current().send_ack(AckType.NOK, True)
-                self.board.push_uci(msg["data"]["value"])
+                self.board.push_san(msg["data"]["value"])
                 self.popped = False
                 if self.board.outcome() is None:
                     await self.current().send_ack(AckType.OK, True)
@@ -220,8 +228,8 @@ class PVEGame(Game):
                         await self.bot.play(
                             self.board, chess.engine.Limit(depth=self.depth)
                         )
-                    ).move.uci()
-                    self.board.push_uci(bot_move)
+                    ).move.san()
+                    self.board.push_san(bot_move)
                     if self.board.outcome() is None:
                         await self.current().send_move(bot_move)
                     else:
