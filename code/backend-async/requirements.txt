@@ -1,1 +1,7 @@
-Django>=3.2,<4.0
+asgiref==3.7.2
+chess==1.10.0
+Django==4.2.7
+numpy==1.26.1
+setuptools==68.2.2
+sqlparse==0.4.4
+websockets==12.0
