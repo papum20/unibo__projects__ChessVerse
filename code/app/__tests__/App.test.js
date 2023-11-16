@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render } from '@testing-library/react';
+import { test } from '@jest/globals';
+import App from 'App';
 
 test('renders the landing page', () => {
 	render(<App />);

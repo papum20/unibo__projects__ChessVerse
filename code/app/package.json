@@ -66,6 +66,10 @@
     ],
 	"modulePaths": ["<rootDir>/src"],
 	"testEnvironment": "jsdom",
-	"testMatch": ["<rootDir>/__tests__/**/*.test.js"]
+	"testMatch": ["<rootDir>/__tests__/**/*.test.js"],
+	"moduleNameMapper":{
+		"\\.(css|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js",
+		"\\.(gif|ttf|eot|jpg|png|svg)$": "<rootDir>/__mocks__/fileMock.js"
+   }
   }
 }
