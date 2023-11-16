@@ -20,18 +20,18 @@ pipeline {
             }
         }
 
-        //stage('Build and Test Backend') {
-        //    agent {
-        //        label 'python'
-        //    }
-        //    steps {
-        //        dir('code/backend') {
-        //            // Add your Python testing commands here
-        //            sh 'pip install -r requirements.txt'
-        //            sh 'python -m unittest discover -s tests -p "*.py"'
-        //        }
-        //    }
-        //}
+        stage('Build and Test Backend') {
+            agent {
+                label 'python'
+            }
+            steps {
+                dir('code/backend') {
+                    // Add your Python testing commands here
+                    sh 'pip install -r requirements.txt'
+                    sh 'python -m unittest discover -s tests -p "*.py"'
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             agent {
