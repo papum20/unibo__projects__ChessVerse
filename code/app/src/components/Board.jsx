@@ -155,7 +155,7 @@ function Board(props) {
     console.log(move);
     console.log(props.socket);
     if (props.socket.connected)
-      await props.socket.emit("move", move);
+      props.socket.emit("move", move);
     else
       console.error("Socket not connected");
   }

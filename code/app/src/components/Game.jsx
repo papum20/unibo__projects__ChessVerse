@@ -154,9 +154,10 @@ function Game (props) {
   
 
     
-    
-
-    
+    function handleMenu(){
+        props.socket.disconnect();
+        props.setSocket(undefined);
+    }
 
     return (
         <>
@@ -197,7 +198,7 @@ function Game (props) {
                         <ThemeProvider theme={theme}>
                             <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={()=>setShowModalMenu(false)} variant="contained">No</Button>
                             <Nav.Link as={Link} to="/">
-                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown"  variant="contained">Yes</Button>
+                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={handleMenu}  variant="contained">Yes</Button>
                             </Nav.Link>
                         </ThemeProvider>
                     </div>

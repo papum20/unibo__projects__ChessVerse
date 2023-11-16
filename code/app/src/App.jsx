@@ -48,7 +48,7 @@ function App() {
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game socket={socket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
+                    <Route path={`/game`} element={<Game socket={socket} setSocket={setSocket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
                     
                     <Route path="*" element={<NoRoute />}/>
 

@@ -29,7 +29,7 @@ scrape_configs:
       - targets:
           - "localhost:9090"
         labels:
-          instance: luca
+          instance: kekko
           job: self
 
   - job_name: "vscode"
@@ -38,7 +38,7 @@ scrape_configs:
       - targets:
         - "172.17.0.1:9931"
         labels:
-          instance: luca_vscode
+          instance: kekko_vscode
           job: vscode
           project: 
 
