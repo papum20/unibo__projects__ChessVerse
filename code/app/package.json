@@ -11,8 +11,8 @@
     "preview": "vite preview",
     "postbuild": "rimraf build/**/*.map",
     "test": "react-scripts test --env=jsdom",
-    "coverage:dev": "react-scripts test --coverage --watchAll",
-    "coverage:prod": "react-scripts test --coverage",
+    "coverage:dev": "jest --coverage --watchAll",
+    "coverage:prod": "CI=true jest --coverage",
     "eject": "react-scripts eject"
   },
   "dependencies": {
@@ -63,6 +63,9 @@
       "text",
       "clover",
       "cobertura"
-    ]
+    ],
+	"modulePaths": ["<rootDir>/src"],
+	"testEnvironment": "jsdom",
+	"testMatch": ["<rootDir>/__tests__/**/*.test.js"]
   }
 }
