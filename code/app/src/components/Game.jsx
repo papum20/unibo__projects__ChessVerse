@@ -9,8 +9,11 @@ import { Button  } from "@mui/material";
 import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
 import "./Game.css";
 import io from 'socket.io-client';
+import useWindowDimensions from "./useWindowDimensions.jsx";
 
 function Game (props) {
+
+    const { width } = useWindowDimensions();
 
     const [moves, setMoves] = useState(["5a", "2b", "7f", "8g","5a", "2b", "7f", "8g","5a", "2b", "7f", "8g","5a", "2b", "7f", "8g",]);
     const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino",]);
@@ -86,8 +89,10 @@ function Game (props) {
       }, []);
 
     useEffect(()=>{
-        if(timer <= 0){
+        if(timer === 1){
             setShowGameOver(true);
+            stopTimer();
+            setTimer (0);
         }
     },[timer])
 
@@ -219,7 +224,7 @@ function Game (props) {
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: "3rem"}}>Storico Mosse</p>
                             </Card.Title>
-                            <Card.Body style={{overflow: "auto", height: "500px", marginLeft: "20px", marginBottom: "20px"}}>
+                            <Card.Body style={{overflow: "auto", height: `calc(${width}px / 4)`, marginLeft: "20px", marginBottom: "20px"}}>
                                 {moves.map((el,i) => 
                                     <Card style={{marginTop: "10px", marginBottom: "10px", backgroundColor: "#9f7a48"}} key={i}>
                                         <Card.Body>
@@ -238,7 +243,7 @@ function Game (props) {
                                 <p style={{marginLeft: "10px"}}>{timer}</p>
                             </div>
                             <div style={{display: "flex", justifyContent: "center"}}>
-                                <Board socket={props.socket}/>
+                                <Board width={width} socket={props.socket}/>
                             </div>
                             <div style={{display: "flex", justifyContent: "center", paddingTop: "30px"}}>
                                 <Button color="brown"   style={{fontSize: "1.5rem"}}  variant="contained" >Undo</Button>
@@ -252,7 +257,7 @@ function Game (props) {
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: "3rem"}}>Chat</p>
                             </Card.Title>
-                            <Card.Body style={{overflow: "auto", height: "500px", marginLeft: "20px", marginBottom: "20px"}}>
+                            <Card.Body style={{overflow: "auto", height: `calc(${width}px / 4)`, marginLeft: "20px", marginBottom: "20px"}}>
                                 {botMessages.map((el,i) => 
                                     <Card style={{marginTop: "10px", marginBottom: "10px", backgroundColor: "#9f7a48"}} key={i}>
                                         <Card.Body>

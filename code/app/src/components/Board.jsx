@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
-import useWindowDimensions from "./useWindowDimensions.jsx";
 
 function Board(props) {
 
-  const { width } = useWindowDimensions();
+  
 
   const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
@@ -177,7 +176,7 @@ function Board(props) {
       }}
       promotionToSquare={moveTo}
       showPromotionDialog={showPromotionDialog}
-      boardWidth={width/2.7}
+      boardWidth={props.width/2.7}
     />
   );
 }
