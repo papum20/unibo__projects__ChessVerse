@@ -21,7 +21,8 @@ function App() {
     const [isSinglePlayer, setIsSinglePlayer] = useState(false);
     const [gameImb, setGameImb] = useState(0);
     const [botDiff, setBotDiff] = useState(1);
-    const [gameTime, setGameTime] = useState(1);
+    const [gameTime, setGameTime] = useState(3000);
+    const [socket, setSocket] = useState(undefined);
 
     
 
@@ -30,12 +31,24 @@ function App() {
     <>  
             <Alert/> 
                 <Routes location={location} key={location.pathname}>
-                    <Route path={`/`} element={<Start setIsSinglePlayer={setIsSinglePlayer} gameImb={gameImb} setGameImb={setGameImb} botDiff={botDiff} setBotDiff={setBotDiff}
-                                                gameTime={gameTime} setGameTime={setGameTime}/>} />
+                    <Route path={`/`} element={
+                      <Start
+                        isSinglePlayer={isSinglePlayer}
+                        setIsSinglePlayer={setIsSinglePlayer}
+                        gameImb={gameImb}
+                        setGameImb={setGameImb}
+                        botDiff={botDiff}
+                        setBotDiff={setBotDiff}
+                        gameTime={gameTime}
+                        setGameTime={setGameTime}
+                        setSocket={setSocket}
+                        socket={socket}
+                        />
+                    }/> 
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
+                    <Route path={`/game`} element={<Game socket={socket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
                     
                     <Route path="*" element={<NoRoute />}/>
 

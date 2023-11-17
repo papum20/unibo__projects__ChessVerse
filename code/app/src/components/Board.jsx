@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 
-function Board() {
+function Board(props) {
+
+  
+
   const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -49,9 +52,9 @@ function Board() {
 
   function makeRandomMove() {
     const possibleMoves = game.moves();
-    console.log("testo il game over")
+    
     // exit if the game is over
-    if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0)
+    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
       return;
 
     const randomIndex = Math.floor(Math.random() * possibleMoves.length);
@@ -61,7 +64,7 @@ function Board() {
     });
   }
 
-  function onSquareClick(square) {
+  async function onSquareClick(square) {
     // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -103,7 +106,7 @@ function Board() {
         setShowPromotionDialog(true);
         return;
       }
-      console.log(game);
+      
       // is normal move
       //const gameCopy = { ...game };
       const gameCopy = game;
@@ -113,42 +116,57 @@ function Board() {
         promotion: "q",
       });
 
+
       // if invalid, setMoveFrom and getMoveOptions
       if (move === null) {
         const hasMoveOptions = getMoveOptions(square);
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-
+      await sendMove(move);
       setGame(gameCopy);
 
       setTimeout(makeRandomMove, 300);
-      setMoveFrom("");
-      setMoveTo(null);
-      setOptionSquares({});
+      resetMove();
     }
   }
 
-  function onPromotionPieceSelect(piece) {
+  async function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
       //const gameCopy = { ...game };
       const gameCopy = game;
-      gameCopy.move({
+      const move = gameCopy.move({
         from: moveFrom,
         to: moveTo,
         promotion: piece[1].toLowerCase() ?? "q",
       });
       setGame(gameCopy);
       setTimeout(makeRandomMove, 300);
+      await sendMove(move);
     }
 
-    setMoveFrom("");
-    setMoveTo(null);
     setShowPromotionDialog(false);
-    setOptionSquares({});
+    resetMove();
     return true;
   }
+
+  async function sendMove(move){
+    console.log(move);
+    console.log(props.socket);
+    if (props.socket.connected)
+      await props.socket.emit("move", move);
+    else
+      console.error("Socket not connected");
+  }
+
+  function resetMove() {
+    setMoveFrom("");
+    setMoveTo(null);
+    setOptionSquares({});
+  }
+  //useEffect(()=>{console.log(moveTo)},[moveTo])
+
 
   return (
     <Chessboard
@@ -168,6 +186,7 @@ function Board() {
       }}
       promotionToSquare={moveTo}
       showPromotionDialog={showPromotionDialog}
+      boardWidth={props.width/2.7}
     />
   );
 }
