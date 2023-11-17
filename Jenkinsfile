@@ -9,7 +9,14 @@ pipeline {
             }
         }
 
-        stage('Build and Test Frontend') {
+        stage('Build and Test App') {
+			when {
+				anyOf {
+					branch "main"
+					branch "testing"
+					branch "dev-app"
+				}
+			}
             steps {
                 dir('code/app') {
                     nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
@@ -20,12 +27,39 @@ pipeline {
             }
         }
 
-        stage('Build and Test Backend') {
+        stage('Build and Test api backend') {
             agent {
                 label 'python'
             }
+			when {
+				anyOf {
+					branch "main"
+					branch "testing"
+					branch "dev-api"
+				}
+			}
             steps {
-                dir('code/backend') {
+                dir('code/api') {
+                    // Add your Python testing commands here
+                    sh 'pip install -r requirements.txt'
+                    sh 'python -m unittest discover -s tests -p "*.py"'
+                }
+            }
+        }
+
+        stage('Build and Test async backend') {
+            agent {
+                label 'python'
+            }
+			when {
+				anyOf {
+					branch "main"
+					branch "testing"
+					branch "dev-async"
+				}
+			}
+            steps {
+                dir('code/async') {
                     // Add your Python testing commands here
                     sh 'pip install -r requirements.txt'
                     sh 'python -m unittest discover -s tests -p "*.py"'
@@ -37,6 +71,12 @@ pipeline {
             agent {
                 label 'node'
             }
+			when {
+				anyOf {
+					branch "main"
+					branch "testing"
+				}
+			}
             steps {
                 dir('code/app') {
                     nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
@@ -50,5 +90,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
