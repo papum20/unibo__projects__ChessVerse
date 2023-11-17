@@ -7,6 +7,7 @@
 # languages
 ## node/js
 build/
+coverage/
 dist/
 node_modules/
 
@@ -22,6 +23,5 @@ __pycache__/
 # logging data
 ## grafana
 prometheus/prometheus.env
-prometheus/prometheus.sh
 prometheus/prometheus.yaml
 prometheus/wal_data/
