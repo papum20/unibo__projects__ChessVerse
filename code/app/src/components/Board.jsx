@@ -191,10 +191,12 @@ const [getPop, setGetPop] = useState(false);
       setBotMoveSan(san.san);
     });
     props.socket.on("end", (winner) =>{
-      console.log(winner)
+      if (winner.winner)
+        console.log("hai vinto");
+      else
+        console.log("hai perso");
     })
     props.socket.on("pop", () => {
-      console.log("mi arriva la pop")
       setGetPop(prevValue => !prevValue);
     })
     props.socket.on("error", (error) =>{
@@ -203,7 +205,6 @@ const [getPop, setGetPop] = useState(false);
   },[])
 
   useEffect(()=>{
-      console.log("Faccio gli undo")
       if(!!game){
         game.undo();
         game.undo();

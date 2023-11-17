@@ -49,7 +49,6 @@ function Start(props){
             props.socket.on('connect_error', (error) => {
                 console.error('Errore di connessione:', error);
             });
-            console.log("ciaone")
             const data = {
                 type: props.isSinglePlayer,
                 rank: props.gameImb,
@@ -57,7 +56,6 @@ function Start(props){
                 depth: props.botDiff
             }
             props.socket.emit('start', data);
-            console.log(data);
             // TODO ricevere config da server
             navigator(`./game`, { relative: "path" });
         }

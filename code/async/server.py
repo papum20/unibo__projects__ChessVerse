@@ -146,6 +146,7 @@ async def handle_start(sid, data):
         return
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
+    print(pveGames[sid].fen)
     await sio.emit("config", {"fen":pveGames[sid].fen}, room=sid)
 
 async def handle_move(sid, data):
@@ -169,24 +170,24 @@ async def handle_move(sid, data):
     game.board.push_uci(uci_move)
     outcome = game.board.outcome()
     if not outcome is None:
-        await sio.emit("end", {"winner": outcome}, room=sid)
+        await sio.emit("end", {"winner": outcome.winner}, room=sid)
         await handle_disconnect(sid)
         await sio.disconnect(sid)
         return
     bot_move = (await game.bot.play(game.board, chess.engine.Limit(depth=game.depth))).move
     game.board.push_uci(bot_move.uci())
     outcome = game.board.outcome()
-    if not outcome is None:
-        await sio.emit("end", {"winner": outcome}, room=sid)
+    latest_move = game.board.pop()
+    san_bot_move = game.board.san(bot_move)
+    game.board.push(latest_move)
+    if outcome is not None:
+        await sio.emit("move", {"san": san_bot_move}, room=sid)
+        await sio.emit("end", {"winner": outcome.winner}, room=sid)
         await handle_disconnect(sid)
         await sio.disconnect(sid)
         return
-    latest_move = game.board.pop()
-    san_move = game.board.san(bot_move)
-    game.board.push(latest_move)
     game.popped = False
-    await sio.emit("move", {"san":san_move}, room=sid)
-    # TODO capire com'e' fatto outcome e modificare in {"winer": bool}
+    await sio.emit("move", {"san": san_bot_move}, room=sid)
     
 async def handle_resign(sid, data):
     print("resign", sid)
