@@ -11,13 +11,16 @@ from enum import IntEnum, StrEnum, Flag
 
 import chess
 import chess.engine
+import sys
+
+sys.path.append("/code/async")
 from Player import Player
 from PVEGame import PVEGame
-
 
 sio = socketio.AsyncServer(cors_allowed_origins="*")
 app = aiohttp.web.Application()
 sio.attach(app)
+
 
 class EventType(StrEnum):
     ERROR = "error"
@@ -43,7 +46,6 @@ class AckType(IntEnum):
 class GameType(Flag):
     PVP = False
     PVE = True
-
 
 
 connected_clients = {-1: [], 5: [], 10: [], 15: []}
@@ -128,16 +130,20 @@ async def receive_message(websocket):
             else:
                 await game.recv_event(msg)
 
+
 pveGames = {}
+
 
 async def handle_connect(sid, environ):
     print("connect ", sid)
     # TODO aggiungere giocatore alla lista dei giocatori connessi
 
+
 async def handle_disconnect(sid):
     print("disconnect ", sid)
     if sid in pveGames.keys():
         del pveGames[sid]
+
 
 async def handle_start(sid, data):
     print("start ", sid, data)
@@ -147,12 +153,13 @@ async def handle_start(sid, data):
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
     print(pveGames[sid].fen)
-    await sio.emit("config", {"fen":pveGames[sid].fen}, room=sid)
+    await sio.emit("config", {"fen": pveGames[sid].fen}, room=sid)
+
 
 async def handle_move(sid, data):
     print("move ", sid, data)
     if not sid in pveGames:
-        await sio.emit("error", {"cause": "game not found"}, room=sid)
+        await sio.emit("error", {"cause": "async not found"}, room=sid)
         return
     game = pveGames[sid]
     if "san" not in data:
@@ -188,11 +195,12 @@ async def handle_move(sid, data):
         return
     game.popped = False
     await sio.emit("move", {"san": san_bot_move}, room=sid)
-    
+
+
 async def handle_resign(sid, data):
     print("resign", sid)
     if not sid in pveGames:
-        await sio.emit("error", {"cause": "game not found"}, room=sid)
+        await sio.emit("error", {"cause": "async not found"}, room=sid)
         return
     await handle_disconnect(sid)
     await sio.disconnect(sid)
@@ -201,7 +209,7 @@ async def handle_resign(sid, data):
 async def handle_pop(sid, data):
     print("pop", sid)
     if not sid in pveGames:
-        await sio.emit("error", {"cause": "game not found"}, room=sid)
+        await sio.emit("error", {"cause": "async not found"}, room=sid)
         return
     game = pveGames[sid]
     if game.popped:
@@ -226,6 +234,7 @@ class EventType(StrEnum):
     END = "end"
     START = "start"
 
+
 sio.on("connect", handle_connect)
 sio.on("disconnect", handle_disconnect)
 sio.on("resign", handle_resign)
@@ -242,9 +251,9 @@ async def main():
     await site.start()
     while True:
         await asyncio.sleep(1)
-       
+
     # async with serve(receive_message, "localhost", 8766):
     #     await asyncio.Future()
 
-
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

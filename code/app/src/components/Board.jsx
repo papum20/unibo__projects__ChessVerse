@@ -108,7 +108,7 @@ function Board(props) {
       
       // is normal move
       const gameCopy = { ...game };
-      // const gameCopy = game;
+      // const gameCopy = async;
       const move = gameCopy.move({
         from: moveFrom,
         to: square,
