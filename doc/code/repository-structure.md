@@ -23,14 +23,18 @@ Each `/code/SUBDIR` represents a (docker) service or a (web) app.
 
 ### app
 
+Frontend.  
+
+`app/__tests__/` : tests for jest, with `.test.js` extension  
+
 ### app-ia
 This is a simple web-app to play chess, made by copilot.  
 It's accessed at `DOMAIN/webapp`.  
 
-### backend
+### api
 The backend providing chessverse api.  
 
-### backend-async
+### async
 Another backend, used for real-time necessities (e.g. games): async is more efficient for such purpose and avoids polling from client-side.  
 It works by establishing a websockets connection with each client requiring it.  
 
