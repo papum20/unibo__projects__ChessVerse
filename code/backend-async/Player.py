@@ -1,8 +1,8 @@
+from time import perf_counter
 
 class Player:
-    def __init__(self, sid, websocket, color, time):
+    def __init__(self, sid, color, time):
         self.id = sid
-        self.ws = websocket
         self.color = color
         self.isTimed = time != -1
         if self.isTimed:

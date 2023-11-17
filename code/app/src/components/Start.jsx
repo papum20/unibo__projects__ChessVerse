@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import io from 'socket.io-client';
 
+
+
 function Start(props){
 
     const theme = createTheme({
@@ -31,12 +33,12 @@ function Start(props){
     const [showModal, setShowModal] = useState(false);
 
 
-    function handleSubmit (e) {
+    async function handleSubmit (e) {
         e.preventDefault();
         if(props.botDiff === 0)
             props.setBotDiff(1);
         setShowModal(false);
-        
+        props.setIsLoadingGame(true);
         props.setSocket(io("http://localhost:8766", {transports: ['websocket']}));
     }
 
@@ -69,7 +71,7 @@ function Start(props){
                 <CloseButton style={{marginRight: "10px", marginTop: "5px"}} onClick={()=> setShowModal(false)}/>
             </Modal.Title>
             <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                <Form onSubmit={handleSubmit} >
+                <Form onSubmit={async (e)=> await handleSubmit(e)} >
                     {props.isSinglePlayer &&
                         <FloatingLabel
                             controlId="floatingInput1"

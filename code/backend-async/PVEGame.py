@@ -1,6 +1,9 @@
+import chess
+import chess.engine
+
 import Game
 
-class PVEGame(Game):
+class PVEGame(Game.Game):
     def __init__(self, player, rank, depth, time):
         super().__init__([player], rank, time)
         self.bot = None

@@ -8,7 +8,6 @@ import csv
 import socketio
 import aiohttp
 from enum import IntEnum, StrEnum, Flag
-from time import perf_counter
 
 import chess
 import chess.engine
@@ -45,10 +44,6 @@ class GameType(Flag):
     PVP = False
     PVE = True
 
-
-class RowType(StrEnum):
-    BACK = "back"
-    FRONT = "front"
 
 
 connected_clients = {-1: [], 5: [], 10: [], 15: []}
@@ -138,20 +133,87 @@ pveGames = {}
 async def handle_connect(sid, environ):
     print("connect ", sid)
     # TODO aggiungere giocatore alla lista dei giocatori connessi
-    await sio.emit("my response", {"data": "Connected", "count": 0}, room=sid)
 
 async def handle_disconnect(sid):
     print("disconnect ", sid)
-    del pveGames[sid]
+    if sid in pveGames.keys():
+        del pveGames[sid]
 
 async def handle_start(sid, data):
     print("start ", sid, data)
     if not "rank" in data or not "depth" in data or not "time" in data:
-        await sio.emit("my response", {"data": "error", "count": 0}, room=sid)
+        await sio.emit("error", {"cause": "bad format"}, room=sid)
         return
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
-    await sio.emit("config", pvGames[sid].current.get_config_msg(), room=sid)
+    await sio.emit("config", {"fen":pveGames[sid].fen}, room=sid)
+
+async def handle_move(sid, data):
+    print("move ", sid, data)
+    if not sid in pveGames:
+        await sio.emit("error", {"cause": "game not found"}, room=sid)
+        return
+    game = pveGames[sid]
+    if "san" not in data:
+        await sio.emit("error", {"cause": "bad format"}, room=sid)
+        return
+    if not game.current.has_time():
+        await sio.emit("end", {"winner": False}, room=sid)
+        await handle_disconnect(sid)
+        await sio.disconnect(sid)
+        return
+    uci_move = game.board.parse_san(data["san"]).uci()
+    if chess.Move.from_uci(uci_move) not in game.board.legal_moves:
+        await sio.emit("error", {"cause": "bad move"}, room=sid)
+        return
+    game.board.push_uci(uci_move)
+    outcome = game.board.outcome()
+    if not outcome is None:
+        await sio.emit("end", {"winner": outcome}, room=sid)
+        await handle_disconnect(sid)
+        await sio.disconnect(sid)
+        return
+    bot_move = (await game.bot.play(game.board, chess.engine.Limit(depth=game.depth))).move
+    game.board.push_uci(bot_move.uci())
+    outcome = game.board.outcome()
+    if not outcome is None:
+        await sio.emit("end", {"winner": outcome}, room=sid)
+        await handle_disconnect(sid)
+        await sio.disconnect(sid)
+        return
+    latest_move = game.board.pop()
+    san_move = game.board.san(bot_move)
+    game.board.push(latest_move)
+    game.popped = False
+    await sio.emit("move", {"san":san_move}, room=sid)
+    # TODO capire com'e' fatto outcome e modificare in {"winer": bool}
+    
+async def handle_resign(sid, data):
+    print("resign", sid)
+    if not sid in pveGames:
+        await sio.emit("error", {"cause": "game not found"}, room=sid)
+        return
+    await handle_disconnect(sid)
+    await sio.disconnect(sid)
+
+
+async def handle_pop(sid, data):
+    print("pop", sid)
+    if not sid in pveGames:
+        await sio.emit("error", {"cause": "game not found"}, room=sid)
+        return
+    game = pveGames[sid]
+    if game.popped:
+        await sio.emit("error", {"cause": "pop not available 1"}, room=sid)
+    elif game.board.fullmove_number == 1:
+        await sio.emit("error", {"cause": "pop not available"}, room=sid)
+    else:
+        print('inizio pop')
+        print(game.board.pop())
+        print(game.board.pop())
+        await sio.emit("pop", {}, room=sid)
+        game.popped = True
+
 
 class EventType(StrEnum):
     ERROR = "error"
@@ -162,7 +224,6 @@ class EventType(StrEnum):
     CONFIG = "config"
     END = "end"
     START = "start"
-
 
 sio.on("connect", handle_connect)
 sio.on("disconnect", handle_disconnect)

@@ -1,7 +1,15 @@
-_configs = {}
+import csv
+import random
+
+from enum import StrEnum
+
+class RowType(StrEnum):
+    BACK = "back"
+    FRONT = "front"
+
+configs = {}
 
 def load_configs(csv_path):
-    global _configs
     with open(csv_path, newline="") as csvfile:
         rows = csv.reader(csvfile, delimiter=",", quotechar='"')
         for idx, (level, row) in enumerate(rows):
@@ -9,11 +17,11 @@ def load_configs(csv_path):
                 configs[level]["front" if idx % 26 >= 13 else "back"].append(row)
             else:
                 configs[level] = {"front": [], "back": [row]}
-    return _configs
+    return configs
 
 def get_configs():
-    if bool(_configs):
-        return _configs
+    if bool(configs):
+        return configs
     return None
 
 def gen_start_fen(rank=50):
@@ -39,12 +47,12 @@ def gen_start_fen(rank=50):
         'k' if bb[7] == 'r' else ''}"""
     return f"{bb}/{bf}/8/8/8/8/{wf.upper()}/{wb.upper()} w {castle if len(castle) else '-'} - 0 1"
 
-def test_configs():
+def testconfigs():
     def gen_config(ranks, row_type):
-        row_configs = [
+        rowconfigs = [
             random.choice(configs[str(ranks[j])][row_type.value]) for j in range(len(ranks))
         ]
-        return row_configs[0][:5] + row_configs[1][5:]
+        return rowconfigs[0][:5] + row_configs[1][5:]
 
     errs = 0
     oks = 0
