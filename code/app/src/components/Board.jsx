@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
+import Spinner from 'react-bootstrap/Spinner';
+import { toast } from "react-toastify";
 
 function Board(props) {
 
-  
-
-  const [game, setGame] = useState(new Chess());
+  const [game, setGame] = useState(null);
+  const [moveSan, setMoveSan] = useState(null);
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
-
+  const [botMoveSan, setBotMoveSan] = useState("");
+  
   function safeGameMutate(modify) {
     setGame((g) => {
       const update = { ...g };
@@ -50,19 +52,16 @@ function Board(props) {
     return true;
   }
 
-  function makeRandomMove() {
-    const possibleMoves = game.moves();
-    
-    // exit if the game is over
-    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
-      return;
+  
 
-    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-    safeGameMutate((game) => {
-        
-      game.move(possibleMoves[randomIndex]);
-    });
-  }
+  useEffect(()=>{
+    if(botMoveSan){
+      safeGameMutate((game) => {
+        game.move(botMoveSan);
+      });
+    }
+    
+  },[botMoveSan])
 
   async function onSquareClick(square) {
     // from square
@@ -108,13 +107,14 @@ function Board(props) {
       }
       
       // is normal move
-      //const gameCopy = { ...game };
-      const gameCopy = game;
+      const gameCopy = { ...game };
+      // const gameCopy = game;
       const move = gameCopy.move({
         from: moveFrom,
         to: square,
         promotion: "q",
       });
+      setMoveSan(move.san);
 
 
       // if invalid, setMoveFrom and getMoveOptions
@@ -123,10 +123,9 @@ function Board(props) {
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-      await sendMove(move);
+      //await sendMove(move);
       setGame(gameCopy);
 
-      setTimeout(makeRandomMove, 300);
       resetMove();
     }
   }
@@ -134,16 +133,14 @@ function Board(props) {
   async function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
-      //const gameCopy = { ...game };
-      const gameCopy = game;
+      const gameCopy = { ...game };
       const move = gameCopy.move({
         from: moveFrom,
         to: moveTo,
         promotion: piece[1].toLowerCase() ?? "q",
       });
+      setMoveSan(move.san);
       setGame(gameCopy);
-      setTimeout(makeRandomMove, 300);
-      await sendMove(move);
     }
 
     setShowPromotionDialog(false);
@@ -151,43 +148,112 @@ function Board(props) {
     return true;
   }
 
-  async function sendMove(move){
-    console.log(move);
-    console.log(props.socket);
-    if (props.socket.connected)
-      await props.socket.emit("move", move);
-    else
-      console.error("Socket not connected");
-  }
-
   function resetMove() {
     setMoveFrom("");
     setMoveTo(null);
     setOptionSquares({});
   }
-  //useEffect(()=>{console.log(moveTo)},[moveTo])
+
+  useEffect(()=>{
+    if(props.socket){
+      props.socket.on("config", (data) => {
+        setGame(new Chess(data.fen));
+      })
+    }
+  },[props.socket])
+
+  useEffect(()=>{
+
+    async function wait (){
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      props.setIsLoadingGame(false);
+
+    } 
+
+    if(!!game){
+      wait();
+    }
+    
+
+  },[game])
+
+  useEffect(()=>{
+    if(!!moveSan){
+      props.socket.emit("move", {san: moveSan});
+
+    }
+  },[moveSan])
+
+const [getPop, setGetPop] = useState(false);
+
+  useEffect(()=>{
+    props.socket.on("move", (san) =>{
+      setBotMoveSan(san.san);
+    });
+    props.socket.on("end", (winner) =>{
+      console.log(winner)
+    })
+    props.socket.on("pop", () => {
+      console.log("mi arriva la pop")
+      setGetPop(prevValue => !prevValue);
+    })
+    props.socket.on("error", (error) =>{
+      toast.error(error.cause, {className: "toast-message"});
+    })
+  },[])
+
+  useEffect(()=>{
+      console.log("Faccio gli undo")
+      if(!!game){
+        game.undo();
+        game.undo();
+        setMoveSan(null);
+        setBotMoveSan(null);
+       
+      }
+      
+
+  },[getPop])
 
 
+ 
+
+
+ //
   return (
-    <Chessboard
-      id="ClickToMove"
-      animationDuration={200}
-      arePiecesDraggable={false}
-      position={game.fen()}
-      onSquareClick={onSquareClick}
-      onPromotionPieceSelect={onPromotionPieceSelect}
-      customBoardStyle={{
-        borderRadius: "4px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-      }}
-      customSquareStyles={{
-        ...moveSquares,
-        ...optionSquares,
-      }}
-      promotionToSquare={moveTo}
-      showPromotionDialog={showPromotionDialog}
-      boardWidth={props.width/2.7}
-    />
+    <>
+    {props.isLoadingGame ? 
+    <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}}>
+      <Spinner  animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    </div>
+    
+  : 
+  <Chessboard
+    id="ClickToMove"
+    animationDuration={200}
+    arePiecesDraggable={false}
+    position={game?.fen()}
+    onSquareClick={async (square)=>await onSquareClick(square)}
+    onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
+    customBoardStyle={{
+      borderRadius: "4px",
+      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+    }}
+    customSquareStyles={{
+      ...moveSquares,
+      ...optionSquares,
+    }}
+    promotionToSquare={moveTo}
+    showPromotionDialog={showPromotionDialog}
+    boardWidth={props.width/2.7}
+  />
+  }
+    </>
+    
+    
+    
   );
 }
 

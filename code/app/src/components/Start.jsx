@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import io from 'socket.io-client';
 
+
+
 function Start(props){
 
     const theme = createTheme({
@@ -31,23 +33,35 @@ function Start(props){
     const [showModal, setShowModal] = useState(false);
 
 
-    function handleSubmit (e) {
+    async function handleSubmit (e) {
         e.preventDefault();
         if(props.botDiff === 0)
             props.setBotDiff(1);
         setShowModal(false);
-        props.socket.emit('start', {
-            type: props.setIsSinglePlayer,
-            rank: props.setGameImb, // qual' e' il rank?
-            time: props.setGameTime
-        });
-        navigator(`./game`, { relative: "path" });
+        props.setIsLoadingGame(true);
+        props.setSocket(io("http://localhost:8766", {transports: ['websocket']}));
     }
 
-
     useEffect(()=>{
-        props.setSocket(io("ws://localhost:8766"));
-    },[])
+        if(props.socket){
+
+            props.socket.connect();
+            props.socket.on('connect_error', (error) => {
+                console.error('Errore di connessione:', error);
+            });
+            console.log("ciaone")
+            const data = {
+                type: props.isSinglePlayer,
+                rank: props.gameImb,
+                time: props.gameTime,
+                depth: props.botDiff
+            }
+            props.socket.emit('start', data);
+            console.log(data);
+            // TODO ricevere config da server
+            navigator(`./game`, { relative: "path" });
+        }
+    },[props.socket]);
 
     return (
         <>
@@ -57,7 +71,7 @@ function Start(props){
                 <CloseButton style={{marginRight: "10px", marginTop: "5px"}} onClick={()=> setShowModal(false)}/>
             </Modal.Title>
             <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                <Form onSubmit={handleSubmit} >
+                <Form onSubmit={async (e)=> await handleSubmit(e)} >
                     {props.isSinglePlayer &&
                         <FloatingLabel
                             controlId="floatingInput1"
@@ -74,7 +88,6 @@ function Start(props){
                     >
                         <Form.Control required value={props.gameImb} onChange={(e)=>{if(e.target.value > 100 || e.target.value < 0) props.setGameImb(0); else props.setGameImb(e.target.value); }}  type="number" min={0} max={100}  placeholder="value from 0 to 100" />
                     </FloatingLabel>
-                    {!props.isSinglePlayer &&
                         <FloatingLabel
                             controlId="floatingInput3"
                             label="Game Time in sec"
@@ -82,7 +95,6 @@ function Start(props){
                         >
                             <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value < 0) props.setGameTime(3000); else props.setGameTime(e.target.value);}}  type="number" min={1}   placeholder="value from 1 " />
                         </FloatingLabel>
-                    }
                         <div style={{display: "flex", justifyContent: "flex-end"}}>
                             <Button size="large" color="primary" type="submit" variant="contained">avvia</Button>
                         </div>
@@ -147,7 +159,7 @@ function Start(props){
                         </div>
                         <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
                             <div>
-                                    <Button color="brown" onClick={()=>{props.setIsSinglePlayer(false); setShowModal(true);}} style={{fontSize: "1.5rem", borderRadius: "20px"}}  variant="contained" >
+                                    <Button disabled color="brown" onClick={()=>{props.setIsSinglePlayer(false); setShowModal(true);}} style={{fontSize: "1.5rem", borderRadius: "20px"}}  variant="contained" >
                                         <div style={{marginTop: "5px", marginBottom: "5px"}}>
                                             <Image src={`${ImageMultiPlayer}`} style={{width: "50px", height: "30px", marginBottom: "-5px", marginRight: "10px"}} alt="immagine di scacchi SinglePlayer" />
                                             <span>MultiPlayer</span>

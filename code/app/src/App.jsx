@@ -23,6 +23,8 @@ function App() {
     const [botDiff, setBotDiff] = useState(1);
     const [gameTime, setGameTime] = useState(3000);
     const [socket, setSocket] = useState(undefined);
+    const [isLoadingGame, setIsLoadingGame] = useState(false);
+
 
     
 
@@ -43,12 +45,13 @@ function App() {
                         setGameTime={setGameTime}
                         setSocket={setSocket}
                         socket={socket}
+                        setIsLoadingGame={setIsLoadingGame}
                         />
                     }/> 
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game socket={socket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
+                    <Route path={`/game`} element={<Game isLoadingGame={isLoadingGame}  setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket={setSocket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
                     
                     <Route path="*" element={<NoRoute />}/>
 

@@ -154,9 +154,14 @@ function Game (props) {
   
 
     
-    
+    function handleMenu(){
+        props.setSocket(undefined);
+        props.socket.emit("resign", {});
+    }
 
-    
+    function handleUndo (){
+        props.socket.emit("pop", {});
+    }
 
     return (
         <>
@@ -197,7 +202,7 @@ function Game (props) {
                         <ThemeProvider theme={theme}>
                             <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={()=>setShowModalMenu(false)} variant="contained">No</Button>
                             <Nav.Link as={Link} to="/">
-                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown"  variant="contained">Yes</Button>
+                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={(e)=>{ e.stopPropagation(); handleMenu();}}  variant="contained">Yes</Button>
                             </Nav.Link>
                         </ThemeProvider>
                     </div>
@@ -243,10 +248,10 @@ function Game (props) {
                                 <p style={{marginLeft: "10px"}}>{timer}</p>
                             </div>
                             <div style={{display: "flex", justifyContent: "center"}}>
-                                <Board width={width} socket={props.socket}/>
+                            <Board isLoadingGame={props.isLoadingGame} setIsLoadingGame={props.setIsLoadingGame} width={width} socket={props.socket}/>
                             </div>
                             <div style={{display: "flex", justifyContent: "center", paddingTop: "30px"}}>
-                                <Button color="brown"   style={{fontSize: "1.5rem"}}  variant="contained" >Undo</Button>
+                                <Button color="brown"   style={{fontSize: "1.5rem"}} onClick={handleUndo}  variant="contained" >Undo</Button>
                             </div>
                         </div>
                         
