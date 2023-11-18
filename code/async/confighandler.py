@@ -41,10 +41,10 @@ def gen_start_fen(rank=50):
     bb = gen_config(get_ref_ranks(100 - rank), RowType.BACK)
     bf = gen_config(get_ref_ranks(100 - rank), RowType.FRONT)
     castle = f"""{
-        'Q' if wb[0] == 'r' else ''}{
-        'K' if wb[7] == 'r' else ''}{
-        'q' if bb[0] == 'r' else ''}{
-        'k' if bb[7] == 'r' else ''}"""
+        "K" if any(wb[i] == "r" for i in [5, 6, 7]) else ""}{
+        "Q" if any(wb[i] == "r" for i in [0, 1, 2, 3]) else ""}{
+        "k" if any(bb[i] == "r" for i in [5, 6, 7]) else ""}{
+        "q" if any(bb[i] == "r" for i in [0, 1, 2, 3]) else ""}"""
     return f"{bb}/{bf}/8/8/8/8/{wf.upper()}/{wb.upper()} w {castle if len(castle) else '-'} - 0 1"
 
 def testconfigs():

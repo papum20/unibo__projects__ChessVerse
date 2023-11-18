@@ -16,12 +16,6 @@ class Game:
         self.turn = 0
         self.popped = False
 
-    # def current(self):
-    #     return self.players[self.turn]
-
-    # def opponent(self):
-    #     return self.players[1 - self.turn]
-
     @property
     def current(self):
         return self.players[self.turn]

@@ -4,18 +4,29 @@ class Player:
     def __init__(self, sid, color, time):
         self.id = sid
         self.color = color
-        self.isTimed = time != -1
-        if self.isTimed:
-            self.remainingTime = time * 60
-            self.latestTimeStamp = perf_counter()
+        time = int(time)
+        self.is_timed = time != -1
+        if self.is_timed:
+            self.remaining_time = time
+            self.latest_timestamp = perf_counter()
+        self.first_move = True
+
+    
+    def add_time(self, time):
+        if self.is_timed:
+            self.remaining_time += time
+
 
     def update_time(self):
-        if self.isTimed:
-            self.remainingTime -= perf_counter() - self.latestTimeStamp
-            self.latestTimeStamp = perf_counter()
+        if self.is_timed:
+            if not self.first_move:
+                self.remaining_time -= perf_counter() - self.latest_timestamp
+            self.latest_timestamp = perf_counter()
 
-    def has_time(self):
-        return not self.isTimed or self.remainingTime > 0
+    def has_time(self, update=True):
+        if update:
+            self.update_time()
+        return not self.is_timed or self.remaining_time > 0
 
     def get_config_msg(self):
         return {"fen": self.fen, "color": self.color}

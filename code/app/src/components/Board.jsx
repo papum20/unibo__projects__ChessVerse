@@ -4,7 +4,10 @@ import { Chess } from "chess.js";
 import Spinner from 'react-bootstrap/Spinner';
 import { toast } from "react-toastify";
 
+
 function Board(props) {
+
+
 
   const [game, setGame] = useState(null);
   const [moveSan, setMoveSan] = useState(null);
@@ -14,6 +17,9 @@ function Board(props) {
   const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
   const [botMoveSan, setBotMoveSan] = useState("");
+  const [awaitingBotMove, setAwaitingBotMove] = useState(false);
+  const [firstMove, setFirstMove] = useState(true);
+  const [position, setPosition] = useState("");
   
   function safeGameMutate(modify) {
     setGame((g) => {
@@ -57,13 +63,15 @@ function Board(props) {
   useEffect(()=>{
     if(botMoveSan){
       safeGameMutate((game) => {
-        game.move(botMoveSan);
+        game.move(botMoveSan)
       });
+      setBotMoveSan(null);
     }
     
   },[botMoveSan])
 
   async function onSquareClick(square) {
+    if (awaitingBotMove) return;
     // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -123,7 +131,6 @@ function Board(props) {
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-      //await sendMove(move);
       setGame(gameCopy);
 
       resetMove();
@@ -155,9 +162,20 @@ function Board(props) {
   }
 
   useEffect(()=>{
+    
     if(props.socket){
-      props.socket.on("config", (data) => {
-        setGame(new Chess(data.fen));
+      props.socket?.on("config", (data) => {
+        if(!data){
+          props.socket?.on("start", props.data);
+        }
+        else {
+          const newGame = new Chess();
+  
+        
+
+            newGame.load(data.fen);
+          setGame(newGame);
+        }
       })
     }
   },[props.socket])
@@ -169,7 +187,6 @@ function Board(props) {
       props.setIsLoadingGame(false);
 
     } 
-
     if(!!game){
       wait();
     }
@@ -179,27 +196,41 @@ function Board(props) {
 
   useEffect(()=>{
     if(!!moveSan){
+      if(firstMove){
+        setFirstMove(false);
+        props.startTimer();
+      }
       props.socket.emit("move", {san: moveSan});
-
+      setMoveSan(null);
+      setAwaitingBotMove(true);
     }
   },[moveSan])
 
 const [getPop, setGetPop] = useState(false);
 
   useEffect(()=>{
-    props.socket.on("move", (san) =>{
+    props.socket?.on("move", (san) =>{
       setBotMoveSan(san.san);
+      setAwaitingBotMove(false);
     });
-    props.socket.on("end", (winner) =>{
+    props.socket?.on("end", (winner) =>{
       if (winner.winner)
-        console.log("hai vinto");
-      else
-        console.log("hai perso");
+        props.setVictory(true);
+      else{
+        props.setShowGameOver(true);
+
+      }
+    
     })
-    props.socket.on("pop", () => {
+
+    props.socket?.on("timeout", (_data) =>{
+        props.setShowGameOver(true);
+    })
+    
+    props.socket?.on("pop", () => {
       setGetPop(prevValue => !prevValue);
     })
-    props.socket.on("error", (error) =>{
+    props.socket?.on("error", (error) =>{
       toast.error(error.cause, {className: "toast-message"});
     })
   },[])
@@ -213,14 +244,22 @@ const [getPop, setGetPop] = useState(false);
        
       }
       
-
   },[getPop])
 
 
- 
+  useEffect(()=>{
+    if(game){
+      props.setMoves(game.history());
+    }
+  },[game, getPop])
 
 
- //
+  useEffect(()=>{
+    if (game){
+      setPosition(game.fen());
+    }
+  },[game])
+
   return (
     <>
     {props.isLoadingGame ? 
@@ -231,11 +270,11 @@ const [getPop, setGetPop] = useState(false);
     </div>
     
   : 
-  <Chessboard
+  <Chessboard 
     id="ClickToMove"
     animationDuration={200}
     arePiecesDraggable={false}
-    position={game?.fen()}
+    position={position}
     onSquareClick={async (square)=>await onSquareClick(square)}
     onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
     customBoardStyle={{
@@ -248,7 +287,7 @@ const [getPop, setGetPop] = useState(false);
     }}
     promotionToSquare={moveTo}
     showPromotionDialog={showPromotionDialog}
-    boardWidth={props.width/2.7}
+    boardWidth={props.width/2.3}
   />
   }
     </>
@@ -259,3 +298,4 @@ const [getPop, setGetPop] = useState(false);
 }
 
 export default Board;
+
