@@ -7,14 +7,37 @@ You first need to setup environment variables: `server-nginx/chessverse.env`, `e
 We also provide a `chessverse.conf.template` file for a nginx server; note that it contaians some variables: our approach is to use `envsubst` and the env file `chessverse.env`.  
 This setup doesn't expose any port, but assumes the use of a proxy server (e.g. nginx), which would communicate with the chessverse containers on the `default` network; change it if you use another network.  
 
+## Doc
+
+We endeavour to keep the documentation clear, consistent and updated at all time, so both our team and whoever wants to look at out project can understand it, or at least its structure, despite the large amount of files, services etc.  
+All documentation shall be put in the `doc/` folder.  
+
+Here are the main points ant paths about it:
+*	schemas:
+	-	`infrastructure.drawio`
+	-	`mockup*.jpg`
+	-	`repository-structure.md`
+	-	`schema*.jpg`
+*	agile definitions:
+	-	`definitions.md`
+*	folders containing sprints information:
+	-	`backlogs`
+	-	`goals`
+	-	`retrospective`
+	-	`review`
+	-	`slides`
+*	project and development:
+	-	`code`: actual documentation for the code
+	-	`workflow`: conventions about our development process
+
 ## Project development methods
 
 **Membri del Team:**
 - Giuseppe Spathis (PO) - 0001043077
 - Luca Gabellini (Dev) - 001020370
 - Nico Wu (Dev) - 0001028979
-- Francesco Licchelli (Dev) - 0001041426
-- Daniele D'Ugo (SM) - 0001027741
+- Francesco Licchelli (SM) - 0001041426
+- Daniele D'Ugo (Dev) - 0001027741
 - Cono Cirone (Dev) - 0001029785
 
 ---
