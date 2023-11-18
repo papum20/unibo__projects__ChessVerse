@@ -239,6 +239,7 @@ const [getPop, setGetPop] = useState(false);
       if(!!game){
         game.undo();
         game.undo();
+        setPosition(game.fen());
         setMoveSan(null);
         setBotMoveSan(null);
        

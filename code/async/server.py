@@ -43,7 +43,6 @@ async def handle_start(sid, data):
         return
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
-    print("fen:", pveGames[sid].fen)
     await sio.emit("config", {"fen": pveGames[sid].fen}, room=sid)
 
 
@@ -170,7 +169,5 @@ async def main():
         await asyncio.sleep(1)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
 if __name__ == "__main__":
     asyncio.run(main())
