@@ -8,15 +8,11 @@ import threading
 
 import socketio
 import aiohttp
-from enum import StrEnum
 from time import perf_counter
 
 import chess
 import chess.engine
-import sys
 
-sys.path.append("/code/async")
-from Player import Player
 from PVEGame import PVEGame
 
 sio = socketio.AsyncServer(cors_allowed_origins="*")
@@ -113,18 +109,6 @@ async def handle_pop(sid, data):
         game.board.pop()
         await sio.emit("pop", {}, room=sid)
         game.popped = True
-
-
-class EventType(StrEnum):
-    ERROR = "error"
-    RESIGN = "resign"
-    MOVE = "move"
-    POP = "pop"
-    ACK = "ack"
-    CONFIG = "config"
-    END = "end"
-    START = "start"
-
 
 
 sio.on("connect", handle_connect)
