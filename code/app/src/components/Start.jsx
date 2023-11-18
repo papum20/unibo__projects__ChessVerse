@@ -32,6 +32,7 @@ function Start(props){
 
     const [showModal, setShowModal] = useState(false);
 
+    
 
     async function handleSubmit (e) {
         e.preventDefault();
@@ -49,13 +50,8 @@ function Start(props){
             props.socket.on('connect_error', (error) => {
                 console.error('Errore di connessione:', error);
             });
-            const data = {
-                type: props.isSinglePlayer,
-                rank: props.gameImb,
-                time: props.gameTime,
-                depth: props.botDiff
-            }
-            props.socket.emit('start', data);
+            
+            props.socket.emit('start', props.data);
             // TODO ricevere config da server
             navigator(`./game`, { relative: "path" });
         }
@@ -73,10 +69,10 @@ function Start(props){
                     {props.isSinglePlayer &&
                         <FloatingLabel
                             controlId="floatingInput1"
-                            label="Bot Difficult"
+                            label="Bot Difficult from 1 to 20"
                             className="mb-3"
                         >
-                            <Form.Control value={props.botDiff} onChange={(e)=>{if(e.target.value > 20 || e.target.value < 0) props.setBotDiff(1); else props.setBotDiff(e.target.value); }} required type="number" min={1} max={20}  placeholder="value from 1 to 20" />
+                            <Form.Control value={props.botDiff} onChange={(e)=>{if(e.target.value > 21 || e.target.value < 0) props.setBotDiff(1); else props.setBotDiff(e.target.value); }} required type="number" min={1} max={20}  placeholder="value from 1 to 21" />
                         </FloatingLabel>
                     }
                     <FloatingLabel

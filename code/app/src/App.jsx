@@ -1,7 +1,7 @@
 
 import loadable from '@loadable/component';
 import Alert from "./components/Alert.jsx";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
 import { useEffect, useState } from 'react';
@@ -16,7 +16,6 @@ const Game = loadable(() => import('./components/Game.jsx'));
 function App() {
 
     var location = useLocation();
-    //const navigator = useNavigate();
 
     const [isSinglePlayer, setIsSinglePlayer] = useState(false);
     const [gameImb, setGameImb] = useState(0);
@@ -24,9 +23,22 @@ function App() {
     const [gameTime, setGameTime] = useState(3000);
     const [socket, setSocket] = useState(undefined);
     const [isLoadingGame, setIsLoadingGame] = useState(false);
+    const [data, setData] = useState({});
 
+
+    useEffect(()=>{
+      setData({
+        type: isSinglePlayer,
+        rank: gameImb,
+        time: gameTime,
+        depth: botDiff
+      })
+
+
+    },[isSinglePlayer, gameImb, gameTime, botDiff])
 
     
+
 
 
   return (
@@ -46,12 +58,13 @@ function App() {
                         setSocket={setSocket}
                         socket={socket}
                         setIsLoadingGame={setIsLoadingGame}
+                        data = {data}
                         />
                     }/> 
                     
                     <Route path={`/signin`} element={<Signup  />}/>
                     <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game isLoadingGame={isLoadingGame}  setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket={setSocket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
+                    <Route path={`/game`} element={<Game data = {data} isLoadingGame={isLoadingGame}  setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket={setSocket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
                     
                     <Route path="*" element={<NoRoute />}/>
 
