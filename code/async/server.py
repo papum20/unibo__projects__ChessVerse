@@ -13,15 +13,19 @@ from time import perf_counter
 
 import chess
 import chess.engine
+import sys
+
+sys.path.append("/code/async")
 from Player import Player
 from PVEGame import PVEGame
-
 
 sio = socketio.AsyncServer(cors_allowed_origins="*")
 app = aiohttp.web.Application()
 sio.attach(app)
 
+
 pveGames = {}
+
 
 async def handle_connect(sid, environ):
     print("connect ", sid)
@@ -31,6 +35,7 @@ async def handle_disconnect(sid):
     if sid in pveGames.keys():
         del pveGames[sid]
 
+
 async def handle_start(sid, data):
     print("start ", sid, data)
     if not "rank" in data or not "depth" in data or not "time" in data:
@@ -39,7 +44,8 @@ async def handle_start(sid, data):
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
     print("fen:", pveGames[sid].fen)
-    await sio.emit("config", {"fen":pveGames[sid].fen}, room=sid)
+    await sio.emit("config", {"fen": pveGames[sid].fen}, room=sid)
+
 
 async def handle_move(sid, data):
     print("move ", sid, data)
@@ -82,7 +88,8 @@ async def handle_move(sid, data):
     game.current.add_time(fine - inizio)
     game.current.first_move = False
     await sio.emit("move", {"san": san_bot_move}, room=sid)
-    
+
+
 async def handle_resign(sid, data):
     print("resign", sid)
     if not sid in pveGames:
@@ -118,6 +125,7 @@ class EventType(StrEnum):
     CONFIG = "config"
     END = "end"
     START = "start"
+
 
 
 sio.on("connect", handle_connect)
@@ -160,7 +168,9 @@ async def main():
     await site.start()
     while True:
         await asyncio.sleep(1)
-       
 
+
+if __name__ == "__main__":
+    asyncio.run(main())
 if __name__ == "__main__":
     asyncio.run(main())
