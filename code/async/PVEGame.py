@@ -11,6 +11,3 @@ class PVEGame(Game.Game):
 
     async def initialize_bot(self):
         self.bot = (await chess.engine.popen_uci("./stockfish"))[1]
-
-    async def end_game(self, winner: bool):
-        await self.current().send_end(winner)

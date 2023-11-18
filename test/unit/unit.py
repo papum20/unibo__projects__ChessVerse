@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, AsyncMock, patch
 import sys
 import json
-sys.path.append("/code/async")
+sys.path.append("../../code/async")
 from server import (
     handle_start,
     handle_move,
@@ -11,10 +11,11 @@ from server import (
     handle_connect,
     handle_disconnect,
     EventType,
-    GameType,
-    matchmaker,
-    receive_message
 )
+################################################################
+#TODO riscrivere la classe usando socketio invece di websocket.#
+################################################################
+
 
 class TestSocketServer(unittest.IsolatedAsyncioTestCase):
     async def test_handle_start_valid_data(self):
