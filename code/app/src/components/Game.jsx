@@ -3,54 +3,54 @@ import { Image, Row, Col, Card, Modal, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Board from "./Board.jsx";
-import {createTheme,ThemeProvider} from '@mui/material/styles';
+import { createTheme,ThemeProvider } from '@mui/material/styles';
 import { Button  } from "@mui/material";
 import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
 import "./Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-
-function Game (props) {
-
+function Game({
+                  gameTime,
+                  botDiff,
+                  isLoadingGame, setIsLoadingGame,
+                  socket, setSocket,
+                  data,
+                  gameImb,
+                  isSinglePlayer
+              })
+{
     const { width, height } = useWindowDimensions();
-
     const [fontSize, setFontSize] = useState("20px");
 
     useLayoutEffect(()=>{
-        if(width<440){
+        if(width < 440)
             setFontSize("18px");
-        }
-        else if((width>440) && (width<540)){
+        else if((width > 440) && (width < 540))
             setFontSize("22px");
-        }
-        else{
+        else
             setFontSize("26px");
-        }
     },[width]);
 
-
+    const navigator = useNavigate();
     const [moves, setMoves] = useState([]);
-    const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino","ciao", "peppecasa", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino",]);
-    const movesRef = useRef(null);
-
-      const theme = createTheme({
-        palette: {
-          brown: {
-            main: '#795548',
-            light: '#543b32',
-            dark: '#543b32',
-            contrastText: '#fff',
-          },
-        },
-      });
-
+    const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino", "ciao", "peppecasa", "pippo", "pluto", "paperino", "ciao", "pippo", "pluto", "paperino"]);
     const [showModalMenu, setShowModalMenu] = useState(false);
     const [showGameOver, setShowGameOver] = useState(false);
     const [showVictory, setVictory] = useState(false);
+    const movesRef = useRef(null);
 
-    const navigator = useNavigate();
-
+    const theme = createTheme({
+        palette: {
+            brown: {
+                main: '#795548',
+                light: '#543b32',
+                dark: '#543b32',
+                contrastText: '#fff',
+            },
+        },
+    });
 
     //inizio
     class EventType {
@@ -77,8 +77,7 @@ function Game (props) {
         }
     }
 
-
-    const [timer, setTimer] = useState(props.gameTime || 1);
+    const [timer, setTimer] = useState(gameTime || 1);
     const [timerId, setTimerId] = useState(null);
 
     const startTimer = () => {
@@ -95,29 +94,23 @@ function Game (props) {
 
     const resumeTimer = () => {
         if (timerId === null) {
-          startTimer();
+            startTimer();
         }
-      };
+    };
 
-    
-
-    useEffect(()=>{
-        
-        if(timer === 0){
+    useEffect(() => {
+        if (timer === 0) {
             stopTimer();
-         }
-         
-    },[timer])
-
-
+        }
+    }, [timer])
     
     function handleMenu(){
-        props.setSocket(undefined);
-        props.socket.emit("resign", {});
+        setSocket(undefined);
+        socket.emit("resign", {});
     }
 
     function handleUndo (){
-        props.socket.emit("pop", {});
+        socket.emit("pop", {});
     }
 
     useEffect(()=>{
@@ -134,30 +127,47 @@ function Game (props) {
         if(props.socket === undefined){
         navigator(`../`, { relative: "path" });
         }
-   },[props.socket])
-
-
+    }, [socket])
 
     return (
-        <>
-
-            <Modal  show={showGameOver} centered dialogClassName="my-modal">
+        <div data-testid="game">
+            <Modal
+              show={showGameOver}
+              centered
+              dialogClassName="my-modal"
+            >
                 <div style={{border: "4px solid red"}}>
                     <Modal.Body style={{backgroundColor: "#b6884e"}}>
                         <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
                             <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
                             <ExclamationDiamond size={40} color="red" />
                         </div>
-                        { timer <=0 &&
-                                <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`, marginTop: "20px"}}>
-                                    <p>The time has run out</p>
-                                </div>
-                            }
-                        
+                        {timer <= 0 &&
+                          <div style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              fontSize: `${fontSize}`,
+                              marginTop: "20px"
+                          }}>
+                              <p>The time has run out</p>
+                          </div>
+                        }
                         <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
                             <ThemeProvider theme={theme}>
-                                <Nav.Link as={Link} to="/"  style={{display: "flex", justifyContent: "center"}}>
-                                    <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={()=>props.setSocket(undefined)}  variant="contained">Return to menu</Button>
+                                <Nav.Link
+                                  as={Link}
+                                  to="/"
+                                  style={{display: "flex", justifyContent: "center"}}
+                                >
+                                    <Button
+                                      style={{fontSize: "1.2rem"}}
+                                      size="large"
+                                      color="brown"
+                                      onClick={() => setSocket(undefined)}
+                                      variant="contained"
+                                    >
+                                        Return to menu
+                                    </Button>
                                 </Nav.Link>
                             </ThemeProvider>
                         </div>
@@ -165,7 +175,11 @@ function Game (props) {
                 </div>
             </Modal>
 
-            <Modal  show={showVictory} centered dialogClassName="my-modal">
+            <Modal
+              show={showVictory}
+              centered
+              dialogClassName="my-modal"
+            >
                 <div style={{border: "4px solid green"}}>
                     <Modal.Body style={{backgroundColor: "#b6884e"}}>
                         <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
@@ -173,11 +187,22 @@ function Game (props) {
                             <ExclamationDiamond size={40} color="green" />
                         </div>
                         
-                        
                         <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
                             <ThemeProvider theme={theme}>
-                                <Nav.Link as={Link} to="/"  style={{display: "flex", justifyContent: "center"}}>
-                                    <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={()=>props.setSocket(undefined)}  variant="contained">Return to menu</Button>
+                                <Nav.Link
+                                  as={Link}
+                                  to="/"
+                                  style={{display: "flex", justifyContent: "center"}}
+                                >
+                                    <Button
+                                      style={{fontSize: "1.2rem"}}
+                                      size="large"
+                                      color="brown"
+                                      onClick={() => setSocket(undefined)}
+                                      variant="contained"
+                                    >
+                                        Return to menu
+                                    </Button>
                                 </Nav.Link>
                             </ThemeProvider>
                         </div>
@@ -185,7 +210,11 @@ function Game (props) {
                 </div>
             </Modal>
 
-            <Modal show={showModalMenu} centered dialogClassName="my-modal">
+            <Modal
+              show={showModalMenu}
+              centered
+              dialogClassName="my-modal"
+            >
                 <Modal.Body style={{backgroundColor: "#b6884e", fontSize: `${fontSize}`}}>
                     <div style={{display: "flex", justifyContent: "center"}}>
                         <p>Are you sure you want to go back</p>
@@ -195,9 +224,28 @@ function Game (props) {
                     </div>
                     <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
                         <ThemeProvider theme={theme}>
-                            <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={()=>setShowModalMenu(false)} variant="contained">No</Button>
+                            <Button
+                              style={{fontSize: "1.2rem"}}
+                              size="large"
+                              color="brown"
+                              onClick={()=> setShowModalMenu(false)}
+                              variant="contained"
+                            >
+                                No
+                            </Button>
                             <Nav.Link as={Link} to="/">
-                                <Button style={{fontSize: "1.2rem"}} size="large" color="brown" onClick={(e)=>{ e.stopPropagation(); handleMenu();}}  variant="contained">Yes</Button>
+                                <Button
+                                  style={{fontSize: "1.2rem"}}
+                                  size="large"
+                                  color="brown"
+                                  onClick={(e)=> {
+                                      e.stopPropagation();
+                                      handleMenu();
+                                  }}
+                                  variant="contained"
+                                >
+                                    Yes
+                                </Button>
                             </Nav.Link>
                         </ThemeProvider>
                     </div>
@@ -223,10 +271,16 @@ function Game (props) {
                             </Row>
                         </Col>
                         <Col style={{display: "flex", justifyContent: "flex-end", marginRight: "40px"}}>
-                            <Button  color="brown" onClick={()=>setShowModalMenu(true)}   style={{fontSize: "1.5rem"}}  variant="contained" ><Gear  size={30} /></Button>
+                            <Button
+                              color="brown"
+                              onClick={()=> setShowModalMenu(true)}
+                              style={{fontSize: "1.5rem"}}
+                              variant="contained"
+                            >
+                                <Gear size={30} />
+                            </Button>
                         </Col>
                     </Row>
-                    
                 </div>
                 <Row>
                     <Col>
@@ -242,35 +296,42 @@ function Game (props) {
                     <Col>
                     <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
-                                <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>Moves History</p>
+                                <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>
+                                    Moves History
+                                </p>
                             </Card.Title>
                             <Card.Body ref={movesRef} style={{overflow: "auto", height: `calc(${height}px / 2)`, marginLeft: "20px", marginBottom: "20px", overflowY:"auto"}}>
                                 <Row>
                                     <Col>
-                                    {moves.map((el,i) =>  {
-                                        if(i%2==0){
+                                    {moves.map((el,i) => {
+                                        if(i % 2 === 0) {
                                             return (
                                             <Card style={{marginBottom: "10px", backgroundColor: "#9f7a48", border: `3px solid white`, display: "flex", alignItems: "center" }} key={i}>
                                                 <span style={{paddingTop: "5px", paddingBottom: "5px"}}>{el}</span>
                                             </Card>
                                             )
                                         }
-                                    } 
-                                    )
-                                    }
+                                    })}
                                     </Col>
                                     <Col>
-                                    {moves.map((el,i) =>  {
-                                        if(i%2==1){
+                                    {moves.map((el,i) => {
+                                        if(i % 2 === 1){
                                             return (
-                                            <Card style={{marginBottom: "10px", backgroundColor: "#9f7a48", border: `3px solid black`, display: "flex", alignItems: "center" }} key={i}>
-                                                <span style={{paddingTop: "5px", paddingBottom: "5px"}}>{el}</span>
-                                            </Card>
+                                              <Card style={{
+                                                  marginBottom: "10px",
+                                                  backgroundColor: "#9f7a48",
+                                                  border: `3px solid black`,
+                                                  display: "flex",
+                                                  alignItems: "center"
+                                              }} key={i}
+                                              >
+                                                  <span style={{paddingTop: "5px", paddingBottom: "5px"}}>
+                                                      {el}
+                                                  </span>
+                                              </Card>
                                             )
                                         }
-                                    } 
-                                    )
-                                    }
+                                    })}
                                     </Col>
 
                                 </Row>
@@ -285,7 +346,9 @@ function Game (props) {
                     <Col>
                         <Card style={{marginRight: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
-                                <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>Chat</p>
+                                <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>
+                                    Chat
+                                </p>
                             </Card.Title>
                             <Card.Body style={{overflow: "auto", height: `calc(${height}px / 2)`, marginLeft: "20px", marginBottom: "20px", overflowY: "auto"}}>
                                 {botMessages.map((el,i) => 
@@ -305,8 +368,21 @@ function Game (props) {
                 </Row>
                 </ThemeProvider>
             </div>
-        </>
+        </div>
     )
+    
+}
+
+Game.propTypes = {
+    gameTime: PropTypes.number,
+    botDiff: PropTypes.number,
+    isLoadingGame: PropTypes.bool,
+    setIsLoadingGame: PropTypes.func,
+    socket: PropTypes.object,
+    setSocket: PropTypes.func,
+    gameImb: PropTypes.number,
+    isSinglePlayer: PropTypes.bool,
+    data: PropTypes.object,
 }
 
 export default Game;
