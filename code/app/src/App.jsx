@@ -1,10 +1,10 @@
 import loadable from '@loadable/component';
 import Alert from "./components/Alert.jsx";
-import { Routes, Route, useLocation } from "react-router-dom";
+import {Routes, Route, useLocation} from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
-import { useEffect, useState } from 'react';
-import { DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB } from "./Const.js";
+import {useEffect, useState} from 'react';
+import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./Const.js";
 
 //caricamento Lazy
 const Login = loadable(() => import('./components/Login.jsx'));
@@ -31,9 +31,9 @@ function App() {
   }, [isSinglePlayer, gameImb, gameTime, botDiff])
 
   return (
-    <>
-      <Alert/>
-      <Routes location={location} key={location.pathname}>
+    <div data-testid="appPage">
+      <Alert data-testid="alertDiv"/>
+      <Routes location={location} key={location.pathname} data-testid="toGame">
         <Route path={`/`} element={
           <Start
             isSinglePlayer={isSinglePlayer}
@@ -51,8 +51,10 @@ function App() {
           />
         }/>
 
-        <Route path={`/signin`} element={<Login/>}/>
-        <Route path={`/login`} element={<Login/>}/>
+        {/* Ancora da implementare
+                    <Route path={`/signin`} element={<Login  />} data-testid="signIn"/>
+                    <Route path={`/login`} element={<Login  />} data-testid="logIn" />
+                    */}
         <Route
           path={`/game`}
           element={
@@ -68,11 +70,13 @@ function App() {
               gameTime={gameTime}
             />
           }
+          data-testid="game"
         />
 
         <Route path="*" element={<NoRoute/>}/>
       </Routes>
-    </>
+
+    </div>
   )
 }
 

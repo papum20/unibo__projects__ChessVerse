@@ -64,13 +64,11 @@ function Start({
     },[socket]);
 
     return (
-        <>
-        <Modal show={showModal} centered size="lg">
-            <Modal.Title style={{display: "flex", justifyContent: "flex-end", backgroundColor: "#b6884e"}}>
-                <CloseButton
-                  style={{marginRight: "10px", marginTop: "5px"}}
-                  onClick={() => setShowModal(false)}
-                />
+        <div data-testid="startPage">
+
+        <Modal  show={showModal} centered size="lg">
+            <Modal.Title  style={{display: "flex", justifyContent: "flex-end", backgroundColor: "#b6884e"}}>
+                <CloseButton style={{marginRight: "10px", marginTop: "5px"}} onClick={()=> setShowModal(false)}/>
             </Modal.Title>
             <Modal.Body style={{backgroundColor: "#b6884e"}}>
                 <Form onSubmit={async (e)=> await handleSubmit(e)}>
@@ -289,7 +287,8 @@ function Start({
                 </div>
                 </ThemeProvider>
             </div>
-        </>
+                
+        </div>
     )
 }
 
