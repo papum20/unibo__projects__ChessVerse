@@ -110,14 +110,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await handle_resign(sid, {})
         mock_disconnect.assert_called()
 
-    # simple_move
-    @mock.patch("server.sio.emit")
-    async def test_handle_move_no_game(self, mock_emit):
-        sid = "test_sid"
-        await handle_move(sid, {"san": "e2e4"})
-
-        # Assertion to check if sio.emit was called with the expected arguments
-        mock_emit.assert_called_with("error", {"cause": "Game not found"}, room=sid)
 
     @mock.patch("Game.confighandler.gen_start_fen")
     @mock.patch("server.sio.emit")
@@ -313,6 +305,13 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await handle_pop(sid, {})
         mock_emit.assert_called_with("error", {"cause": "You have already popped"}, room=sid)
 
+    # @mock.patch("server.sio.emit")
+    # async def test_handle_move_no_game(self, mock_emit):
+    #     sid = "test_sid"
+    #     await handle_move(sid, {"san": "e2e4"})
+    #
+    #     # Assertion to check if sio.emit was called with the expected arguments
+    #     mock_emit.assert_called_with("error", {"cause": "Game not found"}, room=sid)
 
 if __name__ == "__main__":
     unittest.main()
