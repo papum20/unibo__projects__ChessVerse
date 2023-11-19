@@ -59,16 +59,28 @@ function Board(props) {
   }
 
   
+  useEffect(() => {
+    const makeBotMove = async () => {
+      if (botMoveSan) {
+        const updatedGame = new Chess();
+        updatedGame.load(game.fen()); // Carica la posizione attuale della scacchiera
 
-  useEffect(()=>{
-    if(botMoveSan){
-      safeGameMutate((game) => {
-        game.move(botMoveSan)
-      });
-      setBotMoveSan(null);
-    }
-    
-  },[botMoveSan])
+        const move = updatedGame.move(botMoveSan);
+        if (move) {
+          // Ritarda l'esecuzione per un breve periodo per visualizzare l'animazione
+          await new Promise(resolve => setTimeout(resolve, 300));
+
+          safeGameMutate((game) => {
+            game.move(move.san, { sloppy: true });
+          });
+
+          setBotMoveSan(null);
+        }
+      }
+    };
+
+    makeBotMove();
+  }, [botMoveSan]);
 
   async function onSquareClick(square) {
     if (awaitingBotMove) return;
@@ -123,7 +135,6 @@ function Board(props) {
         promotion: "q",
       });
       setMoveSan(move.san);
-
 
       // if invalid, setMoveFrom and getMoveOptions
       if (move === null) {
@@ -216,10 +227,15 @@ const [getPop, setGetPop] = useState(false);
     props.socket?.on("end", (winner) =>{
       if (winner.winner)
         props.setVictory(true);
-      else{
+      else
         props.setShowGameOver(true);
-
-      }
+      // TODO 
+      // else if (winner.winner === false){
+      //   props.setShowGameOver(true);
+      // }
+      // else {
+      //   props.setShowTie(true);
+      // }
     
     })
 
@@ -271,25 +287,25 @@ const [getPop, setGetPop] = useState(false);
     </div>
     
   : 
-  <Chessboard 
-    id="ClickToMove"
-    animationDuration={200}
-    arePiecesDraggable={false}
-    position={position}
-    onSquareClick={async (square)=>await onSquareClick(square)}
-    onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
-    customBoardStyle={{
-      borderRadius: "4px",
-      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-    }}
-    customSquareStyles={{
-      ...moveSquares,
-      ...optionSquares,
-    }}
-    promotionToSquare={moveTo}
-    showPromotionDialog={showPromotionDialog}
-    boardWidth={props.width/2.3}
-  />
+    <Chessboard 
+      id="ClickToMove"
+      animationDuration={300}
+      arePiecesDraggable={false}
+      position={position}
+      onSquareClick={async (square)=>await onSquareClick(square)}
+      onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
+      customBoardStyle={{
+        borderRadius: "4px",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+      }}
+      customSquareStyles={{
+        ...moveSquares,
+        ...optionSquares,
+      }}
+      promotionToSquare={moveTo}
+      showPromotionDialog={showPromotionDialog}
+      boardWidth={`${props.width/2 >(props.height-180) ? (props.height-180) : (props.width/2)}`}
+    />
   }
     </>
     
@@ -299,4 +315,3 @@ const [getPop, setGetPop] = useState(false);
 }
 
 export default Board;
-

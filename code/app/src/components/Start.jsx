@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button  } from "@mui/material";
+import { Button, Typography, Slider  } from "@mui/material";
 import {createTheme,ThemeProvider} from '@mui/material/styles';
 import { Link } from "react-router-dom";
 import ChessBoardImg from "../assets/background2.jpg";
@@ -32,6 +32,8 @@ function Start(props){
 
     const [showModal, setShowModal] = useState(false);
 
+    const [moveMod, setMoveMod] = useState(0);
+
     
 
     async function handleSubmit (e) {
@@ -61,39 +63,75 @@ function Start(props){
         <>
 
         <Modal  show={showModal} centered size="lg">
-            <Modal.Title  style={{display: "flex", justifyContent: "flex-end", backgroundColor: "#b6884e"}}>
-                <CloseButton style={{marginRight: "10px", marginTop: "5px"}} onClick={()=> setShowModal(false)}/>
-            </Modal.Title>
-            <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                <Form onSubmit={async (e)=> await handleSubmit(e)} >
-                    {props.isSinglePlayer &&
-                        <FloatingLabel
-                            controlId="floatingInput1"
-                            label="Bot Difficult from 1 to 20"
-                            className="mb-3"
-                        >
-                            <Form.Control value={props.botDiff} onChange={(e)=>{if(e.target.value > 21 || e.target.value < 0) props.setBotDiff(1); else props.setBotDiff(e.target.value); }} required type="number" min={1} max={20}  placeholder="value from 1 to 21" />
-                        </FloatingLabel>
-                    }
-                    <FloatingLabel
-                        controlId="floatingInput2"
-                        label="Game Imbalance"
-                        className="mb-3"
-                    >
-                        <Form.Control required value={props.gameImb} onChange={(e)=>{if(e.target.value > 100 || e.target.value < 0) props.setGameImb(0); else props.setGameImb(e.target.value); }}  type="number" min={0} max={100}  placeholder="value from 0 to 100" />
-                    </FloatingLabel>
-                        <FloatingLabel
-                            controlId="floatingInput3"
-                            label="Game Time in sec"
-                            className="mb-3"
-                        >
-                            <Form.Control required value={props.gameTime} onChange={(e)=>{if(e.target.value < 0) props.setGameTime(3000); else props.setGameTime(e.target.value);}}  type="number" min={1}   placeholder="value from 1 " />
-                        </FloatingLabel>
+            <ThemeProvider theme={theme}>
+                <Modal.Title  style={{display: "flex", justifyContent: "flex-end", backgroundColor: "#b6884e"}}>
+                    <CloseButton style={{marginRight: "10px", marginTop: "5px"}} onClick={()=> setShowModal(false)}/>
+                </Modal.Title>
+                <Modal.Body style={{backgroundColor: "#b6884e"}}>
+                    <Form onSubmit={async (e)=> await handleSubmit(e)} >
+                        {props.isSinglePlayer &&
+                            <>
+                                <Typography id="botDifficult" gutterBottom
+                                    style={{display:"flex", justifyContent: "center"}}
+                                >
+                                Bot Strength: {props.botDiff}
+                                </Typography>
+                                <Slider
+                                    style={{width:"80%", marginLeft: "10%"}}
+                                    value={props.botDiff}
+                                    min={1}
+                                    step={1}
+                                    max={20}
+                                    color="brown"
+                                    onChange={(e) => { props.setBotDiff(Math.max(1, Math.min(20, e.target.value))); }}
+                                    valueLabelDisplay="auto"
+                                    aria-labelledby="botDifficult"
+                                />
+                            </>
+                        }
+
+                        <>
+                            <Typography id="gameImbalance" gutterBottom
+                                style={{display:"flex", justifyContent: "center"}}
+                            >
+                            Rank: {props.gameImb}
+                            </Typography>
+                            <Slider
+                                style={{width:"80%", marginLeft: "10%"}}
+                                value={props.gameImb}
+                                min={0}
+                                step={1}
+                                max={100}
+                                color="brown"
+                                onChange={(e) => { props.setGameImb(Math.max(0, Math.min(100, e.target.value))); }}
+                                valueLabelDisplay="auto"
+                                aria-labelledby="gameImbalance"
+                            />
+                        </>
+                        <>
+                            <Typography id="gameTime" gutterBottom
+                                style={{display:"flex", justifyContent: "center"}}
+                            >
+                            Clocktime: {props.gameTime}
+                            </Typography>
+                            <Slider
+                                style={{width:"80%", marginLeft: "10%"}}
+                                value={props.gameTime}
+                                min={1}
+                                step={1}
+                                max={3000}
+                                onChange={(e)=>{if(e.target.value < 0) props.setGameTime(3000); else props.setGameTime(e.target.value);}}
+                                color="brown"
+                                valueLabelDisplay="auto"
+                                aria-labelledby="gameTime"
+                            />
+                        </>
                         <div style={{display: "flex", justifyContent: "flex-end"}}>
-                            <Button size="large" color="primary" type="submit" variant="contained">avvia</Button>
+                            <Button size="large" color="brown" type="submit" variant="contained">start</Button>
                         </div>
-                </Form>
-            </Modal.Body>
+                    </Form>
+                </Modal.Body>
+            </ThemeProvider>
         </Modal>
 
 

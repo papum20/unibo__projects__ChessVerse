@@ -1,7 +1,7 @@
 import ImageScacchi from "../assets/logo.png";
 import { Image, Row, Col, Card, Modal, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useEffect, useState, useLayoutEffect } from "react";
+import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Board from "./Board.jsx";
 import {createTheme,ThemeProvider} from '@mui/material/styles';
 import { Button  } from "@mui/material";
@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 function Game (props) {
 
-    const { width } = useWindowDimensions();
+    const { width, height } = useWindowDimensions();
 
     const [fontSize, setFontSize] = useState("20px");
 
@@ -32,6 +32,7 @@ function Game (props) {
 
     const [moves, setMoves] = useState([]);
     const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino","ciao", "peppecasa", "pippo", "pluto", "paperino","ciao", "pippo", "pluto", "paperino",]);
+    const movesRef = useRef(null);
 
       const theme = createTheme({
         palette: {
@@ -119,6 +120,14 @@ function Game (props) {
         props.socket.emit("pop", {});
     }
 
+    useEffect(()=>{
+        movesRef.current.scrollTo({
+            top: movesRef.current.scrollHeight,
+            behavior: "smooth",
+        });
+        
+    },[moves]);
+
 
 //questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
     useEffect(()=>{
@@ -195,13 +204,23 @@ function Game (props) {
                 </Modal.Body>
             </Modal>
 
-            <div style={{backgroundColor: "#b99b69", width: "100vw", height: "100vh"}}>
+            <div style={{backgroundColor: "#b99b69", width: "100vw", height: "100vh", overflow: "auto", overflowX: "hidden"}}>
                 <ThemeProvider theme={theme}>
                 <div style={{paddingTop: "10px", paddingLeft: "10px"}}>
                     <Row>
                         <Col>
-                            <Image src={`${ImageScacchi}`} style={{width: "50px", height: "50px", opacity: 0.8, marginTop: "-30px"}} alt="immagine di scacchi" />
-                            <span style={{color: "white", fontSize: "2.5rem"}}>ChessVerse</span>
+                            <Row style={{marginBottom: "20px"}}>
+                                <Col style={{display:"flex", justifyContent:"flex-end"}}>
+                                    <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
+                                        <Clock size={30}/>
+                                        <p style={{marginLeft: "10px"}}>{timer}</p>
+                                    </div>
+                                </Col>
+                                <Col style={{display:"flex", justifyContent:"flex-end", marginRight: "-200px"}}>
+                                    <Image src={`${ImageScacchi}`} style={{width: "50px", height: "50px", opacity: 0.8}} alt="immagine di scacchi" />
+                                        <span style={{color: "white", fontSize: "2.7rem"}}>ChessVerse</span>
+                                </Col>
+                            </Row>
                         </Col>
                         <Col style={{display: "flex", justifyContent: "flex-end", marginRight: "40px"}}>
                             <Button  color="brown" onClick={()=>setShowModalMenu(true)}   style={{fontSize: "1.5rem"}}  variant="contained" ><Gear  size={30} /></Button>
@@ -209,13 +228,23 @@ function Game (props) {
                     </Row>
                     
                 </div>
-                <Row style={{marginTop: "4vh"}}>
-                    <Col xs={3} sm={3} lg={3}>
-                        <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
+                <Row>
+                    <Col>
+                        <div style={{display: "flex", justifyContent: "center"}}>
+                            <div>
+                                <Board setVictory={setVictory} width={width} height={height} startTimer={startTimer} setShowGameOver={setShowGameOver}  setMoves={setMoves}  data = {props.data} isLoadingGame={props.isLoadingGame} setIsLoadingGame={props.setIsLoadingGame} socket={props.socket}/>
+                            </div>
+                        </div>
+                        
+                    </Col>
+                    <Col style={{maxWidth:"50vw"}}>
+                    <Row>
+                    <Col>
+                    <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>Moves History</p>
                             </Card.Title>
-                            <Card.Body style={{overflow: "auto", height: `calc(${width}px / 4)`, marginLeft: "20px", marginBottom: "20px"}}>
+                            <Card.Body ref={movesRef} style={{overflow: "auto", height: `calc(${height}px / 2)`, marginLeft: "20px", marginBottom: "20px", overflowY:"auto"}}>
                                 <Row>
                                     <Col>
                                     {moves.map((el,i) =>  {
@@ -245,30 +274,20 @@ function Game (props) {
                                     </Col>
 
                                 </Row>
+                                <Row>
+                                    <div style={{paddingTop: "20px"}}>
+                                        <Button disabled={moves.length === 0} color="brown" style={{width: "100%", fontSize: `${fontSize}`}} onClick={handleUndo}  variant="contained" >Undo</Button>
+                                    </div>
+                                </Row>
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col xs={6} sm={6} lg={6}>
-                        <div style={{marginBottom: "30px", display: "flex", justifyContent: "center"}}>
-                            <Clock size={30}/>
-                            <p style={{marginLeft: "10px"}}>{timer}</p>
-                        </div>
-                        <div style={{display: "flex", justifyContent: "center"}}>
-                            <div >
-                                <Board setVictory={setVictory} startTimer={startTimer} setShowGameOver={setShowGameOver}  setMoves={setMoves}  data = {props.data} isLoadingGame={props.isLoadingGame} setIsLoadingGame={props.setIsLoadingGame} width={width} socket={props.socket}/>
-                            </div>
-                        </div>
-                        <div style={{display: "flex", justifyContent: "center", paddingTop: "30px"}}>
-                            <Button color="brown"   style={{fontSize: `${fontSize}`}} onClick={handleUndo}  variant="contained" >Undo</Button>
-                        </div>
-                        
-                    </Col>
-                    <Col xs={3} sm={3} lg={3}>
+                    <Col>
                         <Card style={{marginRight: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>Chat</p>
                             </Card.Title>
-                            <Card.Body style={{overflow: "auto", height: `calc(${width}px / 4)`, marginLeft: "20px", marginBottom: "20px"}}>
+                            <Card.Body style={{overflow: "auto", height: `calc(${height}px / 2)`, marginLeft: "20px", marginBottom: "20px", overflowY: "auto"}}>
                                 {botMessages.map((el,i) => 
                                     <Card style={{marginTop: "10px", marginBottom: "10px", backgroundColor: "#9f7a48"}} key={i}>
                                         <Card.Body>
@@ -279,6 +298,9 @@ function Game (props) {
                                 }
                             </Card.Body>
                         </Card>
+                    </Col>
+
+                    </Row>
                     </Col>
                 </Row>
                 </ThemeProvider>

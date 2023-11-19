@@ -10,8 +10,8 @@ from server import (
     handle_pop,
     handle_connect,
     handle_disconnect,
-    EventType,
 )
+
 ################################################################
 #TODO riscrivere la classe usando socketio invece di websocket.#
 ################################################################
