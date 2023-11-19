@@ -42,9 +42,9 @@ function App() {
 
 
   return (
-    <>  
-            <Alert/> 
-                <Routes location={location} key={location.pathname}>
+    <div data-testid="appPage">  
+            <Alert data-testid="alertDiv"/> 
+                <Routes location={location} key={location.pathname} data-testid="toGame">
                     <Route path={`/`} element={
                       <Start
                         isSinglePlayer={isSinglePlayer}
@@ -62,16 +62,18 @@ function App() {
                         />
                     }/> 
                     
-                    <Route path={`/signin`} element={<Signup  />}/>
-                    <Route path={`/login`} element={<Login  />}/>
-                    <Route path={`/game`} element={<Game data = {data} isLoadingGame={isLoadingGame}  setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket={setSocket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>}/>
+                    {/* Ancora da implementare
+                    <Route path={`/signin`} element={<Signup  />} data-testid="signIn"/>
+                    <Route path={`/login`} element={<Login  />} data-testid="logIn" />
+                    */} 
+                    <Route path={`/game`} element={<Game data = {data} isLoadingGame={isLoadingGame}  setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket={setSocket}  isSinglePlayer={isSinglePlayer} gameImb={gameImb} botDiff={botDiff} gameTime={gameTime}/>} data-testid="game"/>
                     
                     <Route path="*" element={<NoRoute />}/>
 
                 </Routes>
             
 
-		</>
+		</div>
   )
 }
 

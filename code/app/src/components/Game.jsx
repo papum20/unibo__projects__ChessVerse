@@ -120,7 +120,7 @@ function Game({
     }, [socket])
 
     return (
-        <>
+        <div data-testid="game">
             <Modal
               show={showGameOver}
               centered
@@ -389,8 +389,9 @@ function Game({
                 </Row>
                 </ThemeProvider>
             </div>
-        </>
+        </div>
     )
+    
 }
 
 Game.propTypes = {
