@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import asyncio
-import random
-import json
-import csv
 import threading
 
 import socketio
@@ -19,12 +16,12 @@ sio = socketio.AsyncServer(cors_allowed_origins="*")
 app = aiohttp.web.Application()
 sio.attach(app)
 
-
 pveGames = {}
 
 
-async def handle_connect(sid, environ):
+async def handle_connect(sid, _environ):
     print("connect ", sid)
+
 
 async def handle_disconnect(sid):
     print("disconnect ", sid)
@@ -34,7 +31,7 @@ async def handle_disconnect(sid):
 
 async def handle_start(sid, data):
     print("start ", sid, data)
-    if not "rank" in data or not "depth" in data or not "time" in data:
+    if "rank" not in data or "depth" not in data or "time" not in data:
         await sio.emit("error", {"cause": "Missing fields"}, room=sid)
         return
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
@@ -44,7 +41,7 @@ async def handle_start(sid, data):
 
 async def handle_move(sid, data):
     print("move ", sid, data)
-    if not sid in pveGames:
+    if sid not in pveGames:
         await sio.emit("error", {"cause": "Game not found"}, room=sid)
         return
     game = pveGames[sid]
@@ -61,12 +58,12 @@ async def handle_move(sid, data):
         return
     game.board.push_uci(uci_move)
     outcome = game.board.outcome()
-    if not outcome is None:
+    if outcome is not None:
         await sio.emit("end", {"winner": outcome.winner}, room=sid)
         await handle_disconnect(sid)
         await sio.disconnect(sid)
         return
-    inizio = perf_counter()
+    start = perf_counter()
     bot_move = (await game.bot.play(game.board, chess.engine.Limit(depth=game.depth))).move
     game.board.push_uci(bot_move.uci())
     outcome = game.board.outcome()
@@ -80,24 +77,24 @@ async def handle_move(sid, data):
         await sio.disconnect(sid)
         return
     game.popped = False
-    fine = perf_counter()
-    game.current.add_time(fine - inizio)
+    end = perf_counter()
+    game.current.add_time(end - start)
     game.current.first_move = False
     await sio.emit("move", {"san": san_bot_move}, room=sid)
 
 
-async def handle_resign(sid, data):
+async def handle_resign(sid, _data):
     print("resign", sid)
-    if not sid in pveGames:
+    if sid not in pveGames:
         await sio.emit("error", {"cause": "Game not found"}, room=sid)
         return
     await handle_disconnect(sid)
     await sio.disconnect(sid)
 
 
-async def handle_pop(sid, data):
+async def handle_pop(sid, _data):
     print("pop", sid)
-    if not sid in pveGames:
+    if sid not in pveGames:
         await sio.emit("error", {"cause": "Game not found"}, room=sid)
         return
     game = pveGames[sid]
@@ -120,19 +117,19 @@ sio.on("move", handle_move)
 sio.on("start", handle_start)
 
 
-def cleaner_thread(games, sio):
+def cleaner_thread():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
     async def cleaner():
         while True:
-            await asyncio.sleep(1)  # Adjust the sleep interval as needed
+            await asyncio.sleep(1)
 
-            for sid in list(games.keys()):
-                if sid not in games:
+            for sid in list(pveGames.keys()):
+                if sid not in pveGames:
                     continue
 
-                for player in games[sid].players:
+                for player in pveGames[sid].players:
                     if not player.has_time():
                         print("gotcha ", sid)
                         await sio.emit("timeout", {}, room=sid)
@@ -147,7 +144,7 @@ async def main():
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
     site = aiohttp.web.TCPSite(runner, 'localhost', 8766)
-    thread = threading.Thread(target=cleaner_thread, args=(pveGames, sio))
+    thread = threading.Thread(target=cleaner_thread)
     thread.start()
     await site.start()
     while True:
