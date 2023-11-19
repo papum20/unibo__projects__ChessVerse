@@ -6,12 +6,14 @@ function Login () {
 
     return (
         <div style={{marginTop: "30%", marginLeft: "40%"}}>
-            <span>torna alla pagina di </span>
+            <span data-testid="loginSpan">torna alla pagina di </span>
             <Button
               variant="contained"
               onClick={()=> {
                 navigator("../", { relative: "path" });
               }}
+
+              data-testid="loginButton"
             >
                 start
             </Button>
