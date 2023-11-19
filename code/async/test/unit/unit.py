@@ -82,6 +82,34 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await handle_start(sid, data)
         mock_emit.assert_called_with("config", {"fen": chess.STARTING_FEN}, room=sid)
 
+
+    @mock.patch("server.sio.emit")
+    #bad initialization data
+    async def test_handle_invalid_start(self, mock_emit):
+        sid = "test_sid"
+        data = {"rank": -100, "depth": -100, "time": -1000}
+        await handle_start(sid, data)
+        await handle_move(sid, {"san": "e4"})
+        mock_emit.assert_called_with("timeout", {}, room=sid)
+
+    @mock.patch("server.pveGames")
+    @mock.patch("server.sio.emit")
+    async def test_handle_resign_invalid(self, mock_emit, mock_dict):
+        sid = "test_sid"
+        mock_dict.return_value = {}
+        await handle_resign(sid, {})
+        mock_emit.assert_called_with("error", {"cause": "Game not found"}, room=sid)
+
+    @mock.patch("server.pveGames")
+    @mock.patch("server.sio.emit")
+    @mock.patch("server.handle_disconnect")
+    async def test_handle_resign_valid(self, mock_disconnect, mock_emit, mock_dict):
+        sid = "test_sid"
+        mock_dict.return_value = {"test_sid": "val"}
+        mock_dict.__contains__.return_value = True
+        await handle_resign(sid, {})
+        mock_disconnect.assert_called()
+
     # simple_move
     @mock.patch("server.sio.emit")
     async def test_handle_move_no_game(self, mock_emit):
