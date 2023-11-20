@@ -4,17 +4,22 @@ server {
 	listen 80;
 
 	location / {
-		proxy_pass http://chessverse-website:${CHESSVERSE_WEB_PORT};
+		proxy_pass http://chessverse-website:${CHESSVERSE_APP_PORT};
 		include chessverse_params;
 	}
 
-	location /webapp/ {
+	location /${SUBPATH_WEBAPP/ {
 		proxy_pass http://chessverse-ia:${CHESSVERSE_WEBAPP_PORT};
 		include chessverse_params;
 	}
 
-	location /api/ {
+	location /${SUBPATH_API}/ {
 		proxy_pass http://chessverse-back:${CHESSVERSE_BACK_PORT};
+		include chessverse_params;
+	}
+
+	location /${SUBPATH_WSS}/ {
+		proxy_pass http://chessverse-back:${CHESSVERSE_WSS_PORT};
 		include chessverse_params;
 	}
 
