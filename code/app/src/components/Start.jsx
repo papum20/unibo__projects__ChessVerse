@@ -37,8 +37,6 @@ function Start({
     const [showOptions, setShowOptions] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-    
-
     async function handleSubmit (e) {
         e.preventDefault();
         if(botDiff === 0)
@@ -51,18 +49,19 @@ function Start({
         ));
     }
 
-    useEffect(()=>{
-        if(socket){
+    useEffect(() => {
+        if (socket) {
             socket.connect();
+
             socket.on('connect_error', (error) => {
                 console.error('Errore di connessione:', error);
             });
-            
+
             socket.emit('start', data);
             // TODO ricevere config da server
-            navigator(`./game`, { relative: "path" });
+            navigator('./game', { relative: "path" });
         }
-    },[socket]);
+    }, [socket]);
 
     return (
         <div data-testid="startPage">
