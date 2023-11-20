@@ -35,6 +35,11 @@ module.func1
 module.func2
 test(func2, fun1)
 """
+import os
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+target_dir = "/".join(project_root.split("/")[:-1])
+os.chdir(target_dir)
 
 
 def mock_bot_move(move: str, tomock: MagicMock):
@@ -82,9 +87,8 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await handle_start(sid, data)
         mock_emit.assert_called_with("config", {"fen": chess.STARTING_FEN}, room=sid)
 
-
     @mock.patch("server.sio.emit")
-    #bad initialization data
+    # bad initialization data
     async def test_handle_invalid_start(self, mock_emit):
         sid = "test_sid"
         data = {"rank": -100, "depth": -100, "time": -1000}
@@ -109,7 +113,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_dict.__contains__.return_value = True
         await handle_resign(sid, {})
         mock_disconnect.assert_called()
-
 
     @mock.patch("Game.confighandler.gen_start_fen")
     @mock.patch("server.sio.emit")
@@ -178,12 +181,10 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = chess.STARTING_FEN
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("e7e5", mock_play)
         # mock_move = MagicMock()
         # mock_move.uci.return_value = "e7e5"  # Define the return value for uci() method
         # mock_play.return_value = mock.MagicMock(move=mock_move)
-
         await handle_move(sid, {"san": "e4"})
 
     @mock.patch("Game.confighandler.gen_start_fen")
@@ -194,7 +195,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = "nrk4n/ppp1pppp/8/8/8/1q1bb2r/3K4/8 w - - 0 1"
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("h3h1", mock_play)
         await handle_move(sid, {"san": "Ke1"})
         mock_emit.assert_called_with("end", {"winner": False}, room=sid)
@@ -207,7 +207,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = "4k3/2Q5/3RBB2/7P/8/2P5/PPP1PPP1/RN2K1N1 w Q - 0 1"
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("h3h1", mock_play)
         await handle_move(sid, {"san": "Rd8"})
         mock_emit.assert_called_with("end", {"winner": True}, room=sid)
@@ -220,7 +219,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = "nrk4n/ppp1pppp/8/8/3b4/1q1b3r/8/2K5 w - - 0 1"
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("h3h1", mock_play)
         await handle_move(sid, {"san": "Kd2"})
         mock_emit.assert_called_with("end", {"winner": None}, room=sid)
@@ -229,7 +227,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
     async def test_handle_empty_move(self, mock_emit):
         sid = "test_sid"
         await handle_move(sid, {"san": "e2e4"})
-
         # Assertion to check if sio.emit was called with the expected arguments
         mock_emit.assert_called_with("error", {"cause": "Game not found"}, room=sid)
 
@@ -241,7 +238,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = "rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR w KQkq - 0 1"
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("e7e5", mock_play)
         await handle_move(sid, {"san": "f5"})
         mock_bot_move("d7e6", mock_play)
@@ -255,7 +251,6 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = "rnbqkbnr/ppPp2pp/8/8/8/8/PPPPP1PP/RNBQKBNR w KQkq - 0 1"
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("e8d8", mock_play)
         await handle_move(sid, {"san": "cxd8=R+"})
 
@@ -267,9 +262,9 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_gen_start_fen.return_value = "rnbqkbnr/pppppppp/8/8/2N5/PPNPBPP1/1B1QP2P/R3K2R w KQkq - 0 1"
         data = {"rank": 0, "depth": 0, "time": 1000000}
         await handle_start(sid, data)
-
         mock_bot_move("h7h6", mock_play)
         await handle_move(sid, {"san": "O-O"})
+
     @mock.patch("Game.confighandler.gen_start_fen")
     @mock.patch("server.sio.emit")
     async def test_handle_valid_pop(self, mock_emit, mock_gen_start_fen):
@@ -292,6 +287,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await handle_start(sid, data)
         await handle_pop(sid, {})
         mock_emit.assert_called_with("error", {"cause": "No moves to undo"}, room=sid)
+
     @mock.patch("Game.confighandler.gen_start_fen")
     @mock.patch("server.sio.emit")
     async def test_handle_repetitive_pop(self, mock_emit, mock_gen_start_fen):
@@ -312,6 +308,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
     #
     #     # Assertion to check if sio.emit was called with the expected arguments
     #     mock_emit.assert_called_with("error", {"cause": "Game not found"}, room=sid)
+
 
 if __name__ == "__main__":
     unittest.main()
