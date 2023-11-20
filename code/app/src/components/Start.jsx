@@ -7,11 +7,13 @@ import ChessBoardImg from "../assets/background2.jpg";
 import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
 import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
-import { Image, Nav, Modal, Form, FloatingLabel, CloseButton } from "react-bootstrap";
+import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import io from 'socket.io-client';
 import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../Const.js";
+import dotenv from 'dotenv';
+
 
 function Start({
                    isSinglePlayer, setIsSinglePlayer,
@@ -39,6 +41,8 @@ function Start({
     const [showModal, setShowModal] = useState(false);
 
     
+    dotenv.config();
+
 
     async function handleSubmit (e) {
         e.preventDefault();
@@ -46,8 +50,8 @@ function Start({
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-        setSocket(io(
-          "http://localhost:8766",
+        setSocket(io( //per testare in locale "http://localhost:8766"
+          `${process.env.WSS_ADDR}`,
           { transports: ['websocket'] }
         ));
     }
