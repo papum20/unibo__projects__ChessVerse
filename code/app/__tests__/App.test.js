@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent  } from '@testing-library/react';
-import { MemoryRouter, Routes } from 'react-router-dom'; // Importa MemoryRouter
+import { render, screen  } from '@testing-library/react';
+import { MemoryRouter, Routes } from 'react-router-dom'; 
 import App from '../src/App';
 import "@testing-library/jest-dom";
-import { Route } from 'react-router-dom';
+
 
 
 describe('App component', () => {
