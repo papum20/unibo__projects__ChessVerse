@@ -1,13 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button, Typography, Slider  } from "@mui/material";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from "react-router-dom";
 import ChessBoardImg from "../assets/background2.jpg";
 import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
 import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
-import { Image, Nav, Modal, Form, FloatingLabel, CloseButton } from "react-bootstrap";
+import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import io from 'socket.io-client';
