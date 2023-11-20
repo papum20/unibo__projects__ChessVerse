@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 # don't run as root #1
 COPY --chown=node:node . .
 # clean install
-RUN npm ci --only=production
+RUN npm ci --mit=dev
 
 RUN npm run build
 

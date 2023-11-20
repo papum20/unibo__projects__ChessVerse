@@ -156,10 +156,9 @@ def load_env(path):
             os.environ[key] = value.strip()
 
 async def main():
-    load_env("../../env/async.env")
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
-    site = aiohttp.web.TCPSite(runner, os.environ.get("IP"), os.environ.get("PORT"))
+    site = aiohttp.web.TCPSite(runner, "0.0.0.0", os.environ.get("PORT"))
     thread = threading.Thread(target=cleaner_thread)
     thread.start()
     await site.start()
