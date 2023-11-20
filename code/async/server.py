@@ -62,7 +62,11 @@ async def handle_move(sid, data):
         return
     if not game.current.has_time():
         return
-    uci_move = game.board.parse_san(data["san"]).uci()
+    try:
+        uci_move = game.board.parse_san(data["san"]).uci()
+    except (chess.InvalidMoveError, chess.IllegalMoveError):
+        await sio.emit("error", {"cause": "Invalid move"}, room=sid)
+        return
     if chess.Move.from_uci(uci_move) not in game.board.legal_moves:
         await sio.emit("error", {"cause": "Invalid move"}, room=sid)
         return
