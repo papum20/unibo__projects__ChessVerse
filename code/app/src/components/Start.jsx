@@ -1,17 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button, Typography, Slider  } from "@mui/material";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from "react-router-dom";
 import ChessBoardImg from "../assets/background2.jpg";
 import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
 import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
-import { Image, Nav, Modal, Form, FloatingLabel, CloseButton } from "react-bootstrap";
+import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import io from 'socket.io-client';
-import { MAX_BOT_DIFF, MAX_GAME_IMB, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME } from "../Const.js";
+import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../Const.js";
 
 function Start({
                    isSinglePlayer, setIsSinglePlayer,
@@ -43,7 +42,7 @@ function Start({
     async function handleSubmit (e) {
         e.preventDefault();
         if(botDiff === 0)
-            setBotDiff(1);
+            setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
         setSocket(io(
@@ -85,11 +84,11 @@ function Start({
                                 <Slider
                                     style={{width:"80%", marginLeft: "10%"}}
                                     value={botDiff}
-                                    min={1}
+                                    min={MIN_BOT_DIFF}
                                     step={1}
-                                    max={20}
+                                    max={MAX_BOT_DIFF}
                                     color="brown"
-                                    onChange={(e) => { setBotDiff(Math.max(1, Math.min(20, e.target.value))); }}
+                                    onChange={(e) => { setBotDiff(Math.max(MIN_BOT_DIFF, Math.min(MAX_BOT_DIFF, e.target.value))); }}
                                     valueLabelDisplay="auto"
                                     aria-labelledby="botDifficult"
                                 />
@@ -105,11 +104,11 @@ function Start({
                             <Slider
                                 style={{width:"80%", marginLeft: "10%"}}
                                 value={gameImb}
-                                min={0}
+                                min={MIN_GAME_IMB}
                                 step={1}
-                                max={100}
+                                max={MAX_GAME_IMB}
                                 color="brown"
-                                onChange={(e) => { setGameImb(Math.max(0, Math.min(100, e.target.value))); }}
+                                onChange={(e) => { setGameImb(Math.max(MIN_GAME_IMB, Math.min(MAX_GAME_IMB, e.target.value))); }}
                                 valueLabelDisplay="auto"
                                 aria-labelledby="gameImbalance"
                             />
@@ -123,10 +122,10 @@ function Start({
                             <Slider
                                 style={{width:"80%", marginLeft: "10%"}}
                                 value={gameTime}
-                                min={1}
+                                min={MIN_GAME_TIME}
                                 step={1}
-                                max={3000}
-                                onChange={(e)=>{if(e.target.value < 0) setGameTime(3000); else setGameTime(e.target.value);}}
+                                max={MAX_GAME_TIME}
+                                onChange={(e)=>{if(e.target.value < 0) setGameTime(MAX_GAME_IMB); else setGameTime(e.target.value);}}
                                 color="brown"
                                 valueLabelDisplay="auto"
                                 aria-labelledby="gameTime"
