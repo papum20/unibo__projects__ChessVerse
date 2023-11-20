@@ -1,8 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button, Typography, Slider  } from "@mui/material";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from "react-router-dom";
 import ChessBoardImg from "../assets/background2.jpg";
 import ImageScacchi from "../assets/logo.png";
 import ImageSinglePlayer from "../assets/singleplayer-removebg-preview.png";
