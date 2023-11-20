@@ -30,9 +30,20 @@ async def handle_disconnect(sid):
 
 
 async def handle_start(sid, data):
+    def check_int(key, min, max):
+        return key in data and isinstance(data[key], int) and min <= data[key] <= max
     print("start ", sid, data)
     if "rank" not in data or "depth" not in data or "time" not in data:
         await sio.emit("error", {"cause": "Missing fields"}, room=sid)
+        return
+    if not check_int("rank", 0, 100):
+        await sio.emit("error", {"cause": "Invalid rank"}, room=sid)
+        return
+    if not check_int("depth", 1, 20):
+        await sio.emit("error", {"cause": "Invalid bot strength"}, room=sid)
+        return
+    if not check_int("time", 1, 3000):
+        await sio.emit("error", {"cause": "Invalid clocktime"}, room=sid)
         return
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
