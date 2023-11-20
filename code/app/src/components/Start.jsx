@@ -11,7 +11,6 @@ import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import io from 'socket.io-client';
 import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../Const.js";
-import dotenv from 'dotenv';
 
 
 function Start({
@@ -50,7 +49,7 @@ function Start({
         setShowModal(false);
         setIsLoadingGame(true);
         setSocket(io( //per testare in locale "http://localhost:8766"
-          `${process.env.WSS_ADDR}`,
+          `${process.env.REACT_APP_WSS_ADDR}`,
           { transports: ['websocket'] }
         ));
     }
