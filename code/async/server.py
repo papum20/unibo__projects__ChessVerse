@@ -59,8 +59,10 @@ async def handle_move(sid, data):
     if "san" not in data:
         await sio.emit("error", {"cause": "Missing fields"}, room=sid)
         return
+    # manca il messaggio del tempo
     if not game.current.has_time():
         return
+    # manca try catch test_invalid_move, valid_uci_move
     uci_move = game.board.parse_san(data["san"]).uci()
     if chess.Move.from_uci(uci_move) not in game.board.legal_moves:
         await sio.emit("error", {"cause": "Invalid move"}, room=sid)
@@ -80,7 +82,6 @@ async def handle_move(sid, data):
     san_bot_move = game.board.san(bot_move)
     game.board.push(latest_move)
     if outcome is not None:
-        print(outcome)
         await sio.emit("move", {"san": san_bot_move}, room=sid)
         await sio.emit("end", {"winner": outcome.winner}, room=sid)
         await handle_disconnect(sid)

@@ -1,11 +1,11 @@
 import chess
-import chess.engine
 
 import confighandler
 import Player
 import os
 
 class Game:
+    __slots__ = ["fen", "board", "players", "turn", "popped"]
     def __init__(self, sids: [], rank: int, time: int):
         if confighandler.get_configs() is None:
             confighandler.load_configs(os.path.join(os.path.dirname(__file__), 'configs.csv'))
