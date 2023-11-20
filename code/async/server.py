@@ -2,6 +2,7 @@
 
 import asyncio
 import threading
+import os
 
 import socketio
 import aiohttp
@@ -34,16 +35,16 @@ async def handle_start(sid, data):
         return key in data and isinstance(data[key], int) and min <= data[key] <= max
     print("start ", sid, data)
     if "rank" not in data or "depth" not in data or "time" not in data:
-        await sio.emit("error", {"cause": "Missing fields"}, room=sid)
+        await sio.emit("error", {"cause": "Missing fields", "fatal": True}, room=sid)
         return
     if not check_int("rank", 0, 100):
-        await sio.emit("error", {"cause": "Invalid rank"}, room=sid)
+        await sio.emit("error", {"cause": "Invalid rank", "fatal": True}, room=sid)
         return
     if not check_int("depth", 1, 20):
-        await sio.emit("error", {"cause": "Invalid bot strength"}, room=sid)
+        await sio.emit("error", {"cause": "Invalid bot strength", "fatal": True}, room=sid)
         return
     if not check_int("time", 1, 3000):
-        await sio.emit("error", {"cause": "Invalid clocktime"}, room=sid)
+        await sio.emit("error", {"cause": "Invalid clocktime", "fatal": True}, room=sid)
         return
     pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
     await pveGames[sid].initialize_bot()
@@ -53,16 +54,14 @@ async def handle_start(sid, data):
 async def handle_move(sid, data):
     print("move ", sid, data)
     if sid not in pveGames:
-        await sio.emit("error", {"cause": "Game not found"}, room=sid)
+        await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
         return
     game = pveGames[sid]
     if "san" not in data:
         await sio.emit("error", {"cause": "Missing fields"}, room=sid)
         return
-    # manca il messaggio del tempo
     if not game.current.has_time():
         return
-    # manca try catch test_invalid_move, valid_uci_move
     uci_move = game.board.parse_san(data["san"]).uci()
     if chess.Move.from_uci(uci_move) not in game.board.legal_moves:
         await sio.emit("error", {"cause": "Invalid move"}, room=sid)
@@ -82,6 +81,7 @@ async def handle_move(sid, data):
     san_bot_move = game.board.san(bot_move)
     game.board.push(latest_move)
     if outcome is not None:
+        print(outcome)
         await sio.emit("move", {"san": san_bot_move}, room=sid)
         await sio.emit("end", {"winner": outcome.winner}, room=sid)
         await handle_disconnect(sid)
@@ -97,7 +97,7 @@ async def handle_move(sid, data):
 async def handle_resign(sid, _data):
     print("resign", sid)
     if sid not in pveGames:
-        await sio.emit("error", {"cause": "Game not found"}, room=sid)
+        await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
         return
     await handle_disconnect(sid)
     await sio.disconnect(sid)
@@ -106,7 +106,7 @@ async def handle_resign(sid, _data):
 async def handle_pop(sid, _data):
     print("pop", sid)
     if sid not in pveGames:
-        await sio.emit("error", {"cause": "Game not found"}, room=sid)
+        await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
         return
     game = pveGames[sid]
     if game.popped:
@@ -149,18 +149,29 @@ def cleaner_thread():
 
     loop.run_until_complete(cleaner())
 
+def load_env(path):
+    with open(path, "r") as f:
+        for line in f.readlines():
+            key, value = line.split("=")
+            os.environ[key] = value.strip()
 
 async def main():
-    print("starting...")
+    load_env("../../env/async.env")
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
-    site = aiohttp.web.TCPSite(runner, 'localhost', 8766)
+    site = aiohttp.web.TCPSite(runner, os.environ.get("IP"), os.environ.get("PORT"))
     thread = threading.Thread(target=cleaner_thread)
     thread.start()
     await site.start()
+    print(f"listening on {os.environ.get('IP')}:{os.environ.get('PORT')}")
     while True:
         await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+"""
+    per eseguire: 
+        python3.12 server.py
+"""

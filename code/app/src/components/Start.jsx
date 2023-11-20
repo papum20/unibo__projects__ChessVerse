@@ -123,7 +123,7 @@ function Start({
                             <Slider
                                 style={{width:"80%", marginLeft: "10%"}}
                                 value={gameTime}
-                                min={1}
+                                min={0}
                                 step={1}
                                 max={3000}
                                 onChange={(e)=>{if(e.target.value < 0) setGameTime(3000); else setGameTime(e.target.value);}}

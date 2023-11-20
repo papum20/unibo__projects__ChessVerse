@@ -248,6 +248,10 @@ const [getPop, setGetPop] = useState(false);
     })
     props.socket?.on("error", (error) =>{
       toast.error(error.cause, {className: "toast-message"});
+      if(error.fatal){
+        props.setSocket(undefined);
+        props.navigator(`../`, { relative: "path" });
+      }
     })
   },[])
 

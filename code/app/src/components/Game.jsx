@@ -125,6 +125,7 @@ function Game({
 //questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
     useEffect(()=>{
         if(socket === undefined){
+
         navigator(`../`, { relative: "path" });
         }
     }, [socket])
@@ -286,7 +287,7 @@ function Game({
                     <Col>
                         <div style={{display: "flex", justifyContent: "center"}}>
                             <div>
-                                <Board setVictory={setVictory} width={width} height={height} startTimer={startTimer} setShowGameOver={setShowGameOver}  setMoves={setMoves}  data = {data} isLoadingGame={isLoadingGame} setIsLoadingGame={setIsLoadingGame} socket={socket}/>
+                                <Board navigator={navigator} setVictory={setVictory} width={width} height={height} startTimer={startTimer} setShowGameOver={setShowGameOver}  setMoves={setMoves}  data = {data} isLoadingGame={isLoadingGame} setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket = {setSocket}/>
                             </div>
                         </div>
                         
