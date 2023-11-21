@@ -13,6 +13,7 @@ import io from 'socket.io-client';
 import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../Const.js";
 
 
+
 function Start({
                    isSinglePlayer, setIsSinglePlayer,
                    gameImb, setGameImb,
@@ -37,16 +38,21 @@ function Start({
     const navigator = useNavigate();
     const [showOptions, setShowOptions] = useState(false);
     const [showModal, setShowModal] = useState(false);
+
+
+  
     
+    const apiUrl = import.meta.env.VITE_WSS_ADDR;
+
+
     async function handleSubmit (e) {
         e.preventDefault();
         if(botDiff === 0)
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-		console.log(process.env.REACT_APP_WSS_ADDR)
-        setSocket(io( //per testare in locale "http://localhost:8766"
-          process.env.REACT_APP_WSS_ADDR,
+        setSocket(io( 
+          `${apiUrl}`,
           { transports: ['websocket'] }
         ));
     }
@@ -189,7 +195,8 @@ function Start({
                               color="brown"
                               style={{fontSize: "1.5rem"}}
                               onClick={() => {
-                                  setShowOptions(true)
+                                  console.log("ciao");
+                                  setShowOptions(true);
                               }}
                               variant="contained"
                             >
