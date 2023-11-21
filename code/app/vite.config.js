@@ -11,4 +11,7 @@ export default defineConfig({
     assetsInlineLimit: 0,
     minify: "terser",
   },
+  server: {
+    port: process.env.REACT_APP_PORT,
+  },
 });

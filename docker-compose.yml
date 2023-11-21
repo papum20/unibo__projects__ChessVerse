@@ -23,6 +23,32 @@ services:
       - ./database/dist:/usr/src/dist
 
 
+  chessverse-app:
+    container_name: chessverse-app
+    restart: always
+    build:
+      context: ${DIR_APP}
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/app.env
+    networks:
+      chessverse:
+      default:
+        ipv4_address: ${DFLT_IP_APP}
+
+  chessverse-async:
+    container_name: chessverse-async
+    restart: always
+    build:
+      context: ${DIR_ASYNC}
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/async.env
+    networks:
+      chessverse:
+      default:
+        ipv4_address: ${DFLT_IP_ASYNC}
+
   chessverse-db:
     image: mysql:8.2.0
     container_name: chessverse-db

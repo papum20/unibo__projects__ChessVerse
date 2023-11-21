@@ -14,5 +14,5 @@ Use `unittest` for python.
 
 ## async
 
-(to define)  
-Use `unittest` for python.  
+Test are found by python in `code/async/tests/unit`.    
+The test can be executed running `python3.12 -m unittest unit.TestChessSocketIO`.  

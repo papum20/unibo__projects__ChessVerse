@@ -25,3 +25,5 @@ __pycache__/
 prometheus/prometheus.env
 prometheus/prometheus.yaml
 prometheus/wal_data/
+
+venv/
