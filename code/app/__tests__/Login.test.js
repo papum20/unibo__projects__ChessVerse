@@ -1,5 +1,6 @@
 import Login from '/code/app/src/components/Login.jsx';
-import {render, screen, waitFor} from '@testing-library/react';
+import { test, expect } from "@jest/globals";
+import { render, screen, waitFor } from '@testing-library/react';
 
 test('Login renders successfully', async () => {
   render(<Login />);

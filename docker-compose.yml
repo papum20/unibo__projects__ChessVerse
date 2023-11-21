@@ -10,17 +10,17 @@ services:
   #      chessverse:
   #      default:
 
-  #chessverse-back:
-  #  container_name: chessverse-back
-  #  build:
-  #    context: ./code/backend
-  #    dockerfile: Dockerfile
-  #  env_file: ./env/backend.env
-  #  networks:
-  #    default:
-  #      ipv4_address: ${DFLT_IP_BACKEND}
-  #  volumes:
-  #    - ./database/dist:/usr/src/dist
+  chessverse-back:
+    container_name: chessverse-back
+    build:
+      context: ./code/backend
+      dockerfile: Dockerfile
+    env_file: ./env/backend.env
+    networks:
+      default:
+        ipv4_address: ${DFLT_IP_BACKEND}
+    volumes:
+      - ./database/dist:/usr/src/dist
 
 
   chessverse-app:
