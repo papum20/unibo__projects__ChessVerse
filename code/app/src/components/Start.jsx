@@ -42,9 +42,6 @@ function Start({
 
   
     
-    const apiUrl = import.meta.env.VITE_WSS_ADDR;
-
-
     async function handleSubmit (e) {
         e.preventDefault();
         if(botDiff === 0)
@@ -52,8 +49,11 @@ function Start({
         setShowModal(false);
         setIsLoadingGame(true);
         setSocket(io( 
-          `${apiUrl}`,
-          { transports: ['websocket'] }
+          import.meta.env.VITE_SERVER_ADDR,
+          {
+			path: import.meta.env.VITE_SUBPATH_WSS,
+			transports: ['websocket']
+			}
         ));
     }
 

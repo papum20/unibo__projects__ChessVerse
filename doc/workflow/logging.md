@@ -22,5 +22,5 @@ Daniele 40h
 Daniele: 80h  
 
 ### sprint 2
-Daniele: 40h  
+Daniele: 48h  
 
