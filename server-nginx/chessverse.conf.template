@@ -20,7 +20,15 @@ server {
 
 	location /${SUBPATH_WSS}/ {
 		proxy_pass http://chessverse-async:${CHESSVERSE_WSS_PORT};
-		include chessverse_params;
+		#include chessverse_params;
+
+		# Additional directives for WebSocket
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade ${DOLLAR}http_upgrade;
+		proxy_set_header Connection "Upgrade";
+
+		proxy_set_header Host ${DOLLAR}http_host;
+		proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
 	}
 
 }

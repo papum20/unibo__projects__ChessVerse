@@ -13,7 +13,7 @@ import chess.engine
 
 from PVEGame import PVEGame
 
-sio = socketio.AsyncServer(cors_allowed_origins="*")
+sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', path=f'{os.environ.get("SUBPATH")}')
 app = aiohttp.web.Application()
 sio.attach(app)
 
