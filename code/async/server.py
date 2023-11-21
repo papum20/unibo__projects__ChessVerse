@@ -153,20 +153,18 @@ def cleaner_thread():
 
     loop.run_until_complete(cleaner())
 
-def load_env(path):
-    with open(path, "r") as f:
-        for line in f.readlines():
-            key, value = line.split("=")
-            os.environ[key] = value.strip()
-
 async def main():
+    ## SOLO per testing
+    os.environ["IP"] = "localhost"
+    os.environ["PORT"] = "8766"
+    ##
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", os.environ.get("PORT"))
     thread = threading.Thread(target=cleaner_thread)
     thread.start()
     await site.start()
-    print(f"listening on {os.environ.get('IP')}:{os.environ.get('PORT')}")
+    print(f"listening on {os.environ.get('IP')}:{os.environ.get('PORT')}") 
     while True:
         await asyncio.sleep(1)
 

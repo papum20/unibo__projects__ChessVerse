@@ -1,3 +1,5 @@
+export const DEFAULT_GAME_TIME = 600;
+
 export const MIN_BOT_DIFF = 1;
 export const MAX_BOT_DIFF = 20;
 

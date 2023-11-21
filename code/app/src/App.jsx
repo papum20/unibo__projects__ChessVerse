@@ -30,6 +30,9 @@ function App() {
     })
   }, [isSinglePlayer, gameImb, gameTime, botDiff])
 
+
+
+
   return (
     <div data-testid="appPage">
       <Alert data-testid="alertDiv"/>
