@@ -1,21 +1,20 @@
 {
-  "name": "chessverse",
+  "name": "app",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
+    "start": "react-scripts start",
+    "eject": "react-scripts eject",
     "build": "react-scripts build",
     "dev": "vite",
     "prod": "vite",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "serve": "serve -s build",
-    "start": "react-scripts start",
     "preview": "vite preview",
     "postbuild": "rimraf build/**/*.map",
     "test": "react-scripts test --env=jsdom",
     "coverage:dev": "jest --coverage --watchAll",
-    "coverage:prod": "CI=true jest --coverage",
-    "eject": "react-scripts eject"
+    "coverage:prod": "CI=true jest --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -27,6 +26,7 @@
     "@vitejs/plugin-react": "^4.0.3",
     "bootstrap": "^5.3.2",
     "chess.js": "^0.13.4",
+    "cra-template": "1.2.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
@@ -39,7 +39,8 @@
     "redux": "^4.2.1",
     "serve": "^14.2.1",
     "socket.io-client": "^4.7.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "web-vitals": "^3.5.0"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.23.3",
@@ -52,6 +53,24 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "react-test-renderer": "^18.2.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "jest": {
     "collectCoverageFrom": [

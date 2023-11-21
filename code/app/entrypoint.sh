@@ -1,3 +1,3 @@
 #!/bin/sh
 envsubst < ./.env.example > ./.env
-exec dumb-init npm run prod
+exec dumb-init npm run serve
