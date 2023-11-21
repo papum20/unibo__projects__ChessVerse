@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'; // Importa MemoryRouter
 import NoRoute from '../src/NoRoute';
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event"
+
 test('No Route renders successfully', async () => {
     render(
         <MemoryRouter>

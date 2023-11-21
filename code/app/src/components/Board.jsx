@@ -6,9 +6,6 @@ import { toast } from "react-toastify";
 
 
 function Board(props) {
-
-
-
   const [game, setGame] = useState(null);
   const [moveSan, setMoveSan] = useState(null);
   const [moveFrom, setMoveFrom] = useState("");
@@ -289,37 +286,36 @@ const [getPop, setGetPop] = useState(false);
   return (
     <>
     {props.isLoadingGame ? 
-    <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}}>
+    <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}} data-testid="Loading">
       <Spinner  animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
       </Spinner>
     </div>
     
   : 
-    <Chessboard 
-      id="ClickToMove"
-      animationDuration={300}
-      arePiecesDraggable={false}
-      position={position}
-      onSquareClick={async (square)=>await onSquareClick(square)}
-      onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
-      customBoardStyle={{
-        borderRadius: "4px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-      }}
-      customSquareStyles={{
-        ...moveSquares,
-        ...optionSquares,
-      }}
-      promotionToSquare={moveTo}
-      showPromotionDialog={showPromotionDialog}
-      boardWidth={`${props.width/2 >(props.height-180) ? (props.height-180) : (props.width/2)}`}
-    />
+    <div data-testid="chessboard">
+      <Chessboard 
+        id="ClickToMove"
+        animationDuration={300}
+        arePiecesDraggable={false}
+        position={position}
+        onSquareClick={async (square)=>await onSquareClick(square)}
+        onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
+        customBoardStyle={{
+          borderRadius: "4px",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+        }}
+        customSquareStyles={{
+          ...moveSquares,
+          ...optionSquares,
+        }}
+        promotionToSquare={moveTo}
+        showPromotionDialog={showPromotionDialog}
+        boardWidth={`${props.width/2 >(props.height-180) ? (props.height-180) : (props.width/2)}`}
+      />
+    </div>
   }
     </>
-    
-    
-    
   );
 }
 
