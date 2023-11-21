@@ -48,12 +48,12 @@ function Start({
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-        setSocket(io( 
+        setSocket(io(
           import.meta.env.VITE_SERVER_ADDR,
           {
-			path: import.meta.env.VITE_SUBPATH_WSS,
-			transports: ['websocket']
-			}
+              path: import.meta.env.VITE_SUBPATH_WSS,
+              transports: ['websocket']
+          }
         ));
     }
 
