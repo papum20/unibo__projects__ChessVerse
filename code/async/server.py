@@ -154,10 +154,6 @@ def cleaner_thread():
     loop.run_until_complete(cleaner())
 
 async def main():
-    ## SOLO per testing
-    os.environ["IP"] = "localhost"
-    os.environ["PORT"] = "8766"
-    ##
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", os.environ.get("PORT"))
