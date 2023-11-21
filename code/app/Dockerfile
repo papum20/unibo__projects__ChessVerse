@@ -6,6 +6,8 @@ USER root
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init \
 	# envsubst
 	gettext-base
+RUN envsubst < ./.env.example > ./.env
+	
 # only install production dependencies
 ENV NODE_ENV production
 WORKDIR /usr/src/app
