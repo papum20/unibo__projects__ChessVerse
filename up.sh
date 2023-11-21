@@ -11,4 +11,5 @@ envsubst < code/app/.env.example > code/app/.env
 mkdir -p ${VOLUME_MYSQL_DATA}
 
 # start
+docker compose $(ls docker-compose*.yml | awk '{printf "-f %s ", $0}') build
 docker compose $(ls docker-compose*.yml | awk '{printf "-f %s ", $0}') up -d
