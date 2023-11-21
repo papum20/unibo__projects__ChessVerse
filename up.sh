@@ -5,6 +5,8 @@ set -a
 source .env
 source env/credentials.env
 
+envsubst < code/app/.env.example > code/app/.env
+
 # volumes
 mkdir -p ${VOLUME_MYSQL_DATA}
 

@@ -38,16 +38,15 @@ function Start({
     const [showOptions, setShowOptions] = useState(false);
     const [showModal, setShowModal] = useState(false);
     
-    dotenv.config();
-
     async function handleSubmit (e) {
         e.preventDefault();
         if(botDiff === 0)
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
+		console.log(process.env.REACT_APP_WSS_ADDR)
         setSocket(io( //per testare in locale "http://localhost:8766"
-          `${process.env.REACT_APP_WSS_ADDR}`,
+          process.env.REACT_APP_WSS_ADDR,
           { transports: ['websocket'] }
         ));
     }
