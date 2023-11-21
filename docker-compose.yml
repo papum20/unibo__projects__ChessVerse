@@ -33,6 +33,7 @@ services:
       - ./env/app.env
     networks:
       chessverse:
+        ipv4_address: ${DFLT_IP_APP}
       default:
 
   chessverse-async:
