@@ -47,6 +47,7 @@ services:
     networks:
       chessverse:
       default:
+        ipv4_address: ${DFLT_IP_ASYNC}
 
   chessverse-db:
     image: mysql:8.2.0
