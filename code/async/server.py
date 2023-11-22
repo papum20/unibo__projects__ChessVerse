@@ -24,7 +24,7 @@ async def handle_connect(websocket, path):
             if data['type'] == 'start':
                 await handle_start(websocket, data)
             elif data['type'] == 'move':
-                await handle_move(websocket, data)
+                await handle_move(websocket, data["])
             # Add other message types here...
     finally:
         print("disconnect ", sid)

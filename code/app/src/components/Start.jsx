@@ -73,6 +73,27 @@ function Start({
 	  
 		setSocket(ws);
 	  }
+
+	  useEffect(() => {
+		if (socket) {
+			socket.onopen = () => {
+				console.log("WebSocket is open now.");
+				socket.send(JSON.stringify({ type: 'start', data: data }));
+			};
+	
+			socket.onmessage = (event) => {
+				const message = JSON.parse(event.data);
+				console.log("ws msg:",message);
+				if (message.event === 'start') {
+					navigator('/game');
+				}
+			};
+	
+			socket.onerror = (error) => {
+				console.error('Connection error:', error);
+			};
+		}
+	}, [socket]);
 	
 
     return (
