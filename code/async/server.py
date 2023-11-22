@@ -38,7 +38,6 @@ class PVEGameNamespace(socketio.AsyncNamespace):
             except (ValueError, TypeError) as e:
                 return False
 
-        print(self.rooms(sid))
         if "rank" not in data or "depth" not in data or "time" not in data:
             await self.emit("error", {"cause": "Missing fields", "fatal": True}, room=sid)
             return
@@ -54,7 +53,6 @@ class PVEGameNamespace(socketio.AsyncNamespace):
         self.pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
         await self.pveGames[sid].initialize_bot()
         await self.emit("config", {"fen": self.pveGames[sid].fen}, room=sid)
-        print("config sent")
 
     async def on_move(self, sid, data):
         print("move ", sid, data)
@@ -138,25 +136,31 @@ class PVEGameNamespace(socketio.AsyncNamespace):
                         if not player.has_time():
                             print("gotcha ", sid)
                             await self.emit("timeout", {}, room=sid)
-                            await on_disconnect(sid)
+                            await self.on_disconnect(sid)
                             await self.disconnect(sid)
 
         loop.run_until_complete(cleaner())
 
 async def main():
+    env = os.environ.get("ENVIROMENT", "development")
+    if env == "development":
+        from dotenv import load_dotenv
+        env_file = f".env.{env}"
+        load_dotenv(dotenv_path=env_file)
     sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
     app = aiohttp.web.Application()
     sio.attach(app)
 
-    game_namespace = PVEGameNamespace('/wss')
+    game_namespace = PVEGameNamespace(os.environ.get("WSS_NAMESPACE"))
     sio.register_namespace(game_namespace)
 
-    app.router.add_get('/wss', sio.handle_request)
+    app.router.add_get(os.environ.get("WSS_NAMESPACE"), sio.handle_request)
 
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
-    host, port = "127.0.0.1", 8766
+    host = os.environ.get("WSS_DOMAIN")
+    port = 8766
 
     site = aiohttp.web.TCPSite(runner, host, port)
     await site.start()

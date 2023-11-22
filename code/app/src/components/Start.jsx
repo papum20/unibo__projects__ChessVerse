@@ -48,40 +48,15 @@ function Start({
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-        setSocket(io("http://127.0.0.1:8766/wss"));
+        setSocket(io(import.meta.env.VITE_WSS_ADDR))
     }
 
     useEffect(() => {
         if (socket) {
             socket.connect();
-
-            socket.on('reconnect_failed', () => {
-                console.log('Tutti i tentativi di riconnessione sono falliti');
-              });
-
-            socket.on('connect', (reason) => {
-                console.log('Connessione:', reason);
+            socket.on('connect', () => {
+                socket.emit('start', data);
             });
-
-            socket.on('disconnect', (reason) => {
-                console.log('Disconnessione:', reason);
-            });
-
-            socket.on('connect_error', (error) => {
-                console.error('Errore di connessione:', error);
-            });
-
-            socket.on('disconnect', (reason) => {
-                console.log('Disconnessione:', reason);
-            });
-
-            socket.on('disconnect', (reason) => {
-                console.log('Disconnessione:', reason);
-            });
-
-            socket.emit('start', data);
-            console.log('cioaoiq');
-            // TODO ricevere config da server
             navigator('./game', { relative: "path" });
         }
     }, [socket]);

@@ -175,8 +175,6 @@ function Board(props) {
     let failedCnt = 0;
     if(props.socket){
       props.socket?.on("config", async (data) => {
-        console.log(data)
-  
         if (!data && failedCnt > 6){
           props.setSocket(undefined);
           toast.error("comunicazione col server fallita", {className: "toast-message"});
