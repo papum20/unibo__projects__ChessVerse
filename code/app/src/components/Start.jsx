@@ -9,7 +9,6 @@ import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
 import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import io from 'socket.io-client';
 import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../Const.js";
 
 
@@ -42,34 +41,39 @@ function Start({
 
   
     
-    async function handleSubmit (e) {
-        e.preventDefault();
-        if(botDiff === 0)
-            setBotDiff(MIN_BOT_DIFF);
-        setShowModal(false);
-        setIsLoadingGame(true);
-        setSocket(io( 
-          import.meta.env.VITE_SERVER_ADDR,
-          {
-			path: import.meta.env.VITE_SUBPATH_WSS,
-			transports: ['websocket']
-			}
-        ));
-    }
-
-    useEffect(() => {
-        if (socket) {
-            socket.connect();
-
-            socket.on('connect_error', (error) => {
-                console.error('Errore di connessione:', error);
-            });
-
-            socket.emit('start', data);
-            // TODO ricevere config da server
-            navigator('./game', { relative: "path" });
-        }
-    }, [socket]);
+	async function handleSubmit (e) {
+		e.preventDefault();
+		if(botDiff === 0)
+		  setBotDiff(MIN_BOT_DIFF);
+		setShowModal(false);
+		setIsLoadingGame(true);
+		console.log(import.meta.env.VITE_SERVER_ADDR + import.meta.env.VITE_SUBPATH_WSS);
+		
+		const ws = socket || new WebSocket(import.meta.env.VITE_SERVER_ADDR + import.meta.env.VITE_SUBPATH_WSS);
+	  
+		ws.onopen = () => {
+		  console.log("WebSocket is open now.");
+		  ws.send(JSON.stringify({ type: 'start', data: data }));
+		};
+	  
+		ws.onclose = () => {
+		  console.log("WebSocket is closed now.");
+		};
+	  
+		ws.onerror = (error) => {
+		  console.error('Connection error:', error);
+		};
+	  
+		ws.onmessage = (event) => {
+		  const message = JSON.parse(event.data);
+		  if (message.type === 'config') {
+			// TODO handle config message from server
+		  }
+		};
+	  
+		setSocket(ws);
+	  }
+	
 
     return (
         <div data-testid="startPage">
