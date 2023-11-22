@@ -17,7 +17,7 @@ function App() {
   const [gameImb, setGameImb] = useState(MIN_GAME_IMB);
   const [botDiff, setBotDiff] = useState(MIN_BOT_DIFF);
   const [gameTime, setGameTime] = useState(DEFAULT_GAME_TIME);
-  const [socket, setSocket] = useState(undefined);
+  const [socket, setSocket] = useState(null);
   const [isLoadingGame, setIsLoadingGame] = useState(false);
   const [data, setData] = useState({});
 

@@ -223,46 +223,36 @@ function Board(props) {
 
 const [getPop, setGetPop] = useState(false);
 
-  useEffect(()=>{
-    props.socket?.on("move", (san) =>{
-      setBotMoveSan(san.san);
-      setAwaitingBotMove(false);
-    });
-    props.socket?.on("end", (winner) =>{
-      if (winner.winner)
-        props.setVictory(true);
-      else
-        props.setShowGameOver(true);
-      // TODO 
-      // else if (winner.winner === false){
-      //   props.setShowGameOver(true);
-      // }
-      // else {
-      //   props.setShowTie(true);
-      // }
-    
-    })
-
-    props.socket?.on("timeout", (_data) =>{
-        props.setShowGameOver(true);
-    })
-    
-    props.socket?.on("pop", () => {
-      setGetPop(prevValue => !prevValue);
-    })
-    props.socket?.on("error", (error) =>{
-      toast.error(error.cause, {className: "toast-message"});
-      if(error.fatal){
-        props.setSocket(undefined);
-        props.socket?.off("pop");
-        props.socket?.off("timeout");
-        props.socket?.off("move");
-        props.socket?.off("end");
-        props.socket?.off("config");
-        props.navigator(`../`, { relative: "path" });
-      }
-    })
-  },[])
+useEffect(() => {
+	if (props.socket) {
+	  props.socket.addEventListener('message', (event) => {
+		const message = JSON.parse(event.data);
+		if (message.type === 'move') {
+		  setBotMoveSan(message.data.san);
+		  setAwaitingBotMove(false);
+		} else if (message.type === 'end') {
+		  if (message.data.winner)
+			props.setVictory(true);
+		  else
+			props.setShowGameOver(true);
+		} else if (message.type === 'timeout') {
+		  props.setShowGameOver(true);
+		} else if (message.type === 'pop') {
+		  setGetPop(prevValue => !prevValue);
+		} else if (message.type === 'error') {
+		  toast.error(message.data.cause, {className: "toast-message"});
+		  if(message.data.fatal){
+			props.setSocket(undefined);
+			props.navigator(`../`, { relative: "path" });
+		  }
+		}
+	  });
+  
+	  return () => {
+		props.socket.removeEventListener('message');
+	  };
+	}
+  }, []);
 
   useEffect(()=>{
       if(!!game){

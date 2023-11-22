@@ -58,16 +58,16 @@ class Player:
         print(self.board)
 
     def resign(self):
-        return {"event": 0, "data": {"id": self.game_id, "type": gameType}}
+        return json.dumps({"event": 0, "data": {"id": self.game_id, "type": gameType}})
 
     def move(self):
         uci = input("Enter UCI move:")
         validated_move = self.validate_move(uci)
         if validated_move is not None:
-            return {
+            return json.dumps({
                 "event": EventType.MOVE.value,
                 "data": {"value": uci, "id": self.game_id, "type": gameType},
-            }
+            })
         else:
             print("Invalid move. Try again.")
             return None
@@ -108,6 +108,7 @@ class Player:
         self.last_move = to_send
 
     def handler(self, message):
+        message = json.loads(message)
         handlers = {
             EventType.MOVE.value: self.handle_move,
             EventType.POP.value: self.handle_pop,

@@ -11,6 +11,7 @@ from time import perf_counter
 
 import chess
 import chess.engine
+import websockets
 
 from PVEGame import PVEGame
 

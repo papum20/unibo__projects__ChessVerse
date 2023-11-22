@@ -1,3 +1,4 @@
+import json
 from time import perf_counter
 
 class Player:
@@ -29,10 +30,10 @@ class Player:
         return not self.is_timed or self.remaining_time > 0
 
     def get_config_msg(self):
-        return {"fen": self.fen, "color": self.color}
+        return json.dumps({"fen": self.fen, "color": self.color})
 
     def get_end_msg(self, winner: int):
-        return {"value": int(self.color == winner)}
+        return json.dumps({"value": int(self.color == winner)})
 
     async def get_move_msg(self, move: str, success: bool = True):
-        return {"value": move, "success": success}
+        return json.dumps({"value": move, "success": success})

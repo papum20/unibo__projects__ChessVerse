@@ -104,14 +104,15 @@ function Game({
         }
     }, [timer])
     
-    function handleMenu(){
-        setSocket(undefined);
-        socket.emit("resign", {});
-    }
+	function handleMenu(){
+		socket.send(JSON.stringify({ type: 'resign', data: {} }));
+		socket.close();
+		setSocket(undefined);
+	}
 
     function handleUndo (){
-        socket.emit("pop", {});
-    }
+		socket.send(JSON.stringify({ type: 'pop', data: {} }));
+	}
 
     useEffect(()=>{
         movesRef.current.scrollTo({
