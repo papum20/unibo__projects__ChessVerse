@@ -168,22 +168,31 @@ function Board(props) {
     setMoveTo(null);
     setOptionSquares({});
   }
+  
+  
 
   useEffect(()=>{
-    
+    let failedCnt = 0;
     if(props.socket){
-      props.socket?.on("config", (data) => {
-        if(!data){
-          props.socket?.on("start", props.data);
+      props.socket?.on("config", async (data) => {
+        console.log(data)
+  
+        if (!data && failedCnt > 6){
+          props.setSocket(undefined);
+          toast.error("comunicazione col server fallita", {className: "toast-message"});
         }
+        else if (!data){
+          failedCnt++; 
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          props.socket?.emit("start", props.data);
+        } 
         else {
           const newGame = new Chess();
-  
-        
-
-            newGame.load(data.fen);
+          newGame.load(data.fen);
           setGame(newGame);
+          failedCnt = 0;
         }
+        
       })
     }
   },[props.socket])
