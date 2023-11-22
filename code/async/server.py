@@ -3,10 +3,11 @@
 import asyncio
 import os
 import json
+from time import perf_counter
+
 import chess
 import chess.engine
 import websockets
-from time import perf_counter
 
 from PVEGame import PVEGame
 
@@ -22,9 +23,9 @@ async def handle_connect(websocket, path):
         async for message in websocket:
             data = json.loads(message)
             if data['type'] == 'start':
-                await handle_start(websocket, data)
+                await handle_start(websocket, data["data"])
             elif data['type'] == 'move':
-                await handle_move(websocket, data["])
+                await handle_move(websocket, data["data"])
             # Add other message types here...
     finally:
         print("disconnect ", sid)
