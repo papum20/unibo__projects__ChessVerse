@@ -122,12 +122,10 @@ function Game({
         
     },[moves]);
 
-
-//questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
+    //questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
     useEffect(()=>{
-        if(socket === undefined){
-
-        navigator(`../`, { relative: "path" });
+        if (socket === undefined) {
+            navigator(`../`, { relative: "path" });
         }
     }, [socket])
 
@@ -288,10 +286,22 @@ function Game({
                     <Col>
                         <div style={{display: "flex", justifyContent: "center"}}>
                             <div>
-                                <Board navigator={navigator} setVictory={setVictory} width={width} height={height} startTimer={startTimer} setShowGameOver={setShowGameOver}  setMoves={setMoves}  data = {data} isLoadingGame={isLoadingGame} setIsLoadingGame={setIsLoadingGame} socket={socket} setSocket = {setSocket}/>
+                                <Board
+                                  navigator={navigator}
+                                  setVictory={setVictory}
+                                  width={width}
+                                  height={height}
+                                  startTimer={startTimer}
+                                  setShowGameOver={setShowGameOver}
+                                  setMoves={setMoves}
+                                  data={data}
+                                  isLoadingGame={isLoadingGame}
+                                  setIsLoadingGame={setIsLoadingGame}
+                                  socket={socket}
+                                  setSocket={setSocket}
+                                />
                             </div>
                         </div>
-                        
                     </Col>
                     <Col style={{maxWidth:"50vw"}}>
                     <Row>
@@ -335,7 +345,6 @@ function Game({
                                         }
                                     })}
                                     </Col>
-
                                 </Row>
                                 <Row>
                                     <div style={{paddingTop: "20px"}}>
@@ -364,7 +373,6 @@ function Game({
                             </Card.Body>
                         </Card>
                     </Col>
-
                     </Row>
                     </Col>
                 </Row>
@@ -372,7 +380,6 @@ function Game({
             </div>
         </div>
     )
-    
 }
 
 Game.propTypes = {
