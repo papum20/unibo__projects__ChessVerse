@@ -4,28 +4,7 @@ from websockets.sync.client import connect
 import json
 import argparse
 import chess
-from enum import IntEnum
-
-
-class EventType(IntEnum):
-    ERROR = -1
-    RESIGN = 0
-    MOVE = 1
-    POP = 2
-    ACK = 3
-    CONFIG = 4
-    END = 5
-    START = 999
-
-
-class AckType(IntEnum):
-    OK = 0
-    NOK = 1
-    UNKNOWN_ACTION = 2
-    WRONG_CONFIG = 3
-    NOT_IMPLEMENTED = 4
-    GAME_NOT_FOUND = 5
-    WRONG_TURN = 6
+from const import EventType, AckType
 
 
 class Player:

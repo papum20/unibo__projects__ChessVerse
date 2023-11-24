@@ -1,4 +1,7 @@
 import Game
+import json
+from const import EventType, AckType
+
 
 class PVPGame(Game):
 	def __init__(self, players, rank, key, timer):
@@ -24,7 +27,7 @@ class PVPGame(Game):
 	async def recv_event(self, msg):
 		if msg["event"] == EventType.RESIGN:
 			await self.end_game(self.opponent())
-			pass
+
 		elif msg["event"] == EventType.MOVE:
 			if not self.current().has_time():
 				await self.end_game(self.opponent())

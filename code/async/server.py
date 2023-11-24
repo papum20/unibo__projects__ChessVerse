@@ -1,19 +1,15 @@
 #!/usr/bin/env python
-
 import asyncio
 import os
-import json
 import threading
-
 import socketio
 import aiohttp
 from time import perf_counter
-
 import chess
 import chess.engine
-import websockets
-
 from PVEGame import PVEGame
+from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
+
 
 class PVEGameNamespace(socketio.AsyncNamespace):
     def __init__(self, *args, **kwargs):
@@ -21,6 +17,12 @@ class PVEGameNamespace(socketio.AsyncNamespace):
         self.pveGames = {}
         thread = threading.Thread(target=self.cleaner_thread)
         thread.start()
+
+    async def game_found(self, sid):
+        if sid not in self.pveGames:
+            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            return False
+        return True
 
     async def on_connect(self, sid, _):
         await self.emit("connected", room=sid)
@@ -36,31 +38,33 @@ class PVEGameNamespace(socketio.AsyncNamespace):
             try:
                 v = int(data[key])
                 return min <= v <= max
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 return False
 
+        # Check for data validity
         if "rank" not in data or "depth" not in data or "time" not in data:
             await self.emit("error", {"cause": "Missing fields", "fatal": True}, room=sid)
             return
-        if not check_int("rank", 0, 100):
+        if not check_int("rank", MIN_RANK, MAX_RANK):
             await self.emit("error", {"cause": "Invalid rank", "fatal": True}, room=sid)
             return
-        if not check_int("depth", 1, 20):
+        if not check_int("depth", MIN_DEPTH, MAX_DEPTH):
             await self.emit("error", {"cause": "Invalid bot strength", "fatal": True}, room=sid)
             return
-        if not check_int("time", 1, 3000):
+        if not check_int("time", MIN_TIME, MAX_TIME):
             await self.emit("error", {"cause": "Invalid clocktime", "fatal": True}, room=sid)
             return
+
         self.pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
         await self.pveGames[sid].initialize_bot()
         await self.emit("config", {"fen": self.pveGames[sid].fen}, room=sid)
 
     async def on_move(self, sid, data):
         print("move ", sid, data)
-        if sid not in self.pveGames:
-            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+        if not self.game_found(sid):
             return
         game = self.pveGames[sid]
+
         if "san" not in data:
             await self.emit("error", {"cause": "Missing fields"}, room=sid)
             return
@@ -100,15 +104,13 @@ class PVEGameNamespace(socketio.AsyncNamespace):
 
     async def on_resign(self, sid, _):
         print("resign", sid)
-        if sid not in self.pveGames:
-            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+        if not self.game_found(sid):
             return
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, _):
         print("pop", sid)
-        if sid not in self.pveGames:
-            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+        if not self.game_found(sid):
             return
         game = self.pveGames[sid]
         if game.popped:
@@ -142,8 +144,9 @@ class PVEGameNamespace(socketio.AsyncNamespace):
 
         loop.run_until_complete(cleaner())
 
+
 async def main():
-    env = os.environ.get("ENVIROMENT", "development")
+    env = os.environ.get("ENVIRONMENT", "development")
     if env == "development":
         from dotenv import load_dotenv
         env_file = f".env.{env}"

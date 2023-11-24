@@ -1,7 +1,6 @@
-
 FROM node:20.9.0-bullseye-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends dumb-init \
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && apt-get clean \
 	# envsubst
 	gettext-base
 # only install production dependencies

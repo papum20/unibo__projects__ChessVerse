@@ -1,6 +1,7 @@
 import json
 from time import perf_counter
 
+
 class Player:
     def __init__(self, sid, color, time):
         self.id = sid
@@ -12,11 +13,9 @@ class Player:
             self.latest_timestamp = perf_counter()
         self.first_move = True
 
-    
     def add_time(self, time):
         if self.is_timed:
             self.remaining_time += time
-
 
     def update_time(self):
         if self.is_timed:
