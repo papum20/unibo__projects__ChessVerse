@@ -3,21 +3,36 @@
 */
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Card, Form, Button } from 'react-bootstrap';
 import '../../styles/LoginOrSignupPage.css';
 
 
 
 function LoginOrSignupCard() {
+
+	const { register, handleSubmit, formState: {errors} } = useForm();
 	
     const [isLogin, setIsLogin] = useState(true);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Handle form submission here...
-    };
+
+	
+	async function onSubmit(credentials) {
+		console.log(credentials.username);
+		console.log(credentials.password);
+		/*try {
+			const newUser = await NotesApi.signUp(credentials);
+			onSignUpSuccessful(newUser);
+		} catch (error) {
+			if(error instanceof ConflictError) {
+				setErrorText(error.message);
+			} else {
+				alert(error);
+			}
+			console.error(error);
+		}*/
+	}
+
 
     return (
             <Card className="login-signup-card">
@@ -25,24 +40,30 @@ function LoginOrSignupCard() {
                     <h1 className="text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
 
                     <Form className="mb-3"
-						onSubmit={handleSubmit}
+						onSubmit={handleSubmit(onSubmit)}
 					>
                         <Form.Group controlId="formUsername">
                             <Form.Label>Username</Form.Label>
-                            <Form.Control type="text" placeholder="Enter username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                            <Form.Control name="username" placeholder="Enter username" type="text"
+								{...register("username", { required: true })}
+							/>
+							{errors.username && <span>This field is required</span>}
                         </Form.Group>
 
                         <Form.Group controlId="formPassword">
                             <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                            <Form.Control name="password" placeholder="Password" type="password" 
+								{...register("password", { required: true })}
+							/>
+							{errors.password && <span>This field is required</span>}
                         </Form.Group>
 
-                        <Button className="mt-3" block type="submit" variant="primary">
+                        <Button id="buttonSubmit" className="mt-3" block type="submit" variant="primary">
                             {isLogin ? 'Login' : 'Sign Up'}
                         </Button>
                     </Form>
 
-                    <Button block type="submit" variant="link"
+                    <Button id="buttonSwitchLoginSignup" block type="submit" variant="link"
 						onClick={() => setIsLogin(!isLogin)}
 					>
 						<strong>
