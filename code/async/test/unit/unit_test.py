@@ -6,14 +6,14 @@ import json
 
 sys.path.append("../../")
 import chess
-from server import (
-    handle_connect,
-    handle_disconnect,
-    handle_start,
-    handle_move,
-    handle_resign,
-    handle_pop,
-)
+# from server import (
+    # handle_connect,
+    # handle_disconnect,
+    # handle_start,
+    # handle_move,
+    # handle_resign,
+    # handle_pop,
+# )
 
 import PVEGame
 import chess.engine

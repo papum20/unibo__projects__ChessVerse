@@ -10,7 +10,7 @@ import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../Const.js";
-
+import { io } from "socket.io-client";
 
 
 function Start({
@@ -47,7 +47,10 @@ function Start({
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-        setSocket(io(import.meta.env.VITE_WSS_ADDR))
+        const gameDomain = import.meta.env.VITE_GAME_DOMAIN;
+        const gamePort = import.meta.env.VITE_GAME_PORT;
+        const gameProtocol = import.meta.env.VITE_GAME_PROTOCOL;
+        setSocket(io(`${gameProtocol}://${gameDomain}:${gamePort}`, { transports: ["websocket"] }));
     }
 
     useEffect(() => {

@@ -168,29 +168,22 @@ function Board(props) {
     setMoveTo(null);
     setOptionSquares({});
   }
-  
-  
 
   useEffect(()=>{
-    let failedCnt = 0;
+    
     if(props.socket){
-      props.socket?.on("config", async (data) => {
-        if (!data && failedCnt > 6){
-          props.setSocket(undefined);
-          toast.error("comunicazione col server fallita", {className: "toast-message"});
+      props.socket?.on("config", (data) => {
+        if(!data){
+          props.socket?.on("start", props.data);
         }
-        else if (!data){
-          failedCnt++; 
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          props.socket?.emit("start", props.data);
-        } 
         else {
           const newGame = new Chess();
-          newGame.load(data.fen);
-          setGame(newGame);
-          failedCnt = 0;
-        }
+  
         
+
+            newGame.load(data.fen);
+          setGame(newGame);
+        }
       })
     }
   },[props.socket])
@@ -223,36 +216,46 @@ function Board(props) {
 
 const [getPop, setGetPop] = useState(false);
 
-useEffect(() => {
-	if (props.socket) {
-	  props.socket.addEventListener('message', (event) => {
-		const message = JSON.parse(event.data);
-		if (message.type === 'move') {
-		  setBotMoveSan(message.data.san);
-		  setAwaitingBotMove(false);
-		} else if (message.type === 'end') {
-		  if (message.data.winner)
-			props.setVictory(true);
-		  else
-			props.setShowGameOver(true);
-		} else if (message.type === 'timeout') {
-		  props.setShowGameOver(true);
-		} else if (message.type === 'pop') {
-		  setGetPop(prevValue => !prevValue);
-		} else if (message.type === 'error') {
-		  toast.error(message.data.cause, {className: "toast-message"});
-		  if(message.data.fatal){
-			props.setSocket(undefined);
-			props.navigator(`../`, { relative: "path" });
-		  }
-		}
-	  });
-  
-	  return () => {
-		props.socket.removeEventListener('message');
-	  };
-	}
-  }, []);
+  useEffect(()=>{
+    props.socket?.on("move", (san) =>{
+      setBotMoveSan(san.san);
+      setAwaitingBotMove(false);
+    });
+    props.socket?.on("end", (winner) =>{
+      if (winner.winner)
+        props.setVictory(true);
+      else
+        props.setShowGameOver(true);
+      // TODO 
+      // else if (winner.winner === false){
+      //   props.setShowGameOver(true);
+      // }
+      // else {
+      //   props.setShowTie(true);
+      // }
+    
+    })
+
+    props.socket?.on("timeout", (_data) =>{
+        props.setShowGameOver(true);
+    })
+    
+    props.socket?.on("pop", () => {
+      setGetPop(prevValue => !prevValue);
+    })
+    props.socket?.on("error", (error) =>{
+      toast.error(error.cause, {className: "toast-message"});
+      if(error.fatal){
+        props.setSocket(undefined);
+        props.socket?.off("pop");
+        props.socket?.off("timeout");
+        props.socket?.off("move");
+        props.socket?.off("end");
+        props.socket?.off("config");
+        props.navigator(`../`, { relative: "path" });
+      }
+    })
+  },[])
 
   useEffect(()=>{
       if(!!game){
