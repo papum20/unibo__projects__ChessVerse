@@ -23,7 +23,7 @@ class AckType(IntEnum):
     WRONG_TURN = 6
 
 
-# Game constants
+# pveGame constants
 MIN_RANK = 0
 MAX_RANK = 100
 
@@ -32,3 +32,6 @@ MAX_DEPTH = 20
 
 MIN_TIME = 1
 MAX_TIME = 3000
+
+# pvpGame constants
+TIME_OPTIONS = [300, 600, 900]

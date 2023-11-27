@@ -1,13 +1,16 @@
 import csv
 import random
-
 from enum import StrEnum
+import chess
+
 
 class RowType(StrEnum):
     BACK = "back"
     FRONT = "front"
 
+
 configs = {}
+
 
 def load_configs(csv_path):
     with open(csv_path, newline="") as csvfile:
@@ -19,10 +22,12 @@ def load_configs(csv_path):
                 configs[level] = {"front": [], "back": [row]}
     return configs
 
+
 def get_configs():
     if bool(configs):
         return configs
     return None
+
 
 def gen_start_fen(rank=50):
     rank = max(min(int(rank), 100), 0)
@@ -47,12 +52,13 @@ def gen_start_fen(rank=50):
         "q" if any(bb[i] == "r" for i in [0, 1, 2, 3]) else ""}"""
     return f"{bb}/{bf}/8/8/8/8/{wf.upper()}/{wb.upper()} w {castle if len(castle) else '-'} - 0 1"
 
+
 def testconfigs():
     def gen_config(ranks, row_type):
-        rowconfigs = [
+        row_configs = [
             random.choice(configs[str(ranks[j])][row_type.value]) for j in range(len(ranks))
         ]
-        return rowconfigs[0][:5] + row_configs[1][5:]
+        return row_configs[0][:5] + row_configs[1][5:]
 
     errs = 0
     oks = 0
