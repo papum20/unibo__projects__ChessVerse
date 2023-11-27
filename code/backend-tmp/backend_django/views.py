@@ -2,6 +2,13 @@ from django.shortcuts import render
 from .models import Guest
 from django.http import JsonResponse
 import random
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+import json
+from .models import RegisteredUsers
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 
 def is_nickname_in_database(nickname):
     try:
@@ -32,19 +39,70 @@ def get_guest_name(requests):
     print('Guest nickname:' + guest_nickname)
     return JsonResponse({"guest_nickname": guest_nickname})
 
-def download_file(request, operating_system):
-    if operating_system == 'macos':
-        file_path = 'Desktop/t4-chessverse/code/app/versions/Chessverse_v1.0.dmg'
-    elif operating_system == 'windows':
-        file_path = 'Desktop/t4-chessverse/code/app/versions/Chessverse_v1.0.dmg'
-    elif operating_system == 'linux':
-        file_path = 'Desktop/t4-chessverse/code/app/versions/Chessverse_v1.0.dmg'
-    else:
-        return HttpResponseBadRequest("Sistema operativo non supportato")
 
-    if os.path.exists(file_path):
-        response = FileResponse(open(file_path, 'rb'))
-        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
-        return response
+
+@csrf_exempt
+def user_login(request):
+    # Handle user login
+    if request.method == 'POST':
+        # Extract username and password from the request body
+        data = json.loads(request.body)
+        username = data['username']
+        password = data['password']
+
+        try:
+            # Attempt to retrieve the user from the database
+            user = RegisteredUsers.objects.get(Username=username)
+        except RegisteredUsers.DoesNotExist:
+            # Return an error response if the user does not exist
+            return JsonResponse({'message': 'Invalid credentials'}, status=401)
+
+        # Check if the provided password matches the stored password
+        if check_password(password, user.Password):
+            # Return a success response if the login is successful
+            return JsonResponse({'message': 'Login successful'})
+        else:
+            # Return an error response if the password is incorrect
+            return JsonResponse({'message': 'Invalid credentials'}, status=401)
+
+@csrf_exempt
+def user_signup(request):
+    # Handle user signup
+    if request.method == 'POST':
+        try:
+            # Extract user information from the request body
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+            elo_really_bad_chess = data.get('eloReallyBadChess')
+            elo_second_type = data.get('eloSecondType')
+            
+            # Check if all required fields are provided
+            if not all([username, password, elo_really_bad_chess, elo_second_type]):
+                return JsonResponse({'message': 'Missing required fields'}, status=400)
+
+            # Hash the password and save the new user
+            hashed_password = make_password(password)
+            new_user = RegisteredUsers(
+                Username=username,
+                Password=hashed_password,
+                EloReallyBadChess=elo_really_bad_chess,
+                EloSecondChess=elo_second_type
+            )
+            new_user.save()
+
+            # Return a success response if the signup is successful
+            return JsonResponse({'message': 'Signup successful'})
+        except Exception as e:
+            # Return an error response if an unexpected error occurs during signup
+            return JsonResponse({'message': f'Error: {str(e)}'}, status=500)
     else:
-        return HttpResponseNotFound("File non trovato")
+        # Return an error response for invalid request methods
+        return JsonResponse({'message': 'Invalid request method'}, status=405)
+
+@login_required
+def user_signout(request):
+    # Handle user signout (logout)
+    logout(request)
+    # Return a success response if the logout is successful
+    return JsonResponse({'message': 'Logout successful'})

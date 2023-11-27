@@ -1,10 +1,73 @@
-Metodo: add_guest
+Method: add_guest
     Endpoint: /add_guest/
-    GET: Aggiunge un nuovo guest e ritorna un messaggio in caso avvenga con successo
+    GET: add a new guest
 
-Metodo: get_guest_name
+Method: get_guest_name
     Endpoint: /get_guest_name/
-    GET: Questo endpoint permette di ottenere il nome dell'ultimo guest aggiunto.
+    GET: get the name of the last added gest user
 
-Per lanciare Django da terminale andare nella cartella 'backend-api' ed eseguire: 
-    python3.12  manage.py runserver 127.0.0.1:8080
+# User Authentication
+
+This API provides basic user authentication functionalities, including user login, signup, and logout.
+
+## Endpoints
+
+### 1. User Login
+
+#### Endpoint
+- `backend_django/login/`
+
+#### Method
+- `POST`
+
+#### Request Body
+- The request body should contain a JSON object with the following fields:
+  - `username` (string): The username of the user trying to log in.
+  - `password` (string): The password associated with the username.
+
+#### Response
+- `200 OK` with a JSON object containing the message "Login successful" if the login is successful.
+- `401 Unauthorized` with a JSON object containing the message "Invalid credentials" if the provided credentials are incorrect.
+
+### 2. User Signup
+
+#### Endpoint
+- `backend_django/signup/`
+
+#### Method
+- `POST`
+
+#### Request Body
+- The request body should contain a JSON object with the following fields:
+  - `username` (string): The desired username for the new user.
+  - `password` (string): The password for the new user.
+  - `eloReallyBadChess` (integer): The initial Elo rating for Really Bad Chess.
+  - `eloSecondType` (integer): The initial Elo rating for the second chess type.
+
+#### Response
+- `200 OK` with a JSON object containing the message "Signup successful" if the signup is successful.
+- `400 Bad Request` with a JSON object containing the message "Missing required fields" if any required field is not provided in the request body.
+- `500 Internal Server Error` with a JSON object containing an error message if an unexpected error occurs during signup.
+
+### 3. User Signout
+
+#### Endpoint
+- `backend_django/signout/`
+
+#### Response
+- `200 OK` with a JSON object containing the message "Logout successful" if the user is successfully logged out.
+
+## Additional Notes
+
+- The `@login_required` decorator is used for the `user_signout` view to ensure that only authenticated users can log out.
+- Passwords are hashed using Django's `make_password` function before being stored in the database, enhancing security.
+
+
+Ho anche messo un file 'test.rest' da cui si possono simulare delle richieste al backend, si può usare come spunto per vedere il tipo di richieste da fare
+Per eseguire le richieste assicurarsi di avere l'estensione 'REST Client' di VSCODE
+
+###IMPORTANTE 
+    Prima di eseguire Django completare il file '.env.example' 
+    
+Per lanciare Django eseguire: 
+    python3.12  manage.py runserver 
