@@ -1,21 +1,38 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 class Guest(models.Model):
     Username = models.CharField(max_length=255, unique=True)
     class Meta:
         app_label = 'backend_django'
         db_table = 'Guest'
         
-        
-class RegisteredUsers(models.Model):
-    Username = models.CharField(max_length=255, unique=True)
-    Password = models.CharField(max_length=255)
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, username, password=None, **extra_fields):
+        user = self.model(username=username, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        return self.create_user(username, password, **extra_fields)
+
+class RegisteredUsers(AbstractUser):
     GamesWon = models.IntegerField(default=0)
     GameDraw = models.IntegerField(default=0)
     GamesLost = models.IntegerField(default=0)
     EloReallyBadChess = models.IntegerField(default=1000)
     EloSecondChess = models.IntegerField(default=1000)
+
+
+    groups = models.ManyToManyField(Group, blank=True, related_name='registered_users')
+    user_permissions = models.ManyToManyField(Permission, blank=True, related_name='registered_users')
+
     
-    
+    objects = CustomUserManager()
+
     def __str__(self):
-        return self.Username
+        return self.username
