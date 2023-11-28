@@ -9,6 +9,7 @@ import json
 from .models import RegisteredUsers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
+from backend_django.models import RegisteredUsers
 
 def is_nickname_in_database(nickname):
     try:
@@ -49,21 +50,28 @@ def user_login(request):
         data = json.loads(request.body)
         username = data['username']
         password = data['password']
-
+        # Use authenticate to check username and password
         try:
             # Attempt to retrieve the user from the database
-            user = RegisteredUsers.objects.get(Username=username)
+            user = RegisteredUsers.objects.get(username=username)
         except RegisteredUsers.DoesNotExist:
             # Return an error response if the user does not exist
             return JsonResponse({'message': 'Invalid credentials'}, status=401)
 
         # Check if the provided password matches the stored password
-        if check_password(password, user.Password):
+        if check_password(password, user.password):
             # Return a success response if the login is successful
             return JsonResponse({'message': 'Login successful'})
+
+        if user is not None:
+            # If user is authenticated, log them in
+            login(request, user)
+            return JsonResponse({'message': 'Login successful'})
         else:
-            # Return an error response if the password is incorrect
+            # If authentication fails, return an error response
             return JsonResponse({'message': 'Invalid credentials'}, status=401)
+
+
 
 @csrf_exempt
 def user_signup(request):
@@ -81,15 +89,15 @@ def user_signup(request):
             if not all([username, password, elo_really_bad_chess, elo_second_type]):
                 return JsonResponse({'message': 'Missing required fields'}, status=400)
 
-            # Hash the password and save the new user
+            # Hash the password and save the new user using CustomUserManager
             hashed_password = make_password(password)
-            new_user = RegisteredUsers(
-                Username=username,
-                Password=hashed_password,
+            User = RegisteredUsers
+            new_user = User.objects.create_user(
+                username=username,
+                password=hashed_password,
                 EloReallyBadChess=elo_really_bad_chess,
                 EloSecondChess=elo_second_type
             )
-            new_user.save()
 
             # Return a success response if the signup is successful
             return JsonResponse({'message': 'Signup successful'})
@@ -99,7 +107,7 @@ def user_signup(request):
     else:
         # Return an error response for invalid request methods
         return JsonResponse({'message': 'Invalid request method'}, status=405)
-
+    
 @login_required
 def user_signout(request):
     # Handle user signout (logout)
