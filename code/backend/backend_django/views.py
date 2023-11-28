@@ -7,9 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 from .models import RegisteredUsers
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.hashers import check_password
 from backend_django.models import RegisteredUsers
+from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password, check_password
+
 
 def is_nickname_in_database(nickname):
     try:
@@ -40,8 +41,9 @@ def get_guest_name(requests):
     print('Guest nickname:' + guest_nickname)
     return JsonResponse({"guest_nickname": guest_nickname})
 
+    
 
-
+@csrf_exempt
 @csrf_exempt
 def user_login(request):
     # Handle user login
@@ -58,19 +60,29 @@ def user_login(request):
             # Return an error response if the user does not exist
             return JsonResponse({'message': 'Invalid credentials'}, status=401)
 
-        # Check if the provided password matches the stored password
+        # Check if the provided password matches the stored password using bcrypt
+        
         if check_password(password, user.password):
-            # Return a success response if the login is successful
-            return JsonResponse({'message': 'Login successful'})
-
-        if user is not None:
             # If user is authenticated, log them in
             login(request, user)
-            return JsonResponse({'message': 'Login successful'})
+
+            # Create a dictionary with the user information
+            user_info = {
+                'username': user.username,
+                'EloReallyBadChess': user.EloReallyBadChess,
+                'EloSecondChess': user.EloSecondChess
+            }
+
+            # Set each piece of user information as a separate cookie
+            response = JsonResponse({'message': 'Login successful'})
+            response.set_cookie('username', user_info['username'])
+            response.set_cookie('elo_really_bad_chess', str(user_info['EloReallyBadChess']))
+            response.set_cookie('elo_second_chess', str(user_info['EloSecondChess']))
+
+            return response
         else:
             # If authentication fails, return an error response
             return JsonResponse({'message': 'Invalid credentials'}, status=401)
-
 
 
 @csrf_exempt
@@ -84,17 +96,16 @@ def user_signup(request):
             password = data.get('password')
             elo_really_bad_chess = data.get('eloReallyBadChess')
             elo_second_type = data.get('eloSecondType')
-            
+
             # Check if all required fields are provided
             if not all([username, password, elo_really_bad_chess, elo_second_type]):
                 return JsonResponse({'message': 'Missing required fields'}, status=400)
 
-            # Hash the password and save the new user using CustomUserManager
-            hashed_password = make_password(password)
+
             User = RegisteredUsers
             new_user = User.objects.create_user(
                 username=username,
-                password=hashed_password,
+                password=password,
                 EloReallyBadChess=elo_really_bad_chess,
                 EloSecondChess=elo_second_type
             )

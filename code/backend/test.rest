@@ -1,10 +1,13 @@
 
-
-
-POST http://127.0.0.1:8000/backend_django/login/
+POST http://127.0.0.1:8000/backend_django/signup/
 Content-Type: application/json
 
 {
-    "username": "adminerdr",
-    "password": "admin"
+    
+    "username": "adminerdffdr",
+    "password": "admin",
+    "eloReallyBadChess": "1500",
+    "eloSecondType": "1500"
+
+
 }
