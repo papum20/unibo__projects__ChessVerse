@@ -28,9 +28,6 @@ pipeline {
         }
 
         stage('Build and Test api backend') {
-            agent {
-                label 'python'
-            }
 			when {
 				anyOf {
 					branch "main"
@@ -48,9 +45,6 @@ pipeline {
         }
 
         stage('Build and Test async backend') {
-            agent {
-                label 'python'
-            }
 			when {
 				anyOf {
 					branch "main"
@@ -68,9 +62,6 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            agent {
-                label 'node'
-            }
 			when {
 				anyOf {
 					branch "main"
