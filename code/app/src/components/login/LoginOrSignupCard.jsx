@@ -1,15 +1,22 @@
-/*
-	a card that contains a login or signup form
-*/
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Card, Form, Button } from 'react-bootstrap';
 import '../../styles/LoginOrSignupPage.css';
+import * as users_api from "../../network/users_api";
+import PropTypes from "prop-types";
 
 
 
-function LoginOrSignupCard() {
+/**
+ * A card component for login or signup.
+ * It contains a login/signup form.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * @param {Function} props.onLoginSuccessful - Callback called on login or signup successful.
+ * 	@param {string} props.onLoginSuccessful.username - The username of the logged-in or signed-up user.
+ */
+function LoginOrSignupCard({ onLoginSuccessful }) {
 
 	const { register, handleSubmit, formState: {errors} } = useForm();
 	
@@ -18,19 +25,21 @@ function LoginOrSignupCard() {
 
 	
 	async function onSubmit(credentials) {
-		console.log(credentials.username);
-		console.log(credentials.password);
-		/*try {
-			const newUser = await NotesApi.signUp(credentials);
-			onSignUpSuccessful(newUser);
+
+		console.log("sending these credentials obtained from the form:", credentials);
+		console.log("is login:", isLogin);
+
+		try {
+			const newUser = await (isLogin
+				? users_api.login(credentials)
+				: users_api.signup(credentials)
+			);
+
+			onLoginSuccessful(newUser);
 		} catch (error) {
-			if(error instanceof ConflictError) {
-				setErrorText(error.message);
-			} else {
-				alert(error);
-			}
-			console.error(error);
-		}*/
+			console.error("Error:", error);
+			alert(error);
+		}
 	}
 
 
@@ -79,5 +88,9 @@ function LoginOrSignupCard() {
     );
 
 }
+
+LoginOrSignupCard.propTypes = {
+	onLoginSuccessful: PropTypes.func.isRequired
+};
 
 export default LoginOrSignupCard;

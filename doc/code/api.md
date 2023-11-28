@@ -4,7 +4,7 @@ Method: add_guest
 
 Method: get_guest_name
     Endpoint: /get_guest_name/
-    GET: get the name of the last added gest user
+    GET: get the name of the last added guest user
 
 # User Authentication
 

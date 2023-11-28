@@ -11,10 +11,16 @@ import LoginOrSignupCard from './LoginOrSignupCard.jsx';
 function LoginOrSignupPage() {
 	
 
+	function onLoginSuccessful(username) {
+		console.log(username + "was logged in!");
+	}
+
     return (
         <Container className="login-signup-page d-flex align-items-center justify-content-center">
 
-            <LoginOrSignupCard/>
+            <LoginOrSignupCard
+				onLoginSuccessful={onLoginSuccessful}
+			/>
 
         </Container>
     );
