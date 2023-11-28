@@ -52,7 +52,10 @@ This API provides basic user authentication functionalities, including user logi
 ### 3. User Signout
 
 #### Endpoint
-- `backend_django/signout/`
+- `/backend_django/signout/`
+
+#### Method
+- `POST`
 
 #### Response
 - `200 OK` with a JSON object containing the message "Logout successful" if the user is successfully logged out.
