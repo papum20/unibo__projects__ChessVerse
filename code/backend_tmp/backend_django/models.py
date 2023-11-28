@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
+
+
 class Guest(models.Model):
     Username = models.CharField(max_length=255, unique=True)
+
     class Meta:
         app_label = 'backend_django'
         db_table = 'Guest'
@@ -20,6 +23,7 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(username, password, **extra_fields)
 
+
 class RegisteredUsers(AbstractUser):
     GamesWon = models.IntegerField(default=0)
     GameDraw = models.IntegerField(default=0)
@@ -27,11 +31,9 @@ class RegisteredUsers(AbstractUser):
     EloReallyBadChess = models.IntegerField(default=1000)
     EloSecondChess = models.IntegerField(default=1000)
 
-
     groups = models.ManyToManyField(Group, blank=True, related_name='registered_users')
     user_permissions = models.ManyToManyField(Permission, blank=True, related_name='registered_users')
 
-    
     objects = CustomUserManager()
 
     def __str__(self):
