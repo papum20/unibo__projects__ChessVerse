@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import mysql.connector
 from dotenv import load_dotenv
 import os
 
@@ -29,7 +28,10 @@ DATABASES = {
         'USER': DATABASE_USER,
         'PASSWORD': DATABASE_PASSWORD,
         'HOST': DATABASE_HOST,
-        'PORT': '3306', 
+        'PORT': '3306',
+        'TEST': {
+            'NAME': 'TEST_DATABASE'
+        }
     }
 }
 
@@ -73,7 +75,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'backend-api.urls'
+ROOT_URLCONF = 'backend_api.urls'
 
 TEMPLATES = [
     {
@@ -91,7 +93,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend-api.wsgi.application'
+WSGI_APPLICATION = 'backend_api.wsgi.application'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
