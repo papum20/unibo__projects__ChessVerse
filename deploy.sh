@@ -8,6 +8,7 @@ REMOTE_DIR="~/t4-chessverse"
 ssh $REMOTE_USER@$REMOTE_HOST << EOF
   cd $REMOTE_DIR
   git pull
-  sudo docker-compose build
-  sudo docker-compose up -d
+  docker rm $(docker ps -a -q)
+  sudo docker compose build
+  sudo docker compose up -d
 EOF
