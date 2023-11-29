@@ -10,7 +10,11 @@ from .models import RegisteredUsers
 from backend_django.models import RegisteredUsers
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
+import os
+import jwt
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+print(SECRET_KEY)
 
 def is_nickname_in_database(nickname):
     try:
@@ -43,7 +47,7 @@ def get_guest_name(requests):
 
     
 
-@csrf_exempt
+
 @csrf_exempt
 def user_login(request):
     # Handle user login
@@ -70,22 +74,21 @@ def user_login(request):
             #add the session id to the user
             user.session_id = request.session.session_key
             user.save()
-            print('session id: ' + user.session_id)
-            
-            # Create a dictionary with the user information
-            user_info = {
-                'username': user.username,
-                'EloReallyBadChess': user.EloReallyBadChess,
-                'EloSecondChess': user.EloSecondChess
+            #create the payload
+            payload = {
+                'username': username,
+                'elo_really_bad_chess': user.EloReallyBadChess,  
+                'elo_second_chess': user.EloSecondChess,
+                'session_id': user.session_id,
+                'games_won': user.GamesWon,
+                'games_draw': user.GameDraw,
+                'games_lost': user.GamesLost,
             }
-
-            # Set each piece of user information as a separate cookie
-            response = JsonResponse({'message': 'Login successful'})
-            response.set_cookie('username', user_info['username'])
-            response.set_cookie('elo_really_bad_chess', str(user_info['EloReallyBadChess']))
-            response.set_cookie('elo_second_chess', str(user_info['EloSecondChess']))
-
-            return response
+            
+            token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+            # Send the token to the client
+            return JsonResponse({'token': token})
+    
         else:
             # If authentication fails, return an error response
             return JsonResponse({'message': 'Invalid credentials'}, status=401)
@@ -131,3 +134,5 @@ def user_signout(request):
     logout(request)
     # Return a success response if the logout is successful
     return JsonResponse({'message': 'Logout successful'})
+
+

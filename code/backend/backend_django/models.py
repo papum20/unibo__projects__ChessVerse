@@ -39,3 +39,12 @@ class RegisteredUsers(AbstractUser):
 
     def __str__(self):
         return self.username
+
+class Games(models.Model):
+    username1 = models.CharField(max_length=255)
+    username2 = models.CharField(max_length=255)
+    png = models.CharField(max_length=255)
+    
+    class Meta:
+        app_label = 'backend_django'
+        db_table = 'Games'
