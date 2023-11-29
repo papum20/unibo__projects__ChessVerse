@@ -47,10 +47,9 @@ function Start({
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-        const gameDomain = import.meta.env.VITE_GAME_DOMAIN;
-        const gamePort = import.meta.env.VITE_GAME_PORT;
-        const gameProtocol = import.meta.env.VITE_GAME_PROTOCOL;
-        setSocket(io(`${gameProtocol}://${gameDomain}:${gamePort}`, { transports: ["websocket"] }));
+        const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
+        console.log(host);
+        setSocket(io(host, { transports: ["websocket"] }));
     }
 
     useEffect(() => {

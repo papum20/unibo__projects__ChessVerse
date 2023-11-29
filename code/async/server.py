@@ -29,7 +29,6 @@ class PVEGameHandler:
 
     async def on_disconnect(self, sid):
         print("disconnect ", sid)
-        self.pveGames[sid].bot.quit()
         if sid in self.pveGames.keys():
             await self.pveGames[sid].bot.quit()
             del self.pveGames[sid]
@@ -151,7 +150,7 @@ class PVEGameHandler:
 
 
 async def main():
-    env = os.environ.get("ENVIRONMENT", "development")
+    env = os.environ.get("ENV", "development")
     if env == "development":
         from dotenv import load_dotenv
         env_file = f".env.{env}"
@@ -175,10 +174,11 @@ async def main():
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
-    site = aiohttp.web.TCPSite(runner, os.environ.get("DOMAIN", "0.0.0.0"), os.environ.get("PORT", 8080))
+    port = os.environ.get("PORT", 8080)
+    site = aiohttp.web.TCPSite(runner, "0.0.0.0", port)
 
     await site.start()
-    print(f"Listening on {os.environ.get('DOMAIN')}:{os.environ.get('PORT')}")
+    print(f"Listening on 0.0.0.0:{port}")
 
     while True:
         await asyncio.sleep(1)

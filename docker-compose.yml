@@ -1,95 +1,26 @@
 version: '3.7'
 
 services:
-  #chessverse-back:
-  #  container_name: chessverse-back
-  #  build:
-  #    context: ./code/backend
-  #    dockerfile: Dockerfile
-  #    network:
-  #      chessverse:
-  #      default:
-
-  chessverse-back:
-    container_name: chessverse-back
-    build:
-      context: ./code/backend
-      dockerfile: Dockerfile
-    env_file: ./env/backend.env
-    networks:
-      default:
-        ipv4_address: ${DFLT_IP_BACKEND}
-    volumes:
-      - ./database/dist:/usr/src/dist
-
-
-  chessverse-app:
-    container_name: chessverse-app
+  async:
+    container_name: async
     restart: always
     build:
-      context: ${DIR_APP}
+      context: ./code/async
       dockerfile: Dockerfile
-    env_file:
-      - ./env/app.env
-    networks:
-      chessverse:
-      default:
-        ipv4_address: ${DFLT_IP_APP}
-
-  chessverse-async:
-    container_name: chessverse-async
+    environment:
+      - ENV=production
+      - PORT=8080
+    ports:
+      - "8080:8080"
+  app:
+    depends_on:
+      - async
+    container_name: app
     restart: always
     build:
-      context: ${DIR_ASYNC}
+      context: ./code/app
       dockerfile: Dockerfile
-    env_file:
-      - ./env/async.env
-    networks:
-      chessverse:
-      default:
-        ipv4_address: ${DFLT_IP_ASYNC}
-
-  chessverse-db:
-    image: mysql:8.2.0
-    container_name: chessverse-db
-    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
-    command: mysqld --default-authentication-plugin=caching_sha2_password --user=mysql
-    restart: always
-    user: mysql
-    env_file:
-      - ./env/chessverse-db.env
-    networks:
-      chessverse:
-    volumes:
-      - ${VOLUME_MYSQL_DATA}:/var/lib/mysql
-
-  chessverse-website:
-    container_name: chessverse-website
-    build:
-      context: ./code/website
-      dockerfile: Dockerfile
-    env_file:
-      - ./env/chessverse-web.env
-    networks:
-      default:
-        ipv4_address: ${DFLT_IP_WEBSITE}
-
-  chessverse-ia:
-    container_name: chessverse-ia
-    build:
-      context: ./code/app-ia
-      dockerfile: Dockerfile
-    env_file: ./env/webapp.env
-    networks:
-      default:
-        ipv4_address: ${DFLT_IP_WEBAPP}
-
-
-
-
-networks:
-  chessverse:
-    name: chessverse-network
-  default:
-    name: ${PROXY_NETWORK_NAME}
-    external: true
+    environment:
+      VITE_ASYNC_HOST: http://async:8080
+    ports:
+      - "80:3000"

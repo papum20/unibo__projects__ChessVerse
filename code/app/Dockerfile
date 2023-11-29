@@ -1,5 +1,6 @@
 
 FROM node:20.9.0-bullseye-slim
+EXPOSE 3000
 
 USER root
 
