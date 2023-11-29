@@ -20,7 +20,5 @@ services:
     build:
       context: ./code/app
       dockerfile: Dockerfile
-    environment:
-      VITE_ASYNC_HOST: http://async:8080
     ports:
       - "80:3000"

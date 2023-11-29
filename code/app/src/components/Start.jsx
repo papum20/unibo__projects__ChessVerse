@@ -48,7 +48,6 @@ function Start({
         setShowModal(false);
         setIsLoadingGame(true);
         const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
-        console.log(host);
         setSocket(io(host, { transports: ["websocket"] }));
     }
 
