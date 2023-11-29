@@ -102,6 +102,7 @@ class PVPGameHandler:
         if id in self.pvpGames:
             active_clients.remove(self.pvpGames[id].players[0].sid)
             active_clients.remove(self.pvpGames[id].players[1].sid)
+            self.sio.emit("disconnected", room=[player.sid for player in self.pvpGames[id].players])
             del self.pvpGames[id]
 
     async def on_start(self, sid, data):

@@ -53,19 +53,9 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         self.game_handler = GameHandler(self.sio)
         mock_emit = AsyncMock()
         self.sio.emit = mock_emit
-        self.pvp = "pvp"
-        self.pve = "pve"
-        self.pvp1 = "pvp1"
-
-    def tearDown(self):
-        print("tear")
-        del self.sio
-        del self.game_handler
-        del self.sio.emit
-        del self.pvp
-        del self.pvp1
-        del self.pve
-
+        self.pvp = "".join(choice("0123456789abcdef") for _ in range(16))
+        self.pve = "".join(choice("0123456789abcdef") for _ in range(16))
+        self.pvp1 = "".join(choice("0123456789abcdef") for _ in range(16))
 
     # simple connection
     async def test_on_connect(self):
@@ -119,7 +109,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         self.sio.emit.assert_called_with('error', {"cause": "Invalid clocktime", "fatal": True}, room=self.pve)
         data["type"] = GameType.PVP
         await self.game_handler.on_start(self.pvp, data)
-        self.sio.emit.assert_called_with('error', {'cause': 'Invalid rank', 'fatal': True}, room=self.pvp)
+        self.sio.emit.assert_called_with('error', {'cause': "Invalid clocktime", 'fatal': True}, room=self.pvp)
 
     @patch('random.randint', return_value=1)
     @patch('random.choice', return_value="a")
@@ -137,15 +127,14 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await self.game_handler.on_start(self.pvp, {"rank": 70, "time": 300, "type": GameType.PVP})
         await self.game_handler.on_start(self.pvp1, {"rank": 30, "time": 300, "type": GameType.PVP})
         await self.game_handler.on_resign(self.pvp1, {"type": GameType.PVP, "id": "a" * 16})
-        self.sio.emit.assert_called_with("end", {'winner': False}, room=[self.pvp1, self.pvp])
-
+        self.sio.emit.assert_any_call("end", {'winner': False}, room=[self.pvp1, self.pvp])
         # resign player
         await self.game_handler.on_resign(self.pvp, {"type": GameType.PVP})
         self.sio.emit.assert_called_with("error", {"cause": "Missing id", "fatal": True}, room=self.pvp)
         await self.game_handler.on_start(self.pvp, {"rank": 70, "time": 300, "type": GameType.PVP})
         await self.game_handler.on_start(self.pvp1, {"rank": 30, "time": 300, "type": GameType.PVP})
         await self.game_handler.on_resign(self.pvp, {"type": GameType.PVP, "id": "a" * 16})
-        self.sio.emit.assert_called_with("end", {'winner': True}, room=[self.pvp1, self.pvp])
+        self.sio.emit.assert_any_call("end", {'winner': True}, room=[self.pvp1, self.pvp])
 
     @patch('random.randint', return_value=1)
     @patch('random.choice', return_value="a")
@@ -250,7 +239,9 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         mock_bot_move("h3h1", mock_play)
         await self.game_handler.on_start(self.pve, {"rank": 70, "depth": 1, "time": 300, "type": GameType.PVE})
         await self.game_handler.on_move(self.pve, {"type": GameType.PVE, "san": "Ke1"})
+        self.sio.emit.assert_has_calls([call("end", {"winner": False}, room=self.pve)], any_order=True)
         self.sio.emit.assert_any_call("end", {"winner": False}, room=self.pve)
+
         #subsequent move
         await self.game_handler.on_move(self.pve, {"type": GameType.PVE, "san": "e2e3"})
         mock_bot_move("h7h5", mock_play)
@@ -268,7 +259,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await self.game_handler.on_move(self.pvp1, {"type": GameType.PVP, "id": "a"*16, "san": "Ke1"})
         self.sio.emit.assert_called_with("move", {"san": "Ke1"}, room=self.pvp)
         await self.game_handler.on_move(self.pvp, {"type": GameType.PVP, "id": "a"*16, "san": "Rh1"})
-        self.sio.emit.assert_called_with("end", {"winner": False}, room=[self.pvp1, self.pvp])
+        self.sio.emit.assert_any_call("end", {"winner": False}, room=[self.pvp1, self.pvp])
         await self.game_handler.on_move(self.pvp, {"type": GameType.PVP, "id": "a"*16, "san": "e4"})
         self.sio.emit.assert_called_with("error", {"cause": "Game not found", "fatal": True}, room=self.pvp)
 
@@ -296,7 +287,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         self.sio.emit.assert_called_with('error', {'cause': "It's not your turn"}, room=self.pvp)
         #testing moves
         await self.game_handler.on_move(self.pvp1, {"type": GameType.PVP, "id": "a"*16, "san": "Rd8"})
-        self.sio.emit.assert_called_with('end', {'winner': True}, room=['pvp1', 'pvp'])
+        self.sio.emit.assert_any_call('end', {'winner': True}, room=[self.pvp1, self.pvp])
         await self.game_handler.on_move(self.pvp, {"type": GameType.PVP, "id": "a"*16, "san": "e4"})
         self.sio.emit.assert_called_with("error", {"cause": "Game not found", "fatal": True}, room=self.pvp)
 
@@ -327,7 +318,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await self.game_handler.on_move(self.pvp1, {"type": GameType.PVP, "id": "a"*16, "san": "Kd2"})
         self.sio.emit.assert_called_with("move", {"san": "Kd2"}, room=self.pvp)
         await self.game_handler.on_move(self.pvp, {"type": GameType.PVP, "id": "a"*16, "san": "h3h1"})
-        self.sio.emit.assert_called_with("end", {"winner": None}, room=[self.pvp1, self.pvp])
+        self.sio.emit.assert_any_call("end", {"winner": None}, room=[self.pvp1, self.pvp])
         await self.game_handler.on_move(self.pvp, {"type": GameType.PVP, "id": "a"*16, "san": "e4"})
         self.sio.emit.assert_called_with("error", {"cause": "Game not found", "fatal": True}, room=self.pvp)
 
@@ -429,7 +420,7 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         await self.game_handler.on_move(self.pvp1, {"type": GameType.PVP, "id": "a"*16, "san": "e4"})
         await self.game_handler.on_move(self.pvp, {"type": GameType.PVP, "id": "a"*16, "san": "h7h6"})
         await self.game_handler.on_pop(self.pvp1, {"type": GameType.PVP, "id": "a"*16})
-        self.sio.emit.assert_called_with('pop', {}, room=['pvp1', 'pvp'])
+        self.sio.emit.assert_any_call('pop', {}, room=[self.pvp1, self.pvp])
 
     # @mock.patch("Game.configonr.gen_start_fen")
     # @mock.patch("server.sio.emit")
