@@ -65,7 +65,13 @@ def user_login(request):
         if check_password(password, user.password):
             # If user is authenticated, log them in
             login(request, user)
-
+            #get the user from the database
+            user = RegisteredUsers.objects.get(username=username)
+            #add the session id to the user
+            user.session_id = request.session.session_key
+            user.save()
+            print('session id: ' + user.session_id)
+            
             # Create a dictionary with the user information
             user_info = {
                 'username': user.username,

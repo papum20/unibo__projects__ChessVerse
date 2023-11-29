@@ -114,3 +114,4 @@ class RegisteredUsersModelTest(TestCase):
         user = RegisteredUsers.objects.get(id=1)
         blank = user.__meta.get_field('user_permissions').blank
         self.assertEqual(blank, True)
+

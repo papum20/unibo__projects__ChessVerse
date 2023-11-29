@@ -30,6 +30,7 @@ class RegisteredUsers(AbstractUser):
     GamesLost = models.IntegerField(default=0)
     EloReallyBadChess = models.IntegerField(default=1000)
     EloSecondChess = models.IntegerField(default=1000)
+    session_id = models.CharField(max_length=255, default='')
 
     groups = models.ManyToManyField(Group, blank=True, related_name='registered_users')
     user_permissions = models.ManyToManyField(Permission, blank=True, related_name='registered_users')
