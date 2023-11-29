@@ -1,5 +1,5 @@
 from django.test import TestCase
-from ...models import Guest, RegisteredUsers
+from backend_django.models import Guest, RegisteredUsers
 
 
 class GuestModelTest(TestCase):
