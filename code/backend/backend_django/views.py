@@ -7,10 +7,6 @@ from .models import RegisteredUsers, Guest
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 import os
-import jwt
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-print(SECRET_KEY)
 
 def is_nickname_in_database(nickname):
     try:
@@ -73,20 +69,7 @@ def user_login(request):
             #add the session id to the user
             user.session_id = request.session.session_key
             user.save()
-            #create the payload
-            payload = {
-                'username': username,
-                'elo_really_bad_chess': user.EloReallyBadChess,  
-                'elo_second_chess': user.EloSecondChess,
-                'session_id': user.session_id,
-                'games_won': user.GamesWon,
-                'games_draw': user.GameDraw,
-                'games_lost': user.GamesLost,
-            }
-            
-            token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-            # Send the token to the client
-            return JsonResponse({'token': token})
+            return JsonResponse({'message': 'Login successful'})
     
         else:
             # If authentication fails, return an error response
