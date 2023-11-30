@@ -14,7 +14,7 @@ class Game:
         self.board = chess.Board(self.fen)
         self.players = []
         for i, sid in enumerate(sids):
-            self.players.append(Player.Player(sid, not bool(i), time))
+            self.players.append(Player.Player(sid, i, time))
         self.turn = 0
         self.popped = False
 
@@ -23,8 +23,5 @@ class Game:
         return self.players[self.turn]
     
     @property
-    def next(self):
+    def opponent(self):
         return self.players[1 - self.turn]
-
-    def opponent(self, sid):
-        return self.players[1-self.players.index(sid)]

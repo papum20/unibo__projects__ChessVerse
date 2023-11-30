@@ -4,7 +4,7 @@ from time import perf_counter
 
 class Player:
     def __init__(self, sid, color, time):
-        self.sid = sid
+        self.id = sid
         self.color = color
         time = int(time)
         self.is_timed = time != -1
@@ -12,9 +12,6 @@ class Player:
             self.remaining_time = time
             self.latest_timestamp = perf_counter()
         self.first_move = True
-
-    def __eq__(self, sid):
-        return self.sid == sid
 
     def add_time(self, time):
         if self.is_timed:
