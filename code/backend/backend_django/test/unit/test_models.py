@@ -1,25 +1,25 @@
 from django.test import TestCase
-from backend_django.models import Guest, RegisteredUsers
+from ...models import Guest, RegisteredUsers
 
 
 class GuestModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        Guest.objects.create(Username='testUser')
+        Guest.objects.create(Username='test_guest')
 
     def test_username_label(self):
         guest = Guest.objects.get(id=1)
-        field_label = guest.__meta.get_field('Username').verbose_name
+        field_label = guest._meta.get_field('Username').verbose_name
         self.assertEqual(field_label, 'Username')
 
     def test_username_max_length(self):
         guest = Guest.objects.get(id=1)
-        max_length = guest.__meta.get_field('Username').max_length
+        max_length = guest._meta.get_field('Username').max_length
         self.assertEqual(max_length, 255)
 
     def test_username_unique(self):
         guest = Guest.objects.get(id=1)
-        unique = guest.__meta.get_field('Username').unique
+        unique = guest._meta.get_field('Username').unique
         self.assertEqual(unique, True)
 
 
@@ -40,78 +40,78 @@ class RegisteredUsersModelTest(TestCase):
 
     '''test_games_won'''
     def test_games_won_label(self):
-        user = RegisteredUsers.objects.get(id=1)
-        field_label = user.__meta.get_field('GamesWon').verbose_name
+        user = RegisteredUsers.objects.get(username='test_user')
+        field_label = user._meta.get_field('GamesWon').verbose_name
         self.assertEqual(field_label, 'GamesWon')
 
     def test_games_won_default(self):
-        user = RegisteredUsers.objects.get(id=1)
-        default = user.__meta.get_field('GamesWon').default
+        user = RegisteredUsers.objects.get(username='test_user')
+        default = user._meta.get_field('GamesWon').default
         self.assertEqual(default, 0)
 
     '''test_games_draw'''
     def test_games_draw_label(self):
-        user = RegisteredUsers.objects.get(id=1)
-        field_label = user.__meta.get_field('GamesDraw').verbose_name
-        self.assertEqual(field_label, 'GamesDraw')
+        user = RegisteredUsers.objects.get(username='test_user')
+        field_label = user._meta.get_field('GameDraw').verbose_name
+        self.assertEqual(field_label, 'GameDraw')
 
     def test_games_draw_default(self):
-        user = RegisteredUsers.objects.get(id=1)
-        default = user.__meta.get_field('GamesDraw').default
+        user = RegisteredUsers.objects.get(username='test_user')
+        default = user._meta.get_field('GameDraw').default
         self.assertEqual(default, 0)
 
     '''test_games_lost'''
     def test_games_lost_label(self):
-        user = RegisteredUsers.objects.get(id=1)
-        field_label = user.__meta.get_field('GamesLost').verbose_name
+        user = RegisteredUsers.objects.get(username='test_user')
+        field_label = user._meta.get_field('GamesLost').verbose_name
         self.assertEqual(field_label, 'GamesLost')
 
     def test_games_lost_default(self):
-        user = RegisteredUsers.objects.get(id=1)
-        default = user.__meta.get_field('GamesLost').default
+        user = RegisteredUsers.objects.get(username='test_user')
+        default = user._meta.get_field('GamesLost').default
         self.assertEqual(default, 0)
 
     '''test_elo_rbc'''
     def test_elo_rbc_label(self):
-        user = RegisteredUsers.objects.get(id=1)
-        field_label = user.__meta.get_field('EloReallyBadChess').verbose_name
+        user = RegisteredUsers.objects.get(username='test_user')
+        field_label = user._meta.get_field('EloReallyBadChess').verbose_name
         self.assertEqual(field_label, 'EloReallyBadChess')
 
     def test_elo_rbc_default(self):
-        user = RegisteredUsers.objects.get(id=1)
-        default = user.__meta.get_field('EloReallyBadChess').default
+        user = RegisteredUsers.objects.get(username='test_user')
+        default = user._meta.get_field('EloReallyBadChess').default
         self.assertEqual(default, 1000)
 
     '''test_elo_sc'''
     def test_elo_sc_label(self):
-        user = RegisteredUsers.objects.get(id=1)
-        field_label = user.__meta.get_field('EloSecondChess').verbose_name
+        user = RegisteredUsers.objects.get(username='test_user')
+        field_label = user._meta.get_field('EloSecondChess').verbose_name
         self.assertEqual(field_label, 'EloSecondChess')
 
     def test_elo_sc_default(self):
-        user = RegisteredUsers.objects.get(id=1)
-        default = user.__meta.get_field('EloSecondChess').default
+        user = RegisteredUsers.objects.get(username='test_user')
+        default = user._meta.get_field('EloSecondChess').default
         self.assertEqual(default, 1000)
 
     '''test_groups'''
     def test_groups_related_name(self):
-        user = RegisteredUsers.objects.get(id=1)
-        related_name = user.__meta.get_field('groups').related_name
+        user = RegisteredUsers.objects.get(username='test_user')
+        related_name = user._meta.get_field('groups').related_name
         self.assertEqual(related_name, 'registered_users')
 
     def test_groups_blank(self):
-        user = RegisteredUsers.objects.get(id=1)
-        blank = user.__meta.get_field('groups').blank
+        user = RegisteredUsers.objects.get(username='test_user')
+        blank = user._meta.get_field('groups').blank
         self.assertEqual(blank, True)
 
     '''test_user_permissions'''
     def test_user_permissions_related_name(self):
-        user = RegisteredUsers.objects.get(id=1)
-        related_name = user.__meta.get_field('user_permissions').related_name
+        user = RegisteredUsers.objects.get(username='test_user')
+        related_name = user._meta.get_field('user_permissions').related_name
         self.assertEqual(related_name, 'registered_users')
 
     def test_user_permissions_blank(self):
-        user = RegisteredUsers.objects.get(id=1)
-        blank = user.__meta.get_field('user_permissions').blank
+        user = RegisteredUsers.objects.get(username='test_user')
+        blank = user._meta.get_field('user_permissions').blank
         self.assertEqual(blank, True)
 

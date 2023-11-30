@@ -12,9 +12,9 @@ from time import perf_counter
 import chess
 import chess.engine
 import websockets
-
 from PVEGame import PVEGame
-
+import mysql.connector
+import os
 class PVEGameNamespace(socketio.AsyncNamespace):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,6 +23,14 @@ class PVEGameNamespace(socketio.AsyncNamespace):
         thread.start()
 
     async def on_connect(self, sid, _):
+        headers = sio.eio.sid_to_all_rooms[sid].environ.get("headers", {})
+        cookie_header = headers.get('cookie', '')
+        session_id = None
+
+        for cookie in cookie_header.split(';'):
+            key, value = map(str.strip, cookie.split('=', 1))
+            if key == 'sessionId':
+                session_id = value
         await self.emit("connected", room=sid)
         print("connect ", sid)
 
@@ -151,6 +159,16 @@ async def main():
     sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
     app = aiohttp.web.Application()
     sio.attach(app)
+
+    conn = mysql.connector.connect(
+        host=os.environ.get("DATABASE_HOST"),
+        user=os.environ.get("DATABASE_USER"),
+        password=os.environ.get("DATABASE_PASSWORD"),
+        database=os.environ.get("DATABASE_NAME")
+    )
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Guest(Username) VALUES (%s)", ("ciao",))
+    conn.commit()
 
     game_namespace = PVEGameNamespace(os.environ.get("WSS_NAMESPACE"))
     sio.register_namespace(game_namespace)
