@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REMOTE_USER="kekko"
+REMOTE_USER="prod"
 REMOTE_HOST="chessverse.germanywestcentral.cloudapp.azure.com"
 REMOTE_DIR="~/t4-chessverse"
 
