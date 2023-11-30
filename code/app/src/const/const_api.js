@@ -25,14 +25,7 @@ export const API = {
 		method: "",
 		codes : {
 			"ok" : 200
-		},
-		data : [
-			"username",
-			"password"
-		],
-		response : [
-			"message"
-		]
+		}
 	},
 	signup : {
 		endpoint : "signup",
@@ -41,6 +34,15 @@ export const API = {
 			"ok" : 200,
 			"bad request" : 400,
 			"internal server error" : 500
-		}
+		},
+		data : [
+			"username",
+			"password",
+			"elo1",
+			"elo2"
+		],
+		response : [
+			"message"
+		]
 	}
 };
