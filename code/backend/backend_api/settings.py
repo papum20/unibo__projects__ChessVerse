@@ -29,9 +29,6 @@ DATABASES = {
         'PASSWORD': DATABASE_PASSWORD,
         'HOST': DATABASE_HOST,
         'PORT': '3306',
-        'TEST': {
-            'NAME': 'TEST_DATABASE'
-        }
     }
 }
 
