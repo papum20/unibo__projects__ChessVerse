@@ -1,4 +1,4 @@
-
+6
 /*
  * api specs, e.g. paths, methods, codes, data fields (req/res)
  */
@@ -14,6 +14,10 @@ export const API = {
 		data : [
 			"username",
 			"password"
+		],
+		response : [
+			"message",
+			"token"
 		]
 	},
 	signout : {
@@ -25,6 +29,9 @@ export const API = {
 		data : [
 			"username",
 			"password"
+		],
+		response : [
+			"message"
 		]
 	},
 	signup : {

@@ -5,14 +5,25 @@
 import { Container } from 'react-bootstrap';
 import '../../styles/LoginOrSignupPage.css';
 import LoginOrSignupCard from './LoginOrSignupCard.jsx';
+import { parseResponseLogin, parseResponseSignup } from '../../models/api_responses.js';
 
 
 
 function LoginOrSignupPage() {
 	
 
-	function onLoginSuccessful(username) {
-		console.log(username + "was logged in!");
+	function onLoginSuccessful(data) {
+		
+		data = parseResponseLogin(data);
+		console.log("Logged in!");
+		console.log("res:", data);
+	}
+	
+	function onSignupSuccessful(data) {
+		
+		data = parseResponseSignup(data);
+		console.log("Signed up!");
+		console.log("res:", data);
 	}
 
     return (
@@ -20,6 +31,7 @@ function LoginOrSignupPage() {
 
             <LoginOrSignupCard
 				onLoginSuccessful={onLoginSuccessful}
+				onSignupSuccessful={onSignupSuccessful}
 			/>
 
         </Container>

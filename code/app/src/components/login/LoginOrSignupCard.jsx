@@ -5,6 +5,8 @@ import { Card, Form, Button } from 'react-bootstrap';
 import '../../styles/LoginOrSignupPage.css';
 import * as users_api from "../../network/users_api";
 import PropTypes from "prop-types";
+import { parseResponseLogin, parseResponseSignup } from '../../models/api_responses';
+import { parseCredentialsLogin, parseCredentialsSignup } from '../../models/credentials';
 
 
 
@@ -14,9 +16,11 @@ import PropTypes from "prop-types";
  *
  * @param {Object} props - The properties passed to the component.
  * @param {Function} props.onLoginSuccessful - Callback called on login or signup successful.
- * 	@param {string} props.onLoginSuccessful.username - The username of the logged-in or signed-up user.
+ * 	@param {string} props.onLoginSuccessful.data - The response data json.
+ * @param {Function} props.onLoginSuccessful - Callback called on login or signup successful.
+ * 	@param {string} props.onLoginSuccessful.data - The response data json.
  */
-function LoginOrSignupCard({ onLoginSuccessful }) {
+function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 
 	const { register, handleSubmit, formState: {errors} } = useForm();
 	
@@ -29,13 +33,22 @@ function LoginOrSignupCard({ onLoginSuccessful }) {
 		console.log("sending these credentials obtained from the form:", credentials);
 		console.log("is login:", isLogin);
 
+		const credential_parsed = (isLogin
+			? parseCredentialsLogin(credentials)
+			: parseCredentialsSignup(credentials)
+		);
+		
 		try {
-			const newUser = await (isLogin
-				? users_api.login(credentials)
-				: users_api.signup(credentials)
+			const res = await (isLogin
+				? users_api.login(credential_parsed)
+				: users_api.signup(credential_parsed)
 			);
 
-			onLoginSuccessful(newUser);
+			if(isLogin)
+				onLoginSuccessful(parseResponseLogin(res));
+			else
+				onSignupSuccessful(parseResponseSignup(res));
+			
 		} catch (error) {
 			console.error("Error:", error);
 			alert(error);
@@ -91,6 +104,9 @@ function LoginOrSignupCard({ onLoginSuccessful }) {
 
 LoginOrSignupCard.propTypes = {
 	onLoginSuccessful: PropTypes.func.isRequired
+};
+LoginOrSignupCard.propTypes = {
+	onSignupSuccessful: PropTypes.func.isRequired
 };
 
 export default LoginOrSignupCard;

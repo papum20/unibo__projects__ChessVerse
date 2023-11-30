@@ -41,6 +41,7 @@ This API provides basic user authentication functionalities, including user logi
 {
   "message": "Invalid credentials"
 }
+```
 
 
 ### 2. User Signup
@@ -83,7 +84,7 @@ This API provides basic user authentication functionalities, including user logi
 Ho anche messo un file 'test.rest' da cui si possono simulare delle richieste al backend, si può usare come spunto per vedere il tipo di richieste da fare
 Per eseguire le richieste assicurarsi di avere l'estensione 'REST Client' di VSCODE
 
-###IMPORTANTE 
+### IMPORTANTE 
     Prima di eseguire Django completare il file '.env.example' 
     
 Per lanciare Django eseguire: 
