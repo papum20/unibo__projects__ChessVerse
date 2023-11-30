@@ -1,15 +1,11 @@
-from django.shortcuts import render
-from .models import Guest
-from django.http import JsonResponse
 import random
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
-from .models import RegisteredUsers
-from backend_django.models import RegisteredUsers
+from .models import RegisteredUsers, Guest
 from django.http import JsonResponse
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import check_password
 
 
 def is_nickname_in_database(nickname):
@@ -19,6 +15,7 @@ def is_nickname_in_database(nickname):
     except Guest.DoesNotExist:
         return False
 
+
 def generate_random_nickname():
     while True:
         random_number = random.randint(1, 1000000000)
@@ -27,21 +24,23 @@ def generate_random_nickname():
         if not is_nickname_in_database(nickname):
             return nickname
 
+
 guest_nickname = ''
+
 
 def add_guest(requests):
     global guest_nickname
     guest_nickname = generate_random_nickname()
-    print('Guest name:'+  guest_nickname)
+    print('Guest name:' + guest_nickname)
     guest = Guest(Username=guest_nickname)
     guest.save()
     return JsonResponse({"message": "Guest added successfully!"})
+
 
 def get_guest_name(requests):
     print('Guest nickname:' + guest_nickname)
     return JsonResponse({"guest_nickname": guest_nickname})
 
-    
 
 @csrf_exempt
 @csrf_exempt
@@ -118,7 +117,8 @@ def user_signup(request):
     else:
         # Return an error response for invalid request methods
         return JsonResponse({'message': 'Invalid request method'}, status=405)
-    
+
+
 @login_required
 def user_signout(request):
     # Handle user signout (logout)
