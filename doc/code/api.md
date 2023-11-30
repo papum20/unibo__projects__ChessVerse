@@ -12,22 +12,36 @@ This API provides basic user authentication functionalities, including user logi
 
 ## Endpoints
 
-### 1. User Login
+# 1. User Login
 
-#### Endpoint
-- `backend_django/login/`
+## Endpoint
+- `/backend_django/login/`
 
-#### Method
+## Method
 - `POST`
 
-#### Request Body
+## Request Body
 - The request body should contain a JSON object with the following fields:
   - `username` (string): The username of the user trying to log in.
   - `password` (string): The password associated with the username.
 
-#### Response
-- `200 OK` with a JSON object containing the message "Login successful" if the login is successful.
+## Response
+- `200 OK` with a JSON object containing the message "Login successful" and a token if the login is successful.
 - `401 Unauthorized` with a JSON object containing the message "Invalid credentials" if the provided credentials are incorrect.
+
+## Example
+```json
+// Successful Login Response
+{
+  "message": "Login successful",
+  "token": "your_generated_jwt_token_here"
+}
+
+// Unauthorized Login Response
+{
+  "message": "Invalid credentials"
+}
+
 
 ### 2. User Signup
 

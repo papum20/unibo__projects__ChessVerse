@@ -6,7 +6,11 @@ import json
 from .models import RegisteredUsers, Guest
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
+import os
+import jwt
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+print(SECRET_KEY)
 
 def is_nickname_in_database(nickname):
     try:
@@ -42,7 +46,7 @@ def get_guest_name(requests):
     return JsonResponse({"guest_nickname": guest_nickname})
 
 
-@csrf_exempt
+
 @csrf_exempt
 def user_login(request):
     # Handle user login
@@ -64,21 +68,26 @@ def user_login(request):
         if check_password(password, user.password):
             # If user is authenticated, log them in
             login(request, user)
-
-            # Create a dictionary with the user information
-            user_info = {
-                'username': user.username,
-                'EloReallyBadChess': user.EloReallyBadChess,
-                'EloSecondChess': user.EloSecondChess
+            #get the user from the database
+            user = RegisteredUsers.objects.get(username=username)
+            #add the session id to the user
+            user.session_id = request.session.session_key
+            user.save()
+            #create the payload
+            payload = {
+                'username': username,
+                'elo_really_bad_chess': user.EloReallyBadChess,  
+                'elo_second_chess': user.EloSecondChess,
+                'session_id': user.session_id,
+                'games_won': user.GamesWon,
+                'games_draw': user.GameDraw,
+                'games_lost': user.GamesLost,
             }
-
-            # Set each piece of user information as a separate cookie
-            response = JsonResponse({'message': 'Login successful'})
-            response.set_cookie('username', user_info['username'])
-            response.set_cookie('elo_really_bad_chess', str(user_info['EloReallyBadChess']))
-            response.set_cookie('elo_second_chess', str(user_info['EloSecondChess']))
-
-            return response
+            
+            token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+            # Send the token to the client
+            return JsonResponse({'token': token})
+    
         else:
             # If authentication fails, return an error response
             return JsonResponse({'message': 'Invalid credentials'}, status=401)

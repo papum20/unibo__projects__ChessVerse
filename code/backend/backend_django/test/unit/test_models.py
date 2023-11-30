@@ -1,5 +1,5 @@
 from django.test import TestCase
-from ...models import Guest, RegisteredUsers
+from backend_django.models import Guest, RegisteredUsers
 
 
 class GuestModelTest(TestCase):
@@ -114,3 +114,4 @@ class RegisteredUsersModelTest(TestCase):
         user = RegisteredUsers.objects.get(id=1)
         blank = user.__meta.get_field('user_permissions').blank
         self.assertEqual(blank, True)
+
