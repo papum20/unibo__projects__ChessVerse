@@ -1,14 +1,14 @@
 #!/bin/bash
 
-REMOTE_USER="kekko"
-REMOTE_HOST="chessverse.germanywestcentral.cloudapp.azure.com"
-REMOTE_DIR="~/t4-chessverse"
+SSH_NAME="azure_prod"
+REMOTE_DIR="/home/prod/t4-chessverse"
 
-# Connessione SSH e esecuzione dei comandi
-ssh $REMOTE_USER@$REMOTE_HOST << EOF
+# Connessione SSH e esecuzione dei comandi; azure_prod configurato da setup.sh
+ssh $SSH_NAME << EOF
   cd $REMOTE_DIR
+  git checkout origin/prod
   git pull
   docker rm $(docker ps -a -q)
-  sudo docker compose build
-  sudo docker compose up -d
+  docker compose build
+  docker compose up -d
 EOF
