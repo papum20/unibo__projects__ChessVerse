@@ -48,7 +48,10 @@ function Start({
         setShowModal(false);
         setIsLoadingGame(true);
         const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
-        setSocket(io(host, { transports: ["websocket"] }));
+	const secure = import.meta.env.VITE_NODE_ENV == "production";
+	const options = { transports: ["websocket"], secure}
+	    console.log(options);
+        setSocket(io(host, options));
     }
 
     useEffect(() => {

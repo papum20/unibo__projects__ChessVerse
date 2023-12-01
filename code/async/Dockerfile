@@ -1,6 +1,6 @@
 FROM python:3.12.0-slim-bullseye
 
-EXPOSE 80
+EXPOSE 8080
 
 # Set environment variables
 ## for python to not write pyc files
