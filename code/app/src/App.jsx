@@ -13,7 +13,7 @@ const Game = loadable(() => import('./components/Game.jsx'));
 function App() {
   const location = useLocation();
 
-  const [isSinglePlayer, setIsSinglePlayer] = useState(false);
+  const [mode, setMode] = useState(0);
   const [gameImb, setGameImb] = useState(MIN_GAME_IMB);
   const [botDiff, setBotDiff] = useState(MIN_BOT_DIFF);
   const [gameTime, setGameTime] = useState(DEFAULT_GAME_TIME);
@@ -23,12 +23,12 @@ function App() {
 
   useEffect(() => {
     setData({
-      type: isSinglePlayer,
+      type: mode,
       rank: gameImb,
       time: gameTime,
       depth: botDiff
     })
-  }, [isSinglePlayer, gameImb, gameTime, botDiff])
+  }, [mode, gameImb, gameTime, botDiff])
 
 
 
@@ -39,8 +39,8 @@ function App() {
       <Routes location={location} key={location.pathname} data-testid="toGame">
         <Route path={`/`} element={
           <Start
-            isSinglePlayer={isSinglePlayer}
-            setIsSinglePlayer={setIsSinglePlayer}
+            mode={mode}
+            setMode={setMode}
             gameImb={gameImb}
             setGameImb={setGameImb}
             botDiff={botDiff}
@@ -67,7 +67,7 @@ function App() {
               setIsLoadingGame={setIsLoadingGame}
               socket={socket}
               setSocket={setSocket}
-              isSinglePlayer={isSinglePlayer}
+              mode={mode}
               gameImb={gameImb}
               botDiff={botDiff}
               gameTime={gameTime}

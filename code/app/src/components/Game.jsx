@@ -18,7 +18,7 @@ function Game({
                   socket, setSocket,
                   data,
                   gameImb,
-                  isSinglePlayer
+                  mode
               })
 {
     const { width, height } = useWindowDimensions();
@@ -106,11 +106,11 @@ function Game({
     
     function handleMenu(){
         setSocket(undefined);
-        socket.emit("resign", {});
+        socket.emit("resign", {type: mode});
     }
 
     function handleUndo (){
-        socket.emit("pop", {});
+        socket.emit("pop", {type: mode});
     }
 
     useEffect(()=>{
@@ -298,6 +298,7 @@ function Game({
                                   setIsLoadingGame={setIsLoadingGame}
                                   socket={socket}
                                   setSocket={setSocket}
+                                  mode={mode}
                                 />
                             </div>
                         </div>
@@ -389,7 +390,7 @@ Game.propTypes = {
     socket: PropTypes.object,
     setSocket: PropTypes.func,
     gameImb: PropTypes.number,
-    isSinglePlayer: PropTypes.bool,
+    mode: PropTypes.number,
     data: PropTypes.object,
 }
 

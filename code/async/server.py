@@ -20,7 +20,7 @@ class GameHandler:
         self.pve_handler = PVEGameHandler(sio)
         self.pvp_handler = PVPGameHandler(sio)
 
-    async def on_connect(self, sid):
+    async def on_connect(self, sid, _):
         print("connect ", sid)
         await self.sio.emit("connected", room=sid)
 
@@ -261,9 +261,9 @@ class PVEGameHandler:
             return False
         return True
 
-    async def on_connect(self, sid, _):
-        print("connect ", sid)
-        await self.sio.emit("connected", room=sid)
+#  async def on_connect(self, sid, _):
+#       print("connect ", sid)
+#        await self.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
         print("disconnect ", sid)

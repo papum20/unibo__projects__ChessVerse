@@ -9,12 +9,12 @@ import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
 import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME} from "../const/Const.js";
+import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME, PVP, PVE, TIME_OPTIONS} from "../const/Const.js";
 import { io } from "socket.io-client";
 
 
 function Start({
-                   isSinglePlayer, setIsSinglePlayer,
+                   mode, setMode,
                    gameImb, setGameImb,
                    botDiff, setBotDiff,
                    gameTime, setGameTime,
@@ -64,6 +64,9 @@ function Start({
         }
     }, [socket]);
 
+    
+
+
     return (
         <div data-testid="startPage">
 
@@ -74,7 +77,7 @@ function Start({
                 </Modal.Title>
                 <Modal.Body style={{backgroundColor: "#b6884e"}}>
                     <Form onSubmit={async (e)=> await handleSubmit(e)} >
-                        {isSinglePlayer &&
+                        {mode===PVE &&
                             <>
                                 <Typography id="botDifficult" gutterBottom
                                     style={{display:"flex", justifyContent: "center"}}
@@ -113,11 +116,12 @@ function Start({
                                 aria-labelledby="gameImbalance"
                             />
                         </>
+                        {mode===PVE ?
                         <>
                             <Typography id="gameTime" gutterBottom
                                 style={{display:"flex", justifyContent: "center"}}
                             >
-                            Clocktime: {gameTime}
+                            Clocktime: {gameTime} sec 
                             </Typography>
                             <Slider
                                 style={{width:"80%", marginLeft: "10%"}}
@@ -131,6 +135,28 @@ function Start({
                                 aria-labelledby="gameTime"
                             />
                         </>
+                        :
+                        <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
+                            <Form.Label style={{marginRight: "20px"}}>
+                                Clocktime in sec: 
+                            </Form.Label>
+                            {
+                                TIME_OPTIONS.map((el,i) => 
+                                <Form.Check
+                                    key={i}
+                                    inline
+                                    label={el}
+                                    type="radio"
+                                    id={el}
+                                    name="clocktime"
+                                    onChange={()=> {setGameTime(el)}}
+                                    defaultChecked={gameTime===el}
+                                
+                                />
+                                )
+                            }
+                        </div>
+                        }
                         <div style={{display: "flex", justifyContent: "flex-end"}}>
                             <Button size="large" color="brown" type="submit" variant="contained">start</Button>
                         </div>
@@ -175,7 +201,6 @@ function Start({
                             <Nav.Link as={Link} to="/login">
                                 <Button
                                   color="brown"
-                                  disabled={true}
                                   style={{fontSize: "1.5rem"}}
                                   variant="contained"
                                 >
@@ -205,7 +230,7 @@ function Start({
                             <Button
                               color="brown"
                               onClick={() => {
-                                  setIsSinglePlayer(true);
+                                  setMode(PVE);
                                   setShowModal(true);
                               }}
                               style={{fontSize: "1.5rem", borderRadius: "20px"}}
@@ -233,10 +258,10 @@ function Start({
                         </div>
                         <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
                             <Button
-                              disabled
+                              
                               color="brown"
                               onClick={() => {
-                                  setIsSinglePlayer(false);
+                                  setMode(PVP);
                                   setShowModal(true);
                               }}
                               style={{fontSize: "1.5rem", borderRadius: "20px"}}
@@ -245,7 +270,7 @@ function Start({
                                 <div style={{marginTop: "5px", marginBottom: "5px"}}>
                                     <Image
                                       src={`${ImageMultiPlayer}`}
-                                      alt="immagine di scacchi SinglePlayer"
+                                      alt="immagine di scacchi multiplayer"
                                       style={{
                                           width: "50px",
                                           height: "30px",
@@ -284,8 +309,8 @@ function Start({
 }
 
 Start.propTypes = {
-    isSinglePlayer: PropTypes.bool,
-    setIsSinglePlayer: PropTypes.func,
+    mode: PropTypes.number,
+    setMode: PropTypes.func,
     gameImb: PropTypes.number,
     setGameImb: PropTypes.func,
     botDiff: PropTypes.number,

@@ -178,10 +178,7 @@ function Board(props) {
         }
         else {
           const newGame = new Chess();
-  
-        
-
-            newGame.load(data.fen);
+          newGame.load(data.fen);
           setGame(newGame);
         }
       })
@@ -208,7 +205,7 @@ function Board(props) {
         setFirstMove(false);
         props.startTimer();
       }
-      props.socket.emit("move", {san: moveSan});
+      props.socket.emit("move", {san: moveSan, type: props.mode});
       setMoveSan(null);
       setAwaitingBotMove(true);
     }
