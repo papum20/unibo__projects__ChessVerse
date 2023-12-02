@@ -21,12 +21,9 @@ class GameHandler:
         self.pvp_handler = PVPGameHandler(sio)
 
     async def on_connect(self, sid, _):
-        print("connect ", sid)
-        print(active_clients)
         await self.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
-        print("disconnect", sid)
         if sid in active_clients:
             id = active_clients[sid]
             if isinstance(id, dict):
@@ -64,7 +61,6 @@ class GameHandler:
             await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_resign(self, sid, data):
-        print("resign", sid)
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
@@ -155,7 +151,6 @@ class PVPGameHandler:
             self.pvpGames[game_id] = PVPGame(players, rank if first else 100-rank, data["time"])
             active_clients[sid] = game_id
             active_clients[self.pvpGames[game_id].opponent(sid).sid] = game_id
-            print(players)
             await self.sio.emit("config", {"fen": self.pvpGames[game_id].fen, "id": game_id, "color": "white"}, room=players[0])
             await self.sio.emit("config", {"fen": self.pvpGames[game_id].fen, "id": game_id, "color": "black"}, room=players[1])
         else:
@@ -165,7 +160,6 @@ class PVPGameHandler:
 
 
     async def on_move(self, sid, data):
-        print("move", sid, data)
         if not await self.game_found(sid, data["id"]):
             return
         id = data["id"]
@@ -222,7 +216,6 @@ class PVPGameHandler:
 
 
     async def on_pop(self, sid, data):
-        print("pop", sid)
         if "id" not in data.keys():
             await self.sio.emit("error", {"cause": "Missing id", "fatal": True}, room=sid)
         id = data["id"]
@@ -274,7 +267,6 @@ class PVEGameHandler:
         return True
 
     async def on_disconnect(self, sid):
-        print("disconnect ", sid)
         if sid in self.pveGames.keys():
             await self.pveGames[sid].bot.quit()
             del self.pveGames[sid]
@@ -311,7 +303,6 @@ class PVEGameHandler:
             await self.sio.emit("error", {"cause": "Started Matching", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
-        print("move", sid, data)
         if not await self.game_found(sid):
             return
         game = self.pveGames[sid]
@@ -365,7 +356,6 @@ class PVEGameHandler:
 
 
     async def on_pop(self, sid, _):
-        print("pop", sid)
         if not await self.game_found(sid):
             return
         game = self.pveGames[sid]
