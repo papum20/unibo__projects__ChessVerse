@@ -47,7 +47,7 @@ This API provides basic user authentication functionalities, including user logi
 ### 2. User Signup
 
 #### Endpoint
-- `backend_django/signup/`
+- `/backend_django/signup/`
 
 #### Method
 - `POST`

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from ...models import Guest, RegisteredUsers
+from ...models import Guest, RegisteredUsers, Games
 
 
 class GuestModelTest(TestCase):
@@ -49,13 +49,13 @@ class RegisteredUsersModelTest(TestCase):
         default = user._meta.get_field('GamesWon').default
         self.assertEqual(default, 0)
 
-    '''test_games_draw'''
-    def test_games_draw_label(self):
+    '''test_game_draw'''
+    def test_game_draw_label(self):
         user = RegisteredUsers.objects.get(username='test_user')
         field_label = user._meta.get_field('GameDraw').verbose_name
         self.assertEqual(field_label, 'GameDraw')
 
-    def test_games_draw_default(self):
+    def test_game_draw_default(self):
         user = RegisteredUsers.objects.get(username='test_user')
         default = user._meta.get_field('GameDraw').default
         self.assertEqual(default, 0)
@@ -93,25 +93,60 @@ class RegisteredUsersModelTest(TestCase):
         default = user._meta.get_field('EloSecondChess').default
         self.assertEqual(default, 1000)
 
-    '''test_groups'''
-    def test_groups_related_name(self):
+    '''test_session_id'''
+    def test_session_id_label(self):
         user = RegisteredUsers.objects.get(username='test_user')
-        related_name = user._meta.get_field('groups').related_name
-        self.assertEqual(related_name, 'registered_users')
+        field_label = user._meta.get_field('session_id').verbose_name
+        self.assertEqual(field_label, 'session id')
 
-    def test_groups_blank(self):
+    def test_session_id_max_length(self):
         user = RegisteredUsers.objects.get(username='test_user')
-        blank = user._meta.get_field('groups').blank
-        self.assertEqual(blank, True)
+        max_length = user._meta.get_field('session_id').max_length
+        self.assertEqual(max_length, 255)
 
-    '''test_user_permissions'''
-    def test_user_permissions_related_name(self):
+    def test_session_id_default(self):
         user = RegisteredUsers.objects.get(username='test_user')
-        related_name = user._meta.get_field('user_permissions').related_name
-        self.assertEqual(related_name, 'registered_users')
+        default = user._meta.get_field('session_id').default
+        self.assertEqual(default, '')
 
-    def test_user_permissions_blank(self):
+    '''test __str__'''
+    def test_correct_name(self):
         user = RegisteredUsers.objects.get(username='test_user')
-        blank = user._meta.get_field('user_permissions').blank
-        self.assertEqual(blank, True)
+        expected_user_name = user.username
+        self.assertEqual(expected_user_name, str(user))
 
+
+class GamesModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Games.objects.create(username1='player1', username2='player2', png='test_png')
+
+    def test_username1_label(self):
+        game = Games.objects.get(id=1)
+        field_label = game._meta.get_field('username1').verbose_name
+        self.assertEqual(field_label, 'username1')
+
+    def test_username2_label(self):
+        game = Games.objects.get(id=1)
+        field_label = game._meta.get_field('username2').verbose_name
+        self.assertEqual(field_label, 'username2')
+
+    def test_username1_max_length(self):
+        game = Games.objects.get(id=1)
+        max_length = game._meta.get_field('username1').max_length
+        self.assertEqual(max_length, 255)
+
+    def test_username2_max_length(self):
+        game = Games.objects.get(id=1)
+        max_length = game._meta.get_field('username2').max_length
+        self.assertEqual(max_length, 255)
+
+    def test_png_label(self):
+        game = Games.objects.get(id=1)
+        field_label = game._meta.get_field('png').verbose_name
+        self.assertEqual(field_label, 'png')
+
+    def test_png_max_length(self):
+        game = Games.objects.get(id=1)
+        max_length = game._meta.get_field('png').max_length
+        self.assertEqual(max_length, 255)

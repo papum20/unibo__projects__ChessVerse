@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 import os
 
+
 def is_nickname_in_database(nickname):
     try:
         guest = Guest.objects.get(Username=nickname)
@@ -92,9 +93,8 @@ def user_signup(request):
             if not all([username, password, elo_really_bad_chess, elo_second_type]):
                 return JsonResponse({'message': 'Missing required fields'}, status=400)
 
-
             User = RegisteredUsers
-            new_user = User.objects.create_user(
+            User.objects.create_user(
                 username=username,
                 password=password,
                 EloReallyBadChess=elo_really_bad_chess,
@@ -111,7 +111,7 @@ def user_signup(request):
         return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
-@login_required
+@login_required(login_url='/backend_django/login/')
 def user_signout(request):
     # Handle user signout (logout)
     logout(request)
