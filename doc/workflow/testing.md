@@ -15,4 +15,4 @@ Use `unittest` for python.
 ## async
 
 Test are found by python in `code/async/tests/unit`.    
-The test can be executed running `python3.12 -m unittest unit.TestChessSocketIO`.  
+The test can be executed running `python3.12 -m unittest unit_test.TestChessSocketIO`.  
