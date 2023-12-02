@@ -13,7 +13,7 @@ from PVPGame import PVPGame
 from Player import Player
 import random
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, TIME_OPTIONS, GameType
-active_clients = []
+active_clients = {}
 class GameHandler:
     def __init__(self, sio):
         self.sio = sio
@@ -22,21 +22,26 @@ class GameHandler:
 
     async def on_connect(self, sid, _):
         print("connect ", sid)
+        print(active_clients)
         await self.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
-        print("printo data")
-        print(data)
-        print("id " + data["id"])
-        print("type " + data["type"])
-        if("type" not in data.keys()):
-            await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-        elif(data["type"] == GameType.PVE):
-            await self.pve_handler.on_disconnect(sid)
-        elif("id" in data and data["type"] == GameType.PVP):
-            await self.pvp_handler.on_disconnect(sid, data["id"])
-        else:
-            await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        print("disconnect", sid)
+        if sid in active_clients:
+            id = active_clients[sid]
+            if isinstance(id, dict):
+                self.pvp_handler.connected_clients[id["time"]][id["index"]].pop(0)
+            elif id in self.pvp_handler.pvpGames:
+                await self.sio.emit("end", {"winner": True},room=self.pvp_handler.pvpGames[id].opponent(sid).sid)
+                # await self.sio.emit("disconnected", room=[player.sid for player in self.pvp_handler.pvpGames[id].players])
+                del active_clients[self.pvp_handler.pvpGames[id].opponent(sid).sid]
+                del self.pvp_handler.pvpGames[id]
+            elif id in self.pve_handler.pveGames:
+                    await self.sio.emit("end", {"winner": False},
+                                        room=sid)
+                    del self.pve_handler.pveGames[id]
+                    self.sio.emit("disconnected", room=sid)
+            del active_clients[sid]
 
     async def on_start(self, sid, data):
         if("type" not in data.keys()):
@@ -59,14 +64,8 @@ class GameHandler:
             await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_resign(self, sid, data):
-        if("type" not in data.keys()):
-            await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-        elif(data["type"] == GameType.PVE):
-            await self.pve_handler.on_resign(sid, data)
-        elif(data["type"] == GameType.PVP):
-            await self.pvp_handler.on_resign(sid, data)
-        else:
-            await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        print("resign", sid)
+        await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
         if("type" not in data.keys()):
@@ -103,9 +102,14 @@ class PVPGameHandler:
         return True
 
     async def on_disconnect(self, sid):
-        if sid in self.pvpGames:
-            active_clients.remove(sid)
-            self.sio.emit("disconnected", room=sid)
+        if sid in active_clients:
+            id = active_clients[sid]
+            if id in self.pvpGames:
+                await self.sio.emit("end", {"winner": self.pvpGames[id].opponent(sid).color},
+                                    room=[player.sid for player in self.pvpGames[id].players])
+                del self.pvpGames[id]
+                del active_clients[sid]
+                self.sio.emit("disconnected", room=[player.sid for player in self.pvpGames[id].players])
 
     async def on_start(self, sid, data):
         def check_int(key, min, max):
@@ -147,15 +151,17 @@ class PVPGameHandler:
                 if first
                 else [self.connected_clients[time][index].pop(0)["sid"], sid]
             )
-            print(players)
             game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
             self.pvpGames[game_id] = PVPGame(players, rank if first else 100-rank, data["time"])
-            active_clients.append(sid)
+            active_clients[sid] = game_id
+            active_clients[self.pvpGames[game_id].opponent(sid).sid] = game_id
+            print(players)
             await self.sio.emit("config", {"fen": self.pvpGames[game_id].fen, "id": game_id, "color": "white"}, room=players[0])
             await self.sio.emit("config", {"fen": self.pvpGames[game_id].fen, "id": game_id, "color": "black"}, room=players[1])
         else:
             self.connected_clients[time][index].append({"sid": sid, "rank": rank})
-            active_clients.append(sid)
+            # serve per eliminarlo dalla entry
+            active_clients[sid] = {"time": time, "index": index}
 
 
     async def on_move(self, sid, data):
@@ -188,12 +194,11 @@ class PVPGameHandler:
         san_move = game.board.san(uci_move)
         game.board.push_uci(uci_move.uci())
         outcome = game.board.outcome()
-        print(game.board.outcome)
         if outcome is not None:
             await self.sio.emit("move", {"san": san_move}, room=game.current.sid)
             await self.sio.emit("end", {"winner": outcome.winner}, room=[player.sid for player in game.players])
-            print("vediamo se e' questo")
-            await self.on_disconnect(sid, id)
+            await self.on_disconnect(game.current.sid)
+            await self.on_disconnect(game.next.sid)
             return
         game.popped = False
         game.current.first_move = False
@@ -201,20 +206,18 @@ class PVPGameHandler:
         await self.sio.emit("move", {"san": san_move}, room=game.current.sid)
 
 
-    async def on_resign(self, sid, data):
-        print("resign", sid)
-        if "id" not in data.keys():
-            await self.sio.emit("error", {"cause": "Missing id", "fatal": True}, room=sid)
-        elif not await self.game_found(sid, data["id"]):
-            return
-        else:
-            id = data["id"]
-            await self.sio.emit("end", {"winner": self.pvpGames[id].opponent(sid).color}, room=[player.sid for player in self.pvpGames[id].players])
-            print("vediamo se e' questo1")
-            await self.on_disconnect(self.pvpGames[id].players[0].id)
-            await self.on_disconnect(self.pvpGames[id].players[1].id)
-            del self.pvpGames[id]
-            print("vediamo se e' questo2")
+    # async def on_resign(self, sid, data):
+    #     print("resign", sid)
+    #     if "id" not in data.keys():
+    #         await self.sio.emit("error", {"cause": "Missing id", "fatal": True}, room=sid)
+    #     elif not await self.game_found(sid, data["id"]):
+    #         return
+    #     else:
+    #         id = data["id"]
+    #         await self.sio.emit("end", {"winner": self.pvpGames[id].opponent(sid).color}, room=[player.sid for player in self.pvpGames[id].players])
+    #         await self.on_disconnect(self.pvpGames[id].current.sid)
+    #         await self.on_disconnect(self.pvpGames[id].next.sid)
+    #         del self.pvpGames[id]
 
 
 
@@ -251,12 +254,8 @@ class PVPGameHandler:
 
                     for player in self.pvpGames[id].players:
                         if not player.has_time():
-                            print("gotcha ", player.sid)
                             await self.sio.emit("timeout", {}, room=player.sid)
-                            print("vediamo se e' questo3")
-
-                            await self.on_disconnect(player.sid, id)
-                            print("vediamo se e' questo4")
+                            await self.on_resign(player.sid, {"id": id})
 
 
         loop.run_until_complete(cleaner())
@@ -274,10 +273,6 @@ class PVEGameHandler:
             return False
         return True
 
-#  async def on_connect(self, sid, _):
-#       print("connect ", sid)
-#        await self.sio.emit("connected", room=sid)
-
     async def on_disconnect(self, sid):
         print("disconnect ", sid)
         if sid in self.pveGames.keys():
@@ -285,7 +280,6 @@ class PVEGameHandler:
             del self.pveGames[sid]
             active_clients.remove(sid)
             await self.sio.emit("disconnected", room=sid)
-            print("vediamo se e' questo5")
 
 
     async def on_start(self, sid, data):
@@ -342,11 +336,8 @@ class PVEGameHandler:
         outcome = game.board.outcome()
         if outcome is not None:
             await self.sio.emit("end", {"winner": outcome.winner}, room=sid)
-            print("vediamo se e' questo6")
-
             await self.on_disconnect(sid)
-            print("vediamo se e' questo7")
-
+            await self.on_disconnect(game.opponent(sid))
             return
         start = perf_counter()
         bot_move = (await game.bot.play(game.board, chess.engine.Limit(depth=game.depth))).move
@@ -358,11 +349,7 @@ class PVEGameHandler:
         if outcome is not None:
             await self.sio.emit("move", {"san": san_bot_move}, room=sid)
             await self.sio.emit("end", {"winner": outcome.winner}, room=sid)
-            print("vediamo se e' questo8")
-
             await self.on_disconnect(sid)
-            print("vediamo se e' questo9")
-
             return
         game.popped = False
         end = perf_counter()
@@ -370,15 +357,11 @@ class PVEGameHandler:
         game.current.first_move = False
         await self.sio.emit("move", {"san": san_bot_move}, room=sid)
 
-    async def on_resign(self, sid, _):
-        print("resign", sid)
-        if not await self.game_found(sid):
-            return
-
-        print("vediamo se e' questo10")
-        
-        await self.on_disconnect(sid)
-        print("vediamo se e' questo11")
+    # async def on_resign(self, sid, _):
+    #     print("resign", sid)
+    #     if not await self.game_found(sid):
+    #         return
+    #     await self.on_disconnect(sid)
 
 
     async def on_pop(self, sid, _):
@@ -410,15 +393,9 @@ class PVEGameHandler:
 
                     for player in self.pveGames[sid].players:
                         if not player.has_time():
-                            print("gotcha ", sid)
                             await self.sio.emit("timeout", {}, room=sid)
-                            print("vediamo se e' questo12")
-
                             await self.on_disconnect(sid)
-                            print("vediamo se e' questo13")
-
                             await self.disconnect(sid)
-                            print("vediamo se e' questo14")
 
 
         loop.run_until_complete(cleaner())
