@@ -24,7 +24,7 @@ class GenerateRandomNicknameTest(TestCase):
 
 class AddGuestViewTest(TestCase):
     def test_view_url_exists_at_desired_location(self):
-        response = self.client.get('/backend_django/add_guest/')
+        response = self.client.get('/backend/add_guest/')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
@@ -39,7 +39,7 @@ class AddGuestViewTest(TestCase):
 class UserSignupViewTest(TestCase):
     def test_view_url_exists_at_desired_location(self):
         response = self.client.post(
-            '/backend_django/signup/',
+            '/backend/signup/',
             json.dumps({
                 'username': 'test_user',
                 'password': 'secret',
@@ -168,7 +168,7 @@ class UserLoginViewTest(TestCase):
 
     def test_view_url_exists_at_correct_location(self):
         response = self.client.post(
-            '/backend_django/login/',
+            '/backend/login/',
             json.dumps({'username': 'test_user', 'password': 'secret'}),
             content_type='application/json'
         )
@@ -218,7 +218,7 @@ class UserSignoutViewTest(TestCase):
         response = self.client.post(reverse('user_signout'))
         self.assertRedirects(
             response,
-            '/backend_django/login/?next=/backend_django/signout/',
+            '/backend/login/?next=/backend/signout/',
             fetch_redirect_response=False
         )
 
@@ -227,7 +227,7 @@ class UserSignoutViewTest(TestCase):
         # Assert the user is logged in
         self.assertTrue(self.client.login(username='test_user', password='secret'))
 
-        response = self.client.post('/backend_django/signout/')
+        response = self.client.post('/backend/signout/')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):

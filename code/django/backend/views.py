@@ -111,7 +111,7 @@ def user_signup(request):
         return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
-@login_required(login_url='/backend_django/login/')
+@login_required(login_url='/backend/login/')
 def user_signout(request):
     # Handle user signout (logout)
     logout(request)
