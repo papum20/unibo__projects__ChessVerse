@@ -8,6 +8,7 @@ import aiohttp
 from time import perf_counter
 import chess
 import chess.engine
+<<<<<<< HEAD
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Player import Player
@@ -101,6 +102,30 @@ class PVPGameHandler:
             await self.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
             return False
         return True
+=======
+import websockets
+from PVEGame import PVEGame
+import mysql.connector
+import os
+class PVEGameNamespace(socketio.AsyncNamespace):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pveGames = {}
+        thread = threading.Thread(target=self.cleaner_thread)
+        thread.start()
+
+    async def on_connect(self, sid, _):
+        headers = sio.eio.sid_to_all_rooms[sid].environ.get("headers", {})
+        cookie_header = headers.get('cookie', '')
+        session_id = None
+
+        for cookie in cookie_header.split(';'):
+            key, value = map(str.strip, cookie.split('=', 1))
+            if key == 'sessionId':
+                session_id = value
+        await self.emit("connected", room=sid)
+        print("connect ", sid)
+>>>>>>> dev-login
 
     async def on_disconnect(self, sid):
         if sid in self.pvpGames:
@@ -437,6 +462,7 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
+<<<<<<< HEAD
     handler = GameHandler(sio)
     
     # Aggiorna le chiamate a handler
@@ -446,6 +472,22 @@ async def main():
     sio.on('move', handler.on_move)
     sio.on('resign', handler.on_resign)
     sio.on('pop', handler.on_pop)
+=======
+    conn = mysql.connector.connect(
+        host=os.environ.get("DATABASE_HOST"),
+        user=os.environ.get("DATABASE_USER"),
+        password=os.environ.get("DATABASE_PASSWORD"),
+        database=os.environ.get("DATABASE_NAME")
+    )
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Guest(Username) VALUES (%s)", ("ciao",))
+    conn.commit()
+
+    game_namespace = PVEGameNamespace(os.environ.get("WSS_NAMESPACE"))
+    sio.register_namespace(game_namespace)
+
+    app.router.add_get(os.environ.get("WSS_NAMESPACE"), sio.handle_request)
+>>>>>>> dev-login
 
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()

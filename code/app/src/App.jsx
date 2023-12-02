@@ -3,6 +3,7 @@ import Alert from "./components/Alert.jsx";
 import {Routes, Route, useLocation} from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
+import LoginOrSignupPage from './components/login/LoginOrSignupPage.jsx';
 import {useEffect, useState} from 'react';
 import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/Const.js";
 
@@ -85,6 +86,12 @@ function App() {
             />
           }
           data-testid="game"
+        />
+        <Route
+          path={`/login`}
+          element={
+            <LoginOrSignupPage/>
+          }
         />
 
         <Route path="*" element={<NoRoute/>}/>

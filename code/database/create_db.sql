@@ -7,3 +7,16 @@ CREATE TABLE IF NOT EXISTS guest (
     Username VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT uc_Username UNIQUE (Username)
 );
+
+
+CREATE TABLE IF NOT EXISTS RegisteredUsers (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(255) NOT NULL UNIQUE,
+    Password VARCHAR(255) NOT NULL,
+    GamesWon INT DEFAULT 0,
+    GameDraw INT DEFAULT 0,
+    GamesLost INT DEFAULT 0,
+    EloReallyBadChess INT NOT NULL,
+    EloSecondChess INT NOT NULL,
+    CONSTRAINT uc_Username UNIQUE (Username)
+);
