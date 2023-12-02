@@ -304,7 +304,7 @@ class PVEGameHandler:
             return
         if sid not in active_clients:
             self.pveGames[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]))
-            active_clients.append(sid)
+            active_clients["sid"] = None
             await self.pveGames[sid].initialize_bot()
             await self.sio.emit("config", {"fen": self.pveGames[sid].fen}, room=sid)
         else:
