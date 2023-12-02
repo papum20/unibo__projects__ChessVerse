@@ -4,7 +4,7 @@ import {Routes, Route, useLocation} from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
 import {useEffect, useState} from 'react';
-import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./Const.js";
+import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/Const.js";
 
 //caricamento Lazy
 const Login = loadable(() => import('./components/Login.jsx'));

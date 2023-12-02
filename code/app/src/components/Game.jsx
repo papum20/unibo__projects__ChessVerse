@@ -6,7 +6,7 @@ import Board from "./Board.jsx";
 import { createTheme,ThemeProvider } from '@mui/material/styles';
 import { Button  } from "@mui/material";
 import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
-import "./Game.css";
+import "../styles/Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
