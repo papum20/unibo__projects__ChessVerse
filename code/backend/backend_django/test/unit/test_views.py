@@ -1,7 +1,25 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.urls import reverse
-from ...models import RegisteredUsers
+from ...views import is_nickname_in_database, generate_random_nickname
+from ...models import RegisteredUsers, Guest
 import json
+
+
+class IsNicknameInDatabaseTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Guest.objects.create(Username='test_user')
+
+    def test_existing_nickname_is_found(self):
+        self.assertTrue(is_nickname_in_database('test_user'))
+
+    def test_non_existing_nickname_is_not_found(self):
+        self.assertFalse(is_nickname_in_database('wrong_user'))
+
+
+class GenerateRandomNicknameTest(TestCase):
+    def test_random_is_not_in_database(self):
+        self.assertFalse(is_nickname_in_database(generate_random_nickname()))
 
 
 class AddGuestViewTest(TestCase):
