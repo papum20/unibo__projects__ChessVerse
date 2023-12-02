@@ -20,7 +20,10 @@ function Start({
                    gameTime, setGameTime,
                    socket, setSocket,
                    setIsLoadingGame,
-                   data
+                   data,
+                   setStartFen,
+                   setRoomId,
+                   setColor
                })
 {
     const theme = createTheme({
@@ -38,7 +41,6 @@ function Start({
     const [showOptions, setShowOptions] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-
   
     
     async function handleSubmit (e) {
@@ -50,7 +52,6 @@ function Start({
         const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
 	const secure = import.meta.env.VITE_NODE_ENV == "production";
 	const options = { transports: ["websocket"], secure}
-	    console.log(options);
         setSocket(io(host, options));
     }
 
@@ -58,7 +59,19 @@ function Start({
         if (socket) {
             socket.connect();
             socket.on('connect', () => {
+                socket.on("config", (data) => {
+                    if(!data){
+                      props.socket?.on("start", props.data);
+                    }
+                    else {
+                      setStartFen(data.fen);
+                      setColor(data.color);
+                      setRoomId(data.id);
+                    }
+                  })
+
                 socket.emit('start', data);
+                
             });
             navigator('./game', { relative: "path" });
         }
@@ -320,7 +333,10 @@ Start.propTypes = {
     socket: PropTypes.object,
     setSocket: PropTypes.func,
     setIsLoadingGame: PropTypes.func,
-    data: PropTypes.object
+    data: PropTypes.object,
+    setStartFen: PropTypes.func,
+    setColor: PropTypes.func,
+    setRoomId: PropTypes.func
 }
 
 export default Start;
