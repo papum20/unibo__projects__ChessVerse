@@ -18,7 +18,10 @@ function Game({
                   socket, setSocket,
                   data,
                   gameImb,
-                  mode
+                  mode,
+                  startFen,
+                  color,
+                  roomId
               })
 {
     const { width, height } = useWindowDimensions();
@@ -105,12 +108,12 @@ function Game({
     }, [timer])
     
     function handleMenu(){
+        socket.emit("resign", {type: mode, id: roomId});
         setSocket(undefined);
-        socket.emit("resign", {type: mode});
     }
 
     function handleUndo (){
-        socket.emit("pop", {type: mode});
+        socket.emit("pop", {type: mode, id: roomId});
     }
 
     useEffect(()=>{
@@ -162,7 +165,9 @@ function Game({
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
-                                      onClick={() => setSocket(undefined)}
+                                      onClick={() => {socket.emit("resign", {type: mode, id: roomId}); 
+                                                        setSocket(undefined);
+                                                    }}
                                       variant="contained"
                                     >
                                         Return to menu
@@ -197,7 +202,7 @@ function Game({
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
-                                      onClick={() => setSocket(undefined)}
+                                      onClick={() => {setSocket(undefined); }}
                                       variant="contained"
                                     >
                                         Return to menu
@@ -299,6 +304,9 @@ function Game({
                                   socket={socket}
                                   setSocket={setSocket}
                                   mode={mode}
+                                  startFen={startFen}
+                                  color={color}
+                                  roomId={roomId}
                                 />
                             </div>
                         </div>
@@ -392,6 +400,9 @@ Game.propTypes = {
     gameImb: PropTypes.number,
     mode: PropTypes.number,
     data: PropTypes.object,
+    startFen: PropTypes.string,
+    color: PropTypes.string,
+    roomId: PropTypes.string
 }
 
 export default Game;

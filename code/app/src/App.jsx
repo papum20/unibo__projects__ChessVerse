@@ -20,6 +20,10 @@ function App() {
   const [socket, setSocket] = useState(null);
   const [isLoadingGame, setIsLoadingGame] = useState(false);
   const [data, setData] = useState({});
+  const [startFen, setStartFen] = useState(null);
+  const [roomId, setRoomId] = useState(null);
+  const [color, setColor] = useState("white");
+
 
   useEffect(() => {
     setData({
@@ -51,6 +55,10 @@ function App() {
             socket={socket}
             setIsLoadingGame={setIsLoadingGame}
             data={data}
+            setStartFen={setStartFen}
+            setRoomId={setRoomId}
+            setColor={setColor}
+
           />
         }/>
 
@@ -71,6 +79,9 @@ function App() {
               gameImb={gameImb}
               botDiff={botDiff}
               gameTime={gameTime}
+              startFen={startFen}
+              color={color}
+              roomId={roomId}
             />
           }
           data-testid="game"
