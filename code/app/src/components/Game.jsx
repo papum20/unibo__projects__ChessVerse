@@ -6,7 +6,7 @@ import Board from "./Board.jsx";
 import { createTheme,ThemeProvider } from '@mui/material/styles';
 import { Button  } from "@mui/material";
 import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
-import "./Game.css";
+import "../styles/Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -18,7 +18,10 @@ function Game({
                   socket, setSocket,
                   data,
                   gameImb,
-                  isSinglePlayer
+                  mode,
+                  startFen,
+                  color,
+                  roomId
               })
 {
     const { width, height } = useWindowDimensions();
@@ -105,12 +108,12 @@ function Game({
     }, [timer])
     
     function handleMenu(){
+        socket.emit("resign", {type: mode, id: roomId});
         setSocket(undefined);
-        socket.emit("resign", {});
     }
 
     function handleUndo (){
-        socket.emit("pop", {});
+        socket.emit("pop", {type: mode, id: roomId});
     }
 
     useEffect(()=>{
@@ -162,7 +165,9 @@ function Game({
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
-                                      onClick={() => setSocket(undefined)}
+                                      onClick={() => {socket.emit("resign", {type: mode, id: roomId}); 
+                                                        setSocket(undefined);
+                                                    }}
                                       variant="contained"
                                     >
                                         Return to menu
@@ -197,7 +202,7 @@ function Game({
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
-                                      onClick={() => setSocket(undefined)}
+                                      onClick={() => {setSocket(undefined); }}
                                       variant="contained"
                                     >
                                         Return to menu
@@ -298,6 +303,10 @@ function Game({
                                   setIsLoadingGame={setIsLoadingGame}
                                   socket={socket}
                                   setSocket={setSocket}
+                                  mode={mode}
+                                  startFen={startFen}
+                                  color={color}
+                                  roomId={roomId}
                                 />
                             </div>
                         </div>
@@ -389,8 +398,11 @@ Game.propTypes = {
     socket: PropTypes.object,
     setSocket: PropTypes.func,
     gameImb: PropTypes.number,
-    isSinglePlayer: PropTypes.bool,
+    mode: PropTypes.number,
     data: PropTypes.object,
+    startFen: PropTypes.string,
+    color: PropTypes.string,
+    roomId: PropTypes.string
 }
 
 export default Game;

@@ -3,7 +3,8 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import Spinner from 'react-bootstrap/Spinner';
 import { toast } from "react-toastify";
-
+import {PVE, PVP} from "../const/Const.js";
+ 
 
 function Board(props) {
   const [game, setGame] = useState(null);
@@ -17,6 +18,7 @@ function Board(props) {
   const [awaitingBotMove, setAwaitingBotMove] = useState(false);
   const [firstMove, setFirstMove] = useState(true);
   const [position, setPosition] = useState("");
+  
   
   function safeGameMutate(modify) {
     setGame((g) => {
@@ -170,23 +172,12 @@ function Board(props) {
   }
 
   useEffect(()=>{
-    
-    if(props.socket){
-      props.socket?.on("config", (data) => {
-        if(!data){
-          props.socket?.on("start", props.data);
-        }
-        else {
-          const newGame = new Chess();
-  
-        
-
-            newGame.load(data.fen);
+    if(props.startFen){
+      const newGame = new Chess();
+          newGame.load(props.startFen);
           setGame(newGame);
-        }
-      })
     }
-  },[props.socket])
+  },[props.startFen])
 
   useEffect(()=>{
 
@@ -208,7 +199,7 @@ function Board(props) {
         setFirstMove(false);
         props.startTimer();
       }
-      props.socket.emit("move", {san: moveSan});
+      props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
       setMoveSan(null);
       setAwaitingBotMove(true);
     }
@@ -286,11 +277,35 @@ const [getPop, setGetPop] = useState(false);
   return (
     <>
     {props.isLoadingGame ? 
-    <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}} data-testid="Loading">
-      <Spinner  animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-      </Spinner>
-    </div>
+    <>
+      {props.mode===PVP ?
+        <div data-testid="Loading">
+
+          <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}} >
+            <h1 style={{fontWeight:"bold", marginBottom: "20px"}}>waiting for a player</h1>
+          </div>
+
+          <div style={{display: "flex", justifyContent: "center", marginTop: "10px"}}>
+            <Spinner  animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        
+        </div>
+        
+        
+    :
+      <div data-testid="Loading">
+        <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}} >
+          <Spinner  animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      </div>
+    }
+
+    </>
+    
     
   : 
     <div data-testid="chessboard">
@@ -312,6 +327,7 @@ const [getPop, setGetPop] = useState(false);
         promotionToSquare={moveTo}
         showPromotionDialog={showPromotionDialog}
         boardWidth={`${props.width/2 >(props.height-180) ? (props.height-180) : (props.width/2)}`}
+        boardOrientation={props.mode===PVE ? "white" : props.color}
       />
     </div>
   }

@@ -4,7 +4,7 @@ import {Routes, Route, useLocation} from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
 import {useEffect, useState} from 'react';
-import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./Const.js";
+import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/Const.js";
 
 //caricamento Lazy
 const Login = loadable(() => import('./components/Login.jsx'));
@@ -13,22 +13,26 @@ const Game = loadable(() => import('./components/Game.jsx'));
 function App() {
   const location = useLocation();
 
-  const [isSinglePlayer, setIsSinglePlayer] = useState(false);
+  const [mode, setMode] = useState(0);
   const [gameImb, setGameImb] = useState(MIN_GAME_IMB);
   const [botDiff, setBotDiff] = useState(MIN_BOT_DIFF);
   const [gameTime, setGameTime] = useState(DEFAULT_GAME_TIME);
   const [socket, setSocket] = useState(null);
   const [isLoadingGame, setIsLoadingGame] = useState(false);
   const [data, setData] = useState({});
+  const [startFen, setStartFen] = useState(null);
+  const [roomId, setRoomId] = useState(null);
+  const [color, setColor] = useState("white");
+
 
   useEffect(() => {
     setData({
-      type: isSinglePlayer,
+      type: mode,
       rank: gameImb,
       time: gameTime,
       depth: botDiff
     })
-  }, [isSinglePlayer, gameImb, gameTime, botDiff])
+  }, [mode, gameImb, gameTime, botDiff])
 
 
 
@@ -39,8 +43,8 @@ function App() {
       <Routes location={location} key={location.pathname} data-testid="toGame">
         <Route path={`/`} element={
           <Start
-            isSinglePlayer={isSinglePlayer}
-            setIsSinglePlayer={setIsSinglePlayer}
+            mode={mode}
+            setMode={setMode}
             gameImb={gameImb}
             setGameImb={setGameImb}
             botDiff={botDiff}
@@ -51,6 +55,10 @@ function App() {
             socket={socket}
             setIsLoadingGame={setIsLoadingGame}
             data={data}
+            setStartFen={setStartFen}
+            setRoomId={setRoomId}
+            setColor={setColor}
+
           />
         }/>
 
@@ -67,10 +75,13 @@ function App() {
               setIsLoadingGame={setIsLoadingGame}
               socket={socket}
               setSocket={setSocket}
-              isSinglePlayer={isSinglePlayer}
+              mode={mode}
               gameImb={gameImb}
               botDiff={botDiff}
               gameTime={gameTime}
+              startFen={startFen}
+              color={color}
+              roomId={roomId}
             />
           }
           data-testid="game"
