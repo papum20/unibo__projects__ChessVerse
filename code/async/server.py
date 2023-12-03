@@ -31,7 +31,8 @@ class GameHandler:
         if sid in Game.sid_to_id:
             game_id = Game.sid_to_id[sid]
             if isinstance(game_id, dict):
-                Game.waiting_list[game_id["time"]][game_id["index"]].remove(game_id)
+                if game_id in Game.waiting_list[game_id["time"]][game_id["index"]]:
+                    Game.waiting_list[game_id["time"]][game_id["index"]].remove(game_id)
             else:
                 await Game.games[game_id].disconnect(sid)
                 if game_id in Game.games:
