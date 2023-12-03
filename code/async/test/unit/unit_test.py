@@ -8,9 +8,7 @@ import json
 sys.path.append("../../")
 import chess
 from server import (
-    GameHandler,
-    PVPGameHandler,
-    PVEGameHandler
+    GameHandler
 )
 import chess.engine
 from random import choice
