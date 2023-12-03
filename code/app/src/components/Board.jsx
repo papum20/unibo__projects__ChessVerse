@@ -200,6 +200,7 @@ function Board(props) {
         props.startTimer();
       }
       props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
+
       setMoveSan(null);
       setAwaitingBotMove(true);
     }
