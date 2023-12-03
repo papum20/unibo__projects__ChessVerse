@@ -18,10 +18,12 @@ class GameHandler:
 
     @classmethod
     def sid2game(cls, sid):
-        try:
-            return Game.games[Game.sid_to_id[sid]]
-        except KeyError:
-            return None
+        if isinstance(Game.sid_to_id[sid], str):
+            try:
+                return Game.games[Game.sid_to_id[sid]]
+            except KeyError:
+                return None
+        return None
 
 
     async def on_connect(self, sid, _):
@@ -34,12 +36,11 @@ class GameHandler:
                 if game_id in Game.waiting_list[game_id["time"]][game_id["index"]]:
                     Game.waiting_list[game_id["time"]][game_id["index"]].remove(game_id)
             else:
-                await Game.games[game_id].disconnect(sid)
                 if game_id in Game.games:
-                    del Game.games[game_id]
-            del Game.sid_to_id[sid]
+                    await Game.games[game_id].disconnect(sid)
 
     async def on_start(self, sid, data):
+        print(Game.games, Game.sid_to_id, Game.waiting_list)
         if("type" not in data.keys()):
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         elif(data["type"] == GameType.PVE):
@@ -59,6 +60,7 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
+        print(Game.games, Game.sid_to_id, Game.waiting_list)
         game = GameHandler.sid2game(sid)
         if game is None:
             await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)

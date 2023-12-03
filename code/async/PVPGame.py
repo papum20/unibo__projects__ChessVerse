@@ -19,10 +19,16 @@ class PVPGame(Game):
 		return self.current.sid == sid
 
 	async def disconnect(self, sid: str) -> None:
+		print(self.opponent(sid).sid)
 		await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
 		await Game.sio.emit("disconnected", room=self.opponent(sid).sid)
-		if self.opponent(sid).sid in Game.sid_to_id:
-			del Game.sid_to_id[self.opponent(sid).sid]
+		if sid not in Game.sid_to_id:
+			return
+		elif Game.sid_to_id[sid] in Game.games:
+			if self.opponent(sid).sid in Game.sid_to_id:
+				del Game.sid_to_id[self.opponent(sid).sid]
+			del Game.games[Game.sid_to_id[sid]]
+			del Game.sid_to_id[sid]
 
 	async def pop(self, sid: str) -> None:
 		if sid not in Game.sid_to_id:
@@ -70,9 +76,9 @@ class PVPGame(Game):
 		outcome = self.board.outcome()
 		if outcome is not None:
 			await Game.sio.emit("move", {"san": san_move}, room=self.current.sid)
-			await Game.sio.emit("end", {"winner": outcome.winner}, room=[player.sid for player in self.players])
-			await Game.disconnect(self.current.sid)
-			await Game.on_disconnect(self.next.sid)
+			await Game.sio.emit("end", {"winner": True if outcome.winner is not None else outcome.winner}, room=self.current.sid)
+			await Game.sio.emit("end", {"winner": False if outcome.winner is not None else outcome.winner}, room=self.next.sid)
+			await self.disconnect(self.next.sid)
 			return
 		self.popped = False
 		self.current.first_move = False
@@ -123,8 +129,8 @@ class PVPGame(Game):
 			)
 			game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
 			Game.games[game_id] = cls(players, rank if first else 100 - rank, data["time"])
-			Game.sid_to_id[sid] = game_id
-			Game.sid_to_id[players[1] if first else players[0]] = game_id
+			Game.sid_to_id[players[0]] = game_id
+			Game.sid_to_id[players[1]] = game_id
 			await Game.sio.emit("config", {"fen": Game.games[game_id].fen, "id": game_id, "color": "white"}, room=players[0])
 			await Game.sio.emit("config", {"fen": Game.games[game_id].fen, "id": game_id, "color": "black"}, room=players[1])
 			#togliere l'id dal frontend
