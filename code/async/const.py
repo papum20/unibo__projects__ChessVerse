@@ -1,5 +1,8 @@
 from enum import IntEnum
 
+class GameType(IntEnum):
+    PVP = 0
+    PVE = 1
 
 # Enums
 class EventType(IntEnum):
