@@ -3,6 +3,7 @@ import asyncio
 import os
 import socketio
 import aiohttp
+from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
@@ -20,7 +21,6 @@ class GameHandler:
             return Game.games[Game.sid_to_id[sid]]
         except KeyError:
             return None
-
 
     async def on_connect(self, sid, _):
         await self.sio.emit("connected", room=sid)
