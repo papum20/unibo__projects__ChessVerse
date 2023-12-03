@@ -30,7 +30,6 @@ class PVEGame(Game):
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid # solo in PVE;
             Game.games[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]))
-            print(Game.games)
             await Game.games[sid].instanciate_bot()
             await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
         else:
