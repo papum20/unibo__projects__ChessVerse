@@ -12,6 +12,9 @@ services:
       - PORT=8080
     ports:
       - "8080:8080"
+    secrets:
+      - ssl_certificate
+      - ssl_priv_key
   app:
     depends_on:
       - async
@@ -22,3 +25,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+
+secrets:
+  ssl_certificate:
+    file: /etc/ssl/certificate.crt
+  ssl_priv_key:
+    file: /etc/ssl/private/private.key
