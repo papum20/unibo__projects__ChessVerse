@@ -15,6 +15,20 @@ services:
     secrets:
       - ssl_certificate
       - ssl_priv_key
+  django:
+    container_name: django
+    restart: always
+    build:
+      context: ./code/django
+      dockerfile: Dockerfile
+    environment:
+      - ENV=production
+      - PORT=8000
+    ports:
+      - "8000:8000"
+    secrets:
+      - ssl_certificate
+      - ssl_priv_key
   app:
     depends_on:
       - async
@@ -31,3 +45,4 @@ secrets:
     file: /etc/ssl/certificate.crt
   ssl_priv_key:
     file: /etc/ssl/private/private.key
+
