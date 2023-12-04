@@ -10,6 +10,8 @@ from const import GameType
 import threading
 
 active_clients = {}
+
+
 class GameHandler:
     def __init__(self, sio):
         self.sio = sio
@@ -38,17 +40,17 @@ class GameHandler:
             del Game.sid_to_id[sid]
 
     async def on_start(self, sid, data):
-        if("type" not in data.keys()):
+        if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-        elif(data["type"] == GameType.PVE):
+        elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
-        elif(data["type"] == GameType.PVP):
+        elif data["type"] == GameType.PVP:
             await PVPGame.start(sid, data)
         else:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
-        if("type" not in data.keys()):
+        if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
         if game is None:
@@ -64,7 +66,7 @@ class GameHandler:
         await game.disconnect(sid)
 
     async def on_pop(self, sid, data):
-        if("type" not in data.keys()):
+        if "type" not in data.keys():
             await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
         if game is None:

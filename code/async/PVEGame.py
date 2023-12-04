@@ -4,6 +4,7 @@ from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from time import perf_counter
 
+
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
 

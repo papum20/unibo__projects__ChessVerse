@@ -6,6 +6,7 @@ from socketio import AsyncServer
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS
 
+
 class Game(ABC):
     sio = None
     games = {}

@@ -3,6 +3,8 @@ import json
 import random
 from const import TIME_OPTIONS, MIN_RANK, MAX_RANK
 import chess
+
+
 class PVPGame(Game):
 	waiting_list: dict[str, list[list[str]]] = {key: [[] for _ in range(6)] for key in TIME_OPTIONS}
 

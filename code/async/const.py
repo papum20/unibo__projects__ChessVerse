@@ -12,9 +12,11 @@ class EventType(IntEnum):
     END = 5
     START = 999
 
+
 class GameType(IntEnum):
     PVP = 0
     PVE = 1
+
 
 class AckType(IntEnum):
     OK = 0
