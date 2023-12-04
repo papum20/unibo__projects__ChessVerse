@@ -12,6 +12,23 @@ services:
       - PORT=8080
     ports:
       - "8080:8080"
+    secrets:
+      - ssl_certificate
+      - ssl_priv_key
+  django:
+    container_name: django
+    restart: always
+    build:
+      context: ./code/django
+      dockerfile: Dockerfile
+    environment:
+      - ENV=production
+      - PORT=8000
+    ports:
+      - "8000:8000"
+    secrets:
+      - ssl_certificate
+      - ssl_priv_key
   app:
     depends_on:
       - async
@@ -21,4 +38,21 @@ services:
       context: ./code/app
       dockerfile: Dockerfile
     ports:
-      - "80:3000"
+      - "3000:3000"
+  mysql:
+    build:
+      context: ./code/database/
+      dockerfile: Dockerfile
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+
+secrets:
+  ssl_certificate:
+    file: /etc/ssl/certificate.crt
+  ssl_priv_key:
+    file: /etc/ssl/private/private.key
+
+

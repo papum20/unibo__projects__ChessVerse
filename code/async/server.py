@@ -7,25 +7,33 @@ from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
-import threading
+import mysql.connector
 
 active_clients = {}
 
 
 class GameHandler:
-    def __init__(self, sio):
-        self.sio = sio
-        self.games = {}
-
+    def __init__(self):
+        pass
     @classmethod
     def sid2game(cls, sid):
-        try:
-            return Game.games[Game.sid_to_id[sid]]
-        except KeyError:
-            return None
+        if isinstance(Game.sid_to_id[sid], str):
+            try:
+                return Game.games[Game.sid_to_id[sid]]
+            except KeyError:
+                return None
+        return None
 
-    async def on_connect(self, sid, _):
-        await self.sio.emit("connected", room=sid)
+    async def on_connect(self, sid, environ, auth):
+        # cookie_header = environ.get('HTTP_COOKIE', '')
+        # session_id = None
+        #
+        # for cookie in cookie_header.split(';'):
+        #     key, value = map(str.strip, cookie.split('=', 1))
+        #     if key == 'sessionId':
+        #         session_id = value
+        await Game.login(sid)
+        await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
         if sid in Game.sid_to_id:
@@ -34,13 +42,12 @@ class GameHandler:
                 if game_id in Game.waiting_list[game_id["time"]][game_id["index"]]:
                     Game.waiting_list[game_id["time"]][game_id["index"]].remove(game_id)
             else:
-                await Game.games[game_id].disconnect(sid)
                 if game_id in Game.games:
-                    del Game.games[game_id]
-            del Game.sid_to_id[sid]
+                    await Game.games[game_id].disconnect(sid)
 
     async def on_start(self, sid, data):
-        if "type" not in data.keys():
+        print(Game.games, Game.sid_to_id, Game.waiting_list)
+        if("type" not in data.keys()):
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
@@ -59,6 +66,7 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
+        print(Game.games, Game.sid_to_id, Game.waiting_list)
         game = GameHandler.sid2game(sid)
         if game is None:
             await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
@@ -87,18 +95,6 @@ class GameHandler:
                         await self.on_disconnect(player.sid)
 
 
-# async def cleaner():
-#     while True:
-#         await asyncio.sleep(1)
-#
-#         for id in list(Game.games.keys()):
-#             if id not in Game.games:
-#                 continue
-#
-#             for player in Game.games[id].players:
-#                 if not player.has_time():
-#                     await Game.sio.emit("timeout", {}, room=player.sid)
-#                     await Game.games[id].disconnect(player.sid)
 
 async def main():
     env = os.environ.get("ENV", "development")
@@ -112,8 +108,18 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
-    handler = GameHandler(sio)
+    conn = mysql.connector.connect(
+        host=os.environ.get("DATABASE_HOST"),
+        user=os.environ.get("DATABASE_USER"),
+        password=os.environ.get("DATABASE_PASSWORD"),
+        database=os.environ.get("DATABASE_NAME")
+    )
+    cursor = conn.cursor()
+
+    handler = GameHandler()
     Game.sio = sio
+    Game.cursor = cursor
+    Game.conn = conn
     
     # Aggiorna le chiamate a handler
     sio.on('connect', handler.on_connect)
@@ -123,16 +129,6 @@ async def main():
     sio.on('resign', handler.on_resign)
     sio.on('pop', handler.on_pop)
 
-    conn = mysql.connector.connect(
-        host=os.environ.get("DATABASE_HOST"),
-        user=os.environ.get("DATABASE_USER"),
-        password=os.environ.get("DATABASE_PASSWORD"),
-        database=os.environ.get("DATABASE_NAME")
-    )
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO Guest(Username) VALUES (%s)", ("ciao",))
-    conn.commit()
-
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
@@ -140,7 +136,7 @@ async def main():
     ssl_context = None
     if os.environ.get("ENV") == "production":
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(certfile="/run/secrets/certificate.crt", keyfile="/run/secrets/private.key")
+        ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate", keyfile="/run/secrets/ssl_priv_key")
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
 
     await site.start()

@@ -1,6 +1,5 @@
 from enum import IntEnum
 
-
 # Enums
 class EventType(IntEnum):
     ERROR = -1

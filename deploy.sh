@@ -9,6 +9,6 @@ ssh $SSH_NAME << EOF
   git checkout origin/prod
   git pull
   docker rm $(docker ps -a -q)
-  docker compose build
+  sudo docker compose build
   docker compose up -d
 EOF

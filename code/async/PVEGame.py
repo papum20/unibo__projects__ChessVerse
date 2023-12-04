@@ -43,6 +43,8 @@ class PVEGame(Game):
 
     async def disconnect(self, sid: str) -> None:
         await self.bot.quit()
+        del Game.games[sid]
+        del Game.sid_to_id[sid]
 
     async def instanciate_bot(self) -> None:
         self.bot = (await popen_uci("./stockfish"))[1]
