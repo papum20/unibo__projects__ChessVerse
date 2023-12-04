@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "HTTPS=true SSL_CRT_FILE=./cert/cert.pem SSL_KEY_FILE=./cert/key.pem vite",
+    "dev": "vite",
+    "dev-local": "IS_LOCAL=true vite",
     "prod": "vite",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "serve": "serve -s build",
@@ -20,7 +21,6 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@greatsumini/react-facebook-login": "^3.3.3",
     "@jest/globals": "^29.7.0",
     "@loadable/component": "^5.15.3",
     "@mui/icons-material": "^5.14.16",

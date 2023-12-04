@@ -1,12 +1,11 @@
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Card, Form, Button } from 'react-bootstrap';
-import '../../styles/LoginOrSignupPage.css';
-import * as users_api from "../../network/users_api";
 import PropTypes from "prop-types";
-import { parseResponseLogin, parseResponseSignup } from '../../models/api_responses';
+import { useState } from 'react';
+import { Button, Card, Form } from 'react-bootstrap';
+import { useForm } from 'react-hook-form';
 import { parseCredentialsLogin, parseCredentialsSignup } from '../../models/credentials';
+import * as users_api from "../../network/users_api";
+import '../../styles/LoginOrSignupPage.css';
 import LoginButtonFacebook from './LoginButtonFacebook';
 
 
@@ -44,10 +43,14 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 				: users_api.signup(credential_parsed)
 			);
 
+					
+			console.log("Logged in!");
+			console.log("res:", res);
+			
 			if(isLogin)
-				onLoginSuccessful(parseResponseLogin(res));
+				onLoginSuccessful(credential_parsed.username, "");
 			else
-				onSignupSuccessful(parseResponseSignup(res));
+				onSignupSuccessful(credential_parsed.username, "");
 			
 		} catch (error) {
 			console.error("Error:", error);
@@ -61,9 +64,13 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
                 <Card.Body>
                     <h1 className="text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
 
+					{/*
+						fields form
+					*/}
+
                     <Form className="mb-3"
 						onSubmit={handleSubmit(onSubmit)}
-					>
+						>
                         <Form.Group controlId="formUsername">
                             <Form.Label>Username</Form.Label>
                             <Form.Control name="username" placeholder="Enter username" type="text"
@@ -96,14 +103,18 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 							{errors.elo2 && <span>This field is required</span>}
                         </Form.Group>
 
-                        <Button id="buttonSubmit" className="mt-3" block type="submit" variant="primary">
+                        <Button id="buttonSubmit" className="mt-3" block="true" type="submit" variant="primary">
                             {isLogin ? 'Login' : 'Sign Up'}
                         </Button>
                     </Form>
 
-                    <Button id="buttonSwitchLoginSignup" block type="submit" variant="link"
+					{/*
+						switch login/signup
+					*/}
+
+                    <Button id="buttonSwitchLoginSignup" block="true" type="submit" variant="link"
 						onClick={() => setIsLogin(!isLogin)}
-					>
+						>
 						<strong>
 							{ isLogin
 								? "Don't have an account? Sign Up"
@@ -112,6 +123,11 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 						</strong>
                     </Button>
 
+
+					{/*
+						fb
+					*/}
+					
 					<LoginButtonFacebook />
 
                 </Card.Body>

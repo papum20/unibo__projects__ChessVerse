@@ -6,6 +6,7 @@ import Start from "./components/Start.jsx";
 import {useEffect, useState} from 'react';
 import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./Const.js";
 import LoginOrSignupPage from './components/login/LoginOrSignupPage.jsx';
+import AppNavbar from './components/AppNavbar.jsx';
 
 //caricamento Lazy
 const Login = loadable(() => import('./components/Login.jsx'));
@@ -33,11 +34,26 @@ function App() {
 
 
 
+  /* user data */
+  const [user, setUser] = useState(null);
+
+  const handleSignOut = () => {
+	// Sign the user out
+	setUser(null);
+  };
+
 
   return (
     <div data-testid="appPage">
       <Alert data-testid="alertDiv"/>
+
+		<AppNavbar 
+			user={user}
+			onSignOut={handleSignOut}
+		/>
+		
       <Routes location={location} key={location.pathname} data-testid="toGame">
+		
         <Route path={`/`} element={
           <Start
             isSinglePlayer={isSinglePlayer}
@@ -59,6 +75,7 @@ function App() {
                     <Route path={`/signin`} element={<Login  />} data-testid="signIn"/>
                     <Route path={`/login`} element={<Login  />} data-testid="logIn" />
                     */}
+
         <Route
           path={`/game`}
           element={
@@ -79,7 +96,9 @@ function App() {
 		<Route
 			path={`/login`}
 			element={
-				<LoginOrSignupPage/>
+				<LoginOrSignupPage
+					setUser={setUser}
+				/>
 			}
 		/>
 

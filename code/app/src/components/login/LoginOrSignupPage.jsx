@@ -1,29 +1,31 @@
 /*
-	a simple page that contains the login or signup card
+	a simple page that contains the login or signup card.
+	for now, it doesnt consider facebook login.
 */
 
+import PropTypes from "prop-types";
 import { Container } from 'react-bootstrap';
 import '../../styles/LoginOrSignupPage.css';
 import LoginOrSignupCard from './LoginOrSignupCard.jsx';
-import { parseResponseLogin, parseResponseSignup } from '../../models/api_responses.js';
 
 
 
-function LoginOrSignupPage() {
-	
+function LoginOrSignupPage({ setUser }) {
+ 
+	function onLoginSuccessful(username, picture) {
 
-	function onLoginSuccessful(data) {
-		
-		data = parseResponseLogin(data);
-		console.log("Logged in!");
-		console.log("res:", data);
+		setUser({
+			name: username,
+			picture: picture
+		});
 	}
 	
-	function onSignupSuccessful(data) {
+	function onSignupSuccessful(username, picture) {
 		
-		data = parseResponseSignup(data);
-		console.log("Signed up!");
-		console.log("res:", data);
+		setUser({
+			name: username,
+			picture: picture
+		});
 	}
 
     return (
@@ -38,5 +40,9 @@ function LoginOrSignupPage() {
     );
 
 }
+
+LoginOrSignupPage.propTypes = {
+	setUser: PropTypes.func.isRequired,
+};
 
 export default LoginOrSignupPage;

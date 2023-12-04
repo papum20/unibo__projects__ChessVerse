@@ -1,20 +1,28 @@
-import FacebookLogin from '@greatsumini/react-facebook-login';
+import React from 'react';
 
-const LoginButtonFacebook = () => {
 
-	const responseFacebook = (response) => {
-		console.log(response);
-		// Send the 'response' to your Django backend
-	};
 
-	return (
-			<FacebookLogin
-				appId="655569260099474"
-				autoLoad={false}
-				fields="name,email,picture"
-				callback={responseFacebook}
-			/>
-	);
-};
+class LoginButtonFacebook extends React.Component {
+
+	handleLogin = () => {
+		window.FB.login(function(response) {
+		if (response.authResponse) {
+			console.log('Successfully logged in with Facebook');
+			console.log("response:", response);
+			// TODO: Send the user's access token to your server
+		} else {
+			console.log('User did not log in with Facebook');
+		}
+		});
+	}
+
+	render() {
+		return (
+		<button onClick={this.handleLogin}>
+			Login with Facebook
+		</button>
+		);
+	}
+}
 
 export default LoginButtonFacebook;
