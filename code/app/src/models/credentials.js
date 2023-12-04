@@ -10,7 +10,7 @@ export function parseCredentialsSignup(obj) {
 	return {
 		username: obj.username,
 		password: obj.password,
-		elo1: obj.elo1,
-		elo2: obj.elo2
+		eloReallyBadChess: obj.elo1,
+		eloSecondType: obj.elo2
 	};
 }

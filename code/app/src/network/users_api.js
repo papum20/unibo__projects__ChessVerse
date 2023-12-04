@@ -3,6 +3,12 @@ import { parseCredentialsLogin, parseCredentialsSignup } from "../models/credent
 import { SERVER_ADDR } from '../const/const';
 import { joinPaths } from "../utils/path";
 
+
+// credentials include: sends cookies to server requests (automaticaly)
+const HEADERS_DFLT_TO_ADD = {
+	credentials: 'include'
+};
+
 /**
  * Generical function for fetches.
  * Useful for defining only once generical errors and other handling stuff.
@@ -13,10 +19,18 @@ import { joinPaths } from "../utils/path";
  */
 async function fetchData(input, init, api_obj) {
 
-	// grant it's an array
+	// grant data is an array
 	const codes = (api_obj && typeof(api_obj.codes) === "object")
 		? Object.values(api_obj.codes.values)
 		: [];
+
+	// manage headers.
+	if (!init.headers) {
+        init.headers = HEADERS_DFLT_TO_ADD;
+    } else {
+		// init.headers.credentials isn't overwritten, if exists
+        init.headers = { ...HEADERS_DFLT_TO_ADD, ...init.headers };
+    }
 	
 	const response = await fetch(input, init);
 
