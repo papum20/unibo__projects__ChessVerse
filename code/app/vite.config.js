@@ -11,7 +11,6 @@ export default defineConfig({
     assetsInlineLimit: 0,
     minify: "terser",
   },
-<<<<<<< HEAD
   server: {
     port: process.env.REACT_APP_PORT,
 	https: {
@@ -19,6 +18,4 @@ export default defineConfig({
 		cert: process.env.SSL_CERT_PATH || './cert/cert.pem',
 	},
   },
-=======
->>>>>>> main
 });
