@@ -7,14 +7,12 @@ from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
-import threading
+import mysql.connector
 
 active_clients = {}
 class GameHandler:
-    def __init__(self, sio):
-        self.sio = sio
-        self.games = {}
-
+    def __init__(self):
+        pass
     @classmethod
     def sid2game(cls, sid):
         if isinstance(Game.sid_to_id[sid], str):
@@ -24,8 +22,16 @@ class GameHandler:
                 return None
         return None
 
-    async def on_connect(self, sid, _):
-        await self.sio.emit("connected", room=sid)
+    async def on_connect(self, sid, environ, auth):
+        # cookie_header = environ.get('HTTP_COOKIE', '')
+        # session_id = None
+        #
+        # for cookie in cookie_header.split(';'):
+        #     key, value = map(str.strip, cookie.split('=', 1))
+        #     if key == 'sessionId':
+        #         session_id = value
+        await Game.login(sid)
+        await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
         if sid in Game.sid_to_id:
@@ -87,18 +93,6 @@ class GameHandler:
                         await self.on_disconnect(player.sid)
 
 
-# async def cleaner():
-#     while True:
-#         await asyncio.sleep(1)
-#
-#         for id in list(Game.games.keys()):
-#             if id not in Game.games:
-#                 continue
-#
-#             for player in Game.games[id].players:
-#                 if not player.has_time():
-#                     await Game.sio.emit("timeout", {}, room=player.sid)
-#                     await Game.games[id].disconnect(player.sid)
 
 async def main():
     env = os.environ.get("ENV", "development")
@@ -112,8 +106,18 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
-    handler = GameHandler(sio)
+    conn = mysql.connector.connect(
+        host=os.environ.get("DATABASE_HOST"),
+        user=os.environ.get("DATABASE_USER"),
+        password=os.environ.get("DATABASE_PASSWORD"),
+        database=os.environ.get("DATABASE_NAME")
+    )
+    cursor = conn.cursor()
+
+    handler = GameHandler()
     Game.sio = sio
+    Game.cursor = cursor
+    Game.conn = conn
     
     # Aggiorna le chiamate a handler
     sio.on('connect', handler.on_connect)
@@ -122,16 +126,6 @@ async def main():
     sio.on('move', handler.on_move)
     sio.on('resign', handler.on_resign)
     sio.on('pop', handler.on_pop)
-
-    conn = mysql.connector.connect(
-        host=os.environ.get("DATABASE_HOST"),
-        user=os.environ.get("DATABASE_USER"),
-        password=os.environ.get("DATABASE_PASSWORD"),
-        database=os.environ.get("DATABASE_NAME")
-    )
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO Guest(Username) VALUES (%s)", ("ciao",))
-    conn.commit()
 
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()

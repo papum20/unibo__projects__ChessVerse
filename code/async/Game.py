@@ -11,6 +11,8 @@ class Game(ABC):
     games = {}
     sid_to_id: dict[str, str] = {}
     waiting_list: dict[str, list[list[str]]] = {key: [[] for _ in range(6)] for key in TIME_OPTIONS}
+    cursor = None
+    conn = None
     __slots__ = ["fen", "board", "players", "turn", "popped"]
 
     def __init__(self, sids: [], rank: int, time: int) -> None:
@@ -53,9 +55,33 @@ class Game(ABC):
         pass
 
     @classmethod
-    def set_sio(cls, sio: AsyncServer) -> None:
-        if cls.sio is not None and isinstance(sio, AsyncServer):
-            cls.sio = sio
+    async def login(cls, sid: str) -> None:
+        session_id = "abc"
+        Game.cursor.execute("SELECT EloReallyBadChess FROM backend_registeredusers WHERE session_id = %s", (session_id,))
+        user_info = Game.cursor.fetchone()
+        if user_info is not None:
+            print(f"logged user:{user_info}")
+            #prendo le informazioni dal database e le salvo in session
+            await Game.sio.save_session(sid, {'elo': user_info[0], 'session_id': session_id})
+        else:
+            await Game.sio.save_session(sid, {'elo': 1000, 'session_id': None})
+
+    async def update_win_database(self, sid: str) -> None:
+        session = await Game.sio.get_session(sid)
+        if session["session_id"] is not None:
+            Game.cursor.execute("UPDATE backend_registeredusers SET GamesWon = GamesWon + 1 WHERE session_id = %s",
+                                (session["session_id"],))
+            Game.cursor.execute(
+                "UPDATE backend_registeredusers SET EloReallyBadChess = EloReallyBadChess  + 30 WHERE session_id = %s",
+                (session["session_id"],))
+        session = await Game.sio.get_session(self.opponent(sid).sid)
+        if session["session_id"] is not None:
+            Game.cursor.execute("UPDATE backend_registeredusers SET GamesLost = GamesLost + 1 WHERE session_id = %s",
+                                (session["session_id"],))
+            Game.cursor.execute(
+                "UPDATE backend_registeredusers SET EloReallyBadChess = EloReallyBadChess  - 30 WHERE session_id = %s",
+                (session["session_id"],))
+        Game.conn.commit()
 
     async def game_found(self, sid: str, game_id: str):
         if game_id not in self.games:
