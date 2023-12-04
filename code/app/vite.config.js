@@ -13,5 +13,9 @@ export default defineConfig({
   },
   server: {
     port: process.env.REACT_APP_PORT,
+	https: {
+		key: process.env.SSL_KEY_PATH || './cert/key.pem',
+		cert: process.env.SSL_CERT_PATH || './cert/cert.pem',
+	},
   },
 });

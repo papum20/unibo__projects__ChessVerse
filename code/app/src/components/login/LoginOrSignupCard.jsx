@@ -7,7 +7,7 @@ import * as users_api from "../../network/users_api";
 import PropTypes from "prop-types";
 import { parseResponseLogin, parseResponseSignup } from '../../models/api_responses';
 import { parseCredentialsLogin, parseCredentialsSignup } from '../../models/credentials';
-
+import LoginButtonFacebook from './LoginButtonFacebook';
 
 
 /**
@@ -111,6 +111,8 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 							}
 						</strong>
                     </Button>
+
+					<LoginButtonFacebook />
 
                 </Card.Body>
             </Card>
