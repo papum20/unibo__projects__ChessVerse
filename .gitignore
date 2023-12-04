@@ -22,6 +22,10 @@ __pycache__/
 
 # logging data
 ## grafana
+
+### shouldnt be here, but they deleted my prometheus otherwise
+prometheus/
+
 prometheus/prometheus.env
 prometheus/prometheus.yaml
 prometheus/wal_data/

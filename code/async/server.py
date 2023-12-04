@@ -1,42 +1,37 @@
 #!/usr/bin/env python
-
 import asyncio
 import os
-import json
 import threading
-
 import socketio
 import aiohttp
 from time import perf_counter
-
 import chess
 import chess.engine
-import websockets
 from PVEGame import PVEGame
-import mysql.connector
-import os
-class PVEGameNamespace(socketio.AsyncNamespace):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, TIME_OPTIONS
+
+
+class PVEGameHandler:
+    def __init__(self):
         self.pveGames = {}
         thread = threading.Thread(target=self.cleaner_thread)
         thread.start()
 
-    async def on_connect(self, sid, _):
-        headers = sio.eio.sid_to_all_rooms[sid].environ.get("headers", {})
-        cookie_header = headers.get('cookie', '')
-        session_id = None
+    async def game_found(self, sid):
+        if sid not in self.pveGames:
+            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            return False
+        return True
 
-        for cookie in cookie_header.split(';'):
-            key, value = map(str.strip, cookie.split('=', 1))
-            if key == 'sessionId':
-                session_id = value
-        await self.emit("connected", room=sid)
+    async def on_connect(self, sid, _):
         print("connect ", sid)
+        await sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
         print("disconnect ", sid)
+        self.pveGames[sid].bot.quit()
         if sid in self.pveGames.keys():
+            await self.pveGames[sid].bot.quit()
             del self.pveGames[sid]
 
     async def on_start(self, sid, data):
@@ -44,48 +39,51 @@ class PVEGameNamespace(socketio.AsyncNamespace):
             try:
                 v = int(data[key])
                 return min <= v <= max
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 return False
 
+        # Check for data validity
         if "rank" not in data or "depth" not in data or "time" not in data:
-            await self.emit("error", {"cause": "Missing fields", "fatal": True}, room=sid)
+            await sio.emit("error", {"cause": "Missing fields", "fatal": True}, room=sid)
             return
-        if not check_int("rank", 0, 100):
+        if not check_int("rank", MIN_RANK, MAX_RANK):
             await self.emit("error", {"cause": "Invalid rank", "fatal": True}, room=sid)
             return
-        if not check_int("depth", 1, 20):
+        if not check_int("depth", MIN_DEPTH, MAX_DEPTH):
             await self.emit("error", {"cause": "Invalid bot strength", "fatal": True}, room=sid)
             return
-        if not check_int("time", 1, 3000):
+        if not check_int("time", MIN_TIME, MAX_TIME):
             await self.emit("error", {"cause": "Invalid clocktime", "fatal": True}, room=sid)
             return
+
         self.pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
         await self.pveGames[sid].initialize_bot()
-        await self.emit("config", {"fen": self.pveGames[sid].fen}, room=sid)
+        await sio.emit("config", {"fen": self.pveGames[sid].fen}, room=sid)
 
     async def on_move(self, sid, data):
         print("move ", sid, data)
         if sid not in self.pveGames:
-            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
             return
         game = self.pveGames[sid]
+
         if "san" not in data:
-            await self.emit("error", {"cause": "Missing fields"}, room=sid)
+            await sio.emit("error", {"cause": "Missing fields"}, room=sid)
             return
         if not game.current.has_time():
             return
         try:
             uci_move = game.board.parse_san(data["san"]).uci()
         except (chess.InvalidMoveError, chess.IllegalMoveError):
-            await self.emit("error", {"cause": "Invalid move"}, room=sid)
+            await sio.emit("error", {"cause": "Invalid move"}, room=sid)
             return
         if chess.Move.from_uci(uci_move) not in game.board.legal_moves:
-            await self.emit("error", {"cause": "Invalid move"}, room=sid)
+            await sio.emit("error", {"cause": "Invalid move"}, room=sid)
             return
         game.board.push_uci(uci_move)
         outcome = game.board.outcome()
         if outcome is not None:
-            await self.emit("end", {"winner": outcome.winner}, room=sid)
+            await sio.emit("end", {"winner": outcome.winner}, room=sid)
             await self.on_disconnect(sid)
             return
         start = perf_counter()
@@ -96,37 +94,37 @@ class PVEGameNamespace(socketio.AsyncNamespace):
         san_bot_move = game.board.san(bot_move)
         game.board.push(latest_move)
         if outcome is not None:
-            await self.emit("move", {"san": san_bot_move}, room=sid)
-            await self.emit("end", {"winner": outcome.winner}, room=sid)
+            await sio.emit("move", {"san": san_bot_move}, room=sid)
+            await sio.emit("end", {"winner": outcome.winner}, room=sid)
             await self.on_disconnect(sid)
             return
         game.popped = False
         end = perf_counter()
         game.current.add_time(end - start)
         game.current.first_move = False
-        await self.emit("move", {"san": san_bot_move}, room=sid)
+        await sio.emit("move", {"san": san_bot_move}, room=sid)
 
     async def on_resign(self, sid, _):
         print("resign", sid)
         if sid not in self.pveGames:
-            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
             return
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, _):
         print("pop", sid)
         if sid not in self.pveGames:
-            await self.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
             return
         game = self.pveGames[sid]
         if game.popped:
-            await self.emit("error", {"cause": "You have already popped"}, room=sid)
+            await sio.emit("error", {"cause": "You have already popped"}, room=sid)
         elif game.board.fullmove_number == 1:
-            await self.emit("error", {"cause": "No moves to undo"}, room=sid)
+            await sio.emit("error", {"cause": "No moves to undo"}, room=sid)
         else:
             game.board.pop()
             game.board.pop()
-            await self.emit("pop", {}, room=sid)
+            await sio.emit("pop", {}, room=sid)
             game.popped = True
 
     def cleaner_thread(self):
@@ -144,46 +142,43 @@ class PVEGameNamespace(socketio.AsyncNamespace):
                     for player in self.pveGames[sid].players:
                         if not player.has_time():
                             print("gotcha ", sid)
-                            await self.emit("timeout", {}, room=sid)
+                            await sio.emit("timeout", {}, room=sid)
                             await self.on_disconnect(sid)
                             await self.disconnect(sid)
 
         loop.run_until_complete(cleaner())
 
+
+
 async def main():
-    env = os.environ.get("ENVIROMENT", "development")
+    env = os.environ.get("ENVIRONMENT", "development")
     if env == "development":
         from dotenv import load_dotenv
         env_file = f".env.{env}"
         load_dotenv(dotenv_path=env_file)
+
+    global sio
     sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
     app = aiohttp.web.Application()
     sio.attach(app)
 
-    conn = mysql.connector.connect(
-        host=os.environ.get("DATABASE_HOST"),
-        user=os.environ.get("DATABASE_USER"),
-        password=os.environ.get("DATABASE_PASSWORD"),
-        database=os.environ.get("DATABASE_NAME")
-    )
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO Guest(Username) VALUES (%s)", ("ciao",))
-    conn.commit()
-
-    game_namespace = PVEGameNamespace(os.environ.get("WSS_NAMESPACE"))
-    sio.register_namespace(game_namespace)
-
-    app.router.add_get(os.environ.get("WSS_NAMESPACE"), sio.handle_request)
+    handler = PVEGameHandler()
+    
+    # Aggiorna le chiamate a handler
+    sio.on('connect', handler.on_connect)
+    sio.on('disconnect', handler.on_disconnect)
+    sio.on('start', handler.on_start)
+    sio.on('move', handler.on_move)
+    sio.on('resign', handler.on_resign)
+    sio.on('pop', handler.on_pop)
 
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
-    host = os.environ.get("WSS_DOMAIN")
-    port = 8766
+    site = aiohttp.web.TCPSite(runner, os.environ.get("DOMAIN", "0.0.0.0"), os.environ.get("PORT", 8080))
 
-    site = aiohttp.web.TCPSite(runner, host, port)
     await site.start()
-    print(f"Listening on {host}:{port}")
+    print(f"Listening on {os.environ.get('DOMAIN')}:{os.environ.get('PORT')}")
 
     while True:
         await asyncio.sleep(1)

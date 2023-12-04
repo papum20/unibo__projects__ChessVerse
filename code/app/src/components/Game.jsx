@@ -104,15 +104,14 @@ function Game({
         }
     }, [timer])
     
-	function handleMenu(){
-		socket.send(JSON.stringify({ type: 'resign', data: {} }));
-		socket.close();
-		setSocket(undefined);
-	}
+    function handleMenu(){
+        setSocket(undefined);
+        socket.emit("resign", {});
+    }
 
     function handleUndo (){
-		socket.send(JSON.stringify({ type: 'pop', data: {} }));
-	}
+        socket.emit("pop", {});
+    }
 
     useEffect(()=>{
         movesRef.current.scrollTo({
@@ -124,7 +123,7 @@ function Game({
 
     //questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
     useEffect(()=>{
-        if (socket === undefined) {
+        if (socket === undefined || socket === null) {
             navigator(`../`, { relative: "path" });
         }
     }, [socket])
