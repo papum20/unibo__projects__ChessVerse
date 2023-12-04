@@ -1,7 +1,23 @@
 version: '3.7'
 
 services:
+  mysql:
+    container_name: mysql
+    build:
+      context: ./code/database/
+      dockerfile: Dockerfile
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 160
   async:
+    depends_on:
+      mysql:
+        condition: service_healthy
     container_name: async
     restart: always
     build:
@@ -10,12 +26,19 @@ services:
     environment:
       - ENV=production
       - PORT=8080
+      - DATABASE_NAME=users_db
+      - DATABASE_HOST=mysql
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
     ports:
       - "8080:8080"
     secrets:
-      - ssl_certificate
-      - ssl_priv_key
+      - ssl_certificate.crt
+      - ssl_priv_key.key
   django:
+    depends_on:
+      mysql:
+        condition: service_healthy
     container_name: django
     restart: always
     build:
@@ -24,14 +47,16 @@ services:
     environment:
       - ENV=production
       - PORT=8000
+      - DATABASE_NAME=users_db
+      - DATABASE_HOST=mysql
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
     ports:
       - "8000:8000"
     secrets:
-      - ssl_certificate
-      - ssl_priv_key
+      - ssl_certificate.crt
+      - ssl_priv_key.key
   app:
-    depends_on:
-      - async
     container_name: app
     restart: always
     build:
@@ -39,20 +64,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-  mysql:
-    build:
-      context: ./code/database/
-      dockerfile: Dockerfile
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: 'root'
 
 secrets:
-  ssl_certificate:
+  ssl_certificate.crt:
     file: /etc/ssl/certificate.crt
-  ssl_priv_key:
+  ssl_priv_key.key:
     file: /etc/ssl/private/private.key
 
+networks:
+  default:
+    name: chessverse
 

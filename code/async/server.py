@@ -134,7 +134,7 @@ async def main():
     ssl_context = None
     if os.environ.get("ENV") == "production":
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate", keyfile="/run/secrets/ssl_priv_key")
+        ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate.crt", keyfile="/run/secrets/ssl_priv_key.key")
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
 
     await site.start()

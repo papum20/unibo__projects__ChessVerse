@@ -14,6 +14,7 @@ WORKDIR /usr/src/app
 # Install dependencies
 COPY requirements.txt .
 RUN apt-get update -y && apt-get install gcc -y && apt-get clean
+RUN apt-get install python3-dev libmariadb-dev-compat libmariadb-dev build-essential -y && apt-get clean
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
