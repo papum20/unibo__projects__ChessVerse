@@ -39,10 +39,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+  mysql:
+    build:
+      context: ./code/database/
+      dockerfile: Dockerfile
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
 
 secrets:
   ssl_certificate:
     file: /etc/ssl/certificate.crt
   ssl_priv_key:
     file: /etc/ssl/private/private.key
+
 
