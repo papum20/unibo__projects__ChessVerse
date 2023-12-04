@@ -83,7 +83,7 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
                         <Form.Group controlId="formElo1">
                             <Form.Label>Elo ReallyBadChess</Form.Label>
                             <Form.Control name="elo1" placeholder="Elo ReallyBadChess" type="number" 
-								{...register("password", { required: true })}
+								{...register("elo1", { required: true })}
 							/>
 							{errors.elo1 && <span>This field is required</span>}
                         </Form.Group>
@@ -91,7 +91,7 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
                         <Form.Group controlId="formElo2">
                             <Form.Label>Elo ??</Form.Label>
                             <Form.Control name="elo2" placeholder="Elo ??" type="number" 
-								{...register("password", { required: true })}
+								{...register("elo2", { required: true })}
 							/>
 							{errors.elo2 && <span>This field is required</span>}
                         </Form.Group>
