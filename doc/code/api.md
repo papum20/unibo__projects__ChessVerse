@@ -86,6 +86,7 @@ Per eseguire le richieste assicurarsi di avere l'estensione 'REST Client' di VSC
 
 ### IMPORTANTE 
     Prima di eseguire Django completare il file '.env.example' 
+    INDIRIZZO A CUI VANNO FATTE LE RICHIESTE: https://chessverse.cloud:8000/backend
     
 Per lanciare Django eseguire: 
     python3.12  manage.py runserver 
