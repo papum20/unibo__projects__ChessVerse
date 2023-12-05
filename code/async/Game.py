@@ -2,7 +2,6 @@ import chess
 import confighandler
 import Player
 import os
-from socketio import AsyncServer
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS
 

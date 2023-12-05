@@ -8,6 +8,11 @@ from time import perf_counter
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
 
+    def __init__(self, player: str, rank: int, depth: int, time: int) -> None:
+        super().__init__([player], rank, time)
+        self.bot = None
+        self.depth = depth
+
     @classmethod
     async def start(cls, sid: str, data: dict[str, str]) -> None:
         def check_int(key, inf, sup):
@@ -31,22 +36,17 @@ class PVEGame(Game):
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid # solo in PVE;
             Game.games[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]))
-            await Game.games[sid].instanciate_bot()
+            await Game.games[sid].instantiate_bot()
             await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
         else:
             await Game.sio.emit("error", {"cause": "SID already used", "fatal": True}, room=sid)
-
-    def __init__(self, player: str, rank: int, depth: int, time: int) -> None:
-        super().__init__([player], rank, time)
-        self.bot = None
-        self.depth = depth
 
     async def disconnect(self, sid: str) -> None:
         await self.bot.quit()
         del Game.games[sid]
         del Game.sid_to_id[sid]
 
-    async def instanciate_bot(self) -> None:
+    async def instantiate_bot(self) -> None:
         self.bot = (await popen_uci("./stockfish"))[1]
 
     async def move(self, sid: str, data: dict[str, str]) -> None:
@@ -66,7 +66,6 @@ class PVEGame(Game):
         self.board.push_uci(uci_move)
         outcome = self.board.outcome()
         if outcome is not None:
-            await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
             await self.disconnect(sid)
             return

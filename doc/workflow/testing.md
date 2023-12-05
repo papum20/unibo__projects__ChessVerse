@@ -17,8 +17,9 @@ Use `unittest` for python.
 
 ### async
 
-Test are found by python in `code/async/tests/unit`.    
-The test can be executed running `python3.12 -m unittest unit_test.TestChessSocketIO`.
+Test are found by python in `code/async/test/unit`.    
+The test can be executed from inside the folder above by 
+running `python3.12 -m unittest test_*`.
 
 ### django
 
