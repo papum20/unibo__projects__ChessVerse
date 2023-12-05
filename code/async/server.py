@@ -75,7 +75,7 @@ class GameHandler:
 
     async def on_pop(self, sid, data):
         if "type" not in data.keys():
-            await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
         if game is None:
             await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
