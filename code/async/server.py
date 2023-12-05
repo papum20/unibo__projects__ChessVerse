@@ -7,6 +7,7 @@ from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
+import ssl
 import mysql.connector
 
 active_clients = {}
