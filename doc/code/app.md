@@ -6,6 +6,7 @@ The frontend of our website.
 
 This uses environment variables, which, since we use vite, need to be declared as `VITE_<VARNAME>` and used as `proces.env.VITE_APP_<VARNAME>`.  
 Since `.env` files are ignored in this repository, as always we use `.env.example` templates for convenience and automation.  
+The `.env.example` can be easily converted using `envsubst`.  
 
 Also, you could have to set something in the `index.html`.  
 

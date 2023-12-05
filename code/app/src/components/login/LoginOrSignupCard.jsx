@@ -87,21 +87,25 @@ function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 							{errors.password && <span>This field is required</span>}
                         </Form.Group>
 						
-                        <Form.Group controlId="formElo1">
-                            <Form.Label>Elo ReallyBadChess</Form.Label>
-                            <Form.Control name="elo1" placeholder="Elo ReallyBadChess" type="number" 
-								{...register("elo1", { required: true })}
-							/>
-							{errors.elo1 && <span>This field is required</span>}
-                        </Form.Group>
+						{ !isLogin && 
+							<>
+								<Form.Group controlId="formElo1">
+									<Form.Label>Elo ReallyBadChess</Form.Label>
+									<Form.Control name="elo1" placeholder="Elo ReallyBadChess" type="number" 
+										{...register("elo1", { required: true })}
+									/>
+									{errors.elo1 && <span>This field is required</span>}
+								</Form.Group>
 
-                        <Form.Group controlId="formElo2">
-                            <Form.Label>Elo ??</Form.Label>
-                            <Form.Control name="elo2" placeholder="Elo ??" type="number" 
-								{...register("elo2", { required: true })}
-							/>
-							{errors.elo2 && <span>This field is required</span>}
-                        </Form.Group>
+								<Form.Group controlId="formElo2">
+									<Form.Label>Elo ??</Form.Label>
+									<Form.Control name="elo2" placeholder="Elo ??" type="number" 
+										{...register("elo2", { required: true })}
+										/>
+									{errors.elo2 && <span>This field is required</span>}
+								</Form.Group>
+							</>
+						}
 
                         <Button id="buttonSubmit" className="mt-3" block="true" type="submit" variant="primary">
                             {isLogin ? 'Login' : 'Sign Up'}
