@@ -22,7 +22,7 @@ class PVPGame(Game):
 
 	async def disconnect(self, sid: str) -> None:
 		print(self.opponent(sid).sid)
-		await Game.update_win_database(sid.opponent(sid).sid)
+		await Game.update_win_database(sid=self.opponent(sid).sid)
 		await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
 		await Game.sio.emit("disconnected", room=self.opponent(sid).sid)
 		if sid not in Game.sid_to_id:
@@ -35,7 +35,7 @@ class PVPGame(Game):
 
 	async def pop(self, sid: str) -> None:
 		if sid not in Game.sid_to_id:
-			await self.sio.emit("error", {"cause": "Missing id", "fatal": True}, room=sid)
+			await Game.sio.emit("error", {"cause": "Missing id", "fatal": True}, room=sid)
 		if not await self.game_found(sid, Game.sid_to_id[sid]):
 			return
 		if not self.is_player_turn(sid):
@@ -53,7 +53,7 @@ class PVPGame(Game):
 
 	async def move(self, sid: str, data: dict[str, str]) -> None:
 		if sid not in Game.sid_to_id:
-			await Game.sio.emit("error", {"cause": "No games founded"}, room=sid)
+			await Game.sio.emit("error", {"cause": "No games found"}, room=sid)
 		if "san" not in data:
 			await Game.sio.emit("error", {"cause": "Missing fields"}, room=sid)
 			return
@@ -123,8 +123,7 @@ class PVPGame(Game):
 		index = (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
 		if sid in Game.sid_to_id:
 			await Game.sio.emit("error", {"cause": "Started Matching", "fatal": True}, room=sid)
-		elif (len(cls.waiting_list[time][index]) > 0 and cls.waiting_list[time][index][0][
-			"rank"] == 100 - rank):
+		elif (len(cls.waiting_list[time][index]) > 0 and cls.waiting_list[time][index][0]["rank"] == 100 - rank):
 			session = await Game.sio.get_session(sid)
 			found_guest = None
 			for waiting in cls.waiting_list[time][index]:
