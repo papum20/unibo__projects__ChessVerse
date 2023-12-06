@@ -10,10 +10,14 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "root"
+    volumes:
+      - "./db_data:/var/lib/mysql"
+    command: --wait_timeout=999999
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
       retries: 160
+
   async:
     depends_on:
       mysql:
@@ -35,6 +39,7 @@ services:
     secrets:
       - ssl_certificate.crt
       - ssl_priv_key.key
+        
   django:
     depends_on:
       mysql:
@@ -56,6 +61,7 @@ services:
     secrets:
       - ssl_certificate.crt
       - ssl_priv_key.key
+
   app:
     container_name: app
     restart: always
@@ -74,4 +80,3 @@ secrets:
 networks:
   default:
     name: chessverse
-

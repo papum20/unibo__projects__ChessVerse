@@ -107,11 +107,18 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
+    print(os.environ.get("DATABASE_HOST"))
+    print(os.environ.get("DATABASE_USER"))
+    print(os.environ.get("DATABASE_PASSWORD"))
+    print(os.environ.get("DATABASE_NAME"))
+
+
     conn = mysql.connector.connect(
         host=os.environ.get("DATABASE_HOST"),
         user=os.environ.get("DATABASE_USER"),
         password=os.environ.get("DATABASE_PASSWORD"),
-        database=os.environ.get("DATABASE_NAME")
+        database=os.environ.get("DATABASE_NAME"),
+        port=3306
     )
     cursor = conn.cursor()
 
