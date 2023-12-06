@@ -23,12 +23,12 @@ DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': "django.db.backends.mysql",
         'NAME': DATABASE_NAME,
         'USER': DATABASE_USER,
         'PASSWORD': DATABASE_PASSWORD,
         'HOST': DATABASE_HOST,
-        'PORT': '3306',
+        'PORT': "3306",
     }
 }
 
@@ -43,9 +43,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5edbub374@ktlft1dupti2t*74ri&86l^hz9h-=-qeomtf#ya5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ADDRESS = '0.0.0.0'
 
 
 # Application definition
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
+    'sslserver',
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -127,6 +128,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+ALLOWED_HOSTS = ["*"]
+
+PORT = 8000
 
 
 # Static files (CSS, JavaScript, Images)

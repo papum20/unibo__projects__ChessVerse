@@ -7,6 +7,7 @@ from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
+import ssl
 import mysql.connector
 
 active_clients = {}
@@ -108,11 +109,18 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
+    print(os.environ.get("DATABASE_HOST"))
+    print(os.environ.get("DATABASE_USER"))
+    print(os.environ.get("DATABASE_PASSWORD"))
+    print(os.environ.get("DATABASE_NAME"))
+
+
     conn = mysql.connector.connect(
         host=os.environ.get("DATABASE_HOST"),
         user=os.environ.get("DATABASE_USER"),
         password=os.environ.get("DATABASE_PASSWORD"),
-        database=os.environ.get("DATABASE_NAME")
+        database=os.environ.get("DATABASE_NAME"),
+        port=3306
     )
     cursor = conn.cursor()
 
@@ -136,7 +144,7 @@ async def main():
     ssl_context = None
     if os.environ.get("ENV") == "production":
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate", keyfile="/run/secrets/ssl_priv_key")
+        ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate.crt", keyfile="/run/secrets/ssl_priv_key.key")
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
 
     await site.start()
