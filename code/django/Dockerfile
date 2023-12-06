@@ -13,7 +13,8 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY requirements.txt .
-RUN apt-get update -y && apt-get install gcc -y && apt-get clean
+RUN apt-get update -y && apt-get install gcc pkg-config -y && apt-get clean 
+RUN apt-get install python3-dev default-libmysqlclient-dev build-essential -y && apt-get clean
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,10 +25,6 @@ COPY . .
 RUN adduser --system --no-create-home python
 USER python
 COPY runserver.sh /usr/local/bin/runserver.sh
-RUN chmod +x /usr/local/bin/runserver.sh
 
 # Run the command to start uWSGI
 CMD ["/usr/local/bin/runserver.sh"]
-
-
-

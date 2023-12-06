@@ -79,7 +79,7 @@ class PVPGame(Game):
 		outcome = self.board.outcome()
 		if outcome is not None:
 			await Game.sio.emit("move", {"san": san_move}, room=self.current.sid)
-			await Game.update_win_database(sid)
+			await self.update_win_database(sid)
 			await Game.sio.emit("end", {"winner": True if outcome.winner is not None else outcome.winner}, room=self.current.sid)
 			await Game.sio.emit("end", {"winner": False if outcome.winner is not None else outcome.winner}, room=self.next.sid)
 			await self.disconnect(self.next.sid)
