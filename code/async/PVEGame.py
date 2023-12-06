@@ -65,7 +65,6 @@ class PVEGame(Game):
         self.board.push_uci(uci_move)
         outcome = self.board.outcome()
         if outcome is not None:
-            await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
             await self.disconnect(sid)
             return
