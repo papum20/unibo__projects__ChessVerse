@@ -64,7 +64,7 @@ class Game(ABC):
             #prendo le informazioni dal database e le salvo in session
             await Game.sio.save_session(sid, {'elo': user_info[0], 'session_id': session_id})
         else:
-        await Game.sio.save_session(sid, {'elo': 1000, 'session_id': None})
+            await Game.sio.save_session(sid, {'elo': 1000, 'session_id': None})
 
     async def update_win_database(self, sid: str) -> None:
         session = await Game.sio.get_session(sid)
