@@ -3,12 +3,12 @@ import Alert from "./components/Alert.jsx";
 import {Routes, Route, useLocation} from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
-import LoginOrSignupPage from './components/login/LoginOrSignupPage.jsx';
 import {useEffect, useState} from 'react';
 import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/Const.js";
 
+
 //caricamento Lazy
-const Login = loadable(() => import('./components/Login.jsx'));
+const LoginOrSignupPage = loadable(() => import('./components/login/LoginOrSignupPage.jsx'));
 const Game = loadable(() => import('./components/Game.jsx'));
 
 function App() {
@@ -63,10 +63,7 @@ function App() {
           />
         }/>
 
-        {/* Ancora da implementare
-                    <Route path={`/signin`} element={<Login  />} data-testid="signIn"/>
-                    <Route path={`/login`} element={<Login  />} data-testid="logIn" />
-                    */}
+       
         <Route
           path={`/game`}
           element={
@@ -77,8 +74,6 @@ function App() {
               socket={socket}
               setSocket={setSocket}
               mode={mode}
-              gameImb={gameImb}
-              botDiff={botDiff}
               gameTime={gameTime}
               startFen={startFen}
               color={color}
@@ -90,7 +85,14 @@ function App() {
         <Route
           path={`/login`}
           element={
-            <LoginOrSignupPage/>
+            <LoginOrSignupPage isLogin={true}  />
+          }
+        />
+
+        <Route
+          path={`/signup`}
+          element={
+            <LoginOrSignupPage isLogin={false}  />
           }
         />
 

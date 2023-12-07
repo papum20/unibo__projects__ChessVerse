@@ -83,7 +83,7 @@ class PVEGame(Game):
         end = perf_counter()
         self.current.add_time(end - start)
         self.current.first_move = False
-        await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
+        await Game.sio.emit("move", {"san": san_bot_move, "time": self.get_times()}, room=sid)
 
     async def pop(self, sid: str) -> None:
         if self.popped:
@@ -94,4 +94,4 @@ class PVEGame(Game):
             self.board.pop()
             self.board.pop()
             self.popped = True
-            await Game.sio.emit("pop", {}, room=sid)
+            await Game.sio.emit("pop", {"time": self.get_times()}, room=sid)

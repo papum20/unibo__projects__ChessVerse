@@ -60,6 +60,7 @@ function Start({
             socket.connect();
             socket.on('connect', () => {
                 socket.on("config", (data) => {
+                    console.log("config", data);
                     if(!data){
                       props.socket?.on("start", props.data);
                     }
@@ -67,6 +68,7 @@ function Start({
                       setStartFen(data.fen);
                       setColor(data.color);
                       setRoomId(data.id);
+                      setIsLoadingGame(false);
                     }
                   })
 

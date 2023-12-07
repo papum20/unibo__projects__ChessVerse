@@ -88,3 +88,6 @@ class Game(ABC):
             await self.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
             return False
         return True
+
+    def get_times(self):
+        return [player.time for player in self.players]

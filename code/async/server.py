@@ -47,7 +47,6 @@ class GameHandler:
                     await Game.games[game_id].disconnect(sid)
 
     async def on_start(self, sid, data):
-        print(Game.games, Game.sid_to_id, Game.waiting_list)
         if("type" not in data.keys()):
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         elif data["type"] == GameType.PVE:
@@ -108,12 +107,6 @@ async def main():
     sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
     app = aiohttp.web.Application()
     sio.attach(app)
-
-    print(os.environ.get("DATABASE_HOST"))
-    print(os.environ.get("DATABASE_USER"))
-    print(os.environ.get("DATABASE_PASSWORD"))
-    print(os.environ.get("DATABASE_NAME"))
-
 
     conn = mysql.connector.connect(
         host=os.environ.get("DATABASE_HOST"),

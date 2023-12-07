@@ -12,6 +12,10 @@
 }
 
 .login-signup-card {
-    width: 300px;
-    background-color: rgba(255, 255, 255, 0.9) !important; /* Semi-transparent white */
+    width: 400px;
+    background-color: rgb(86, 59, 50) !important; /* Semi-transparent white */
 }
+
+#buttonSwitchLoginSignup:hover {
+    text-decoration: underline;
+  }

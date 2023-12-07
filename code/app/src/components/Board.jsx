@@ -4,7 +4,7 @@ import { Chess } from "chess.js";
 import Spinner from 'react-bootstrap/Spinner';
 import { toast } from "react-toastify";
 import {PVE, PVP} from "../const/Const.js";
- 
+
 
 function Board(props) {
   const [game, setGame] = useState(null);
@@ -14,10 +14,11 @@ function Board(props) {
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
-  const [botMoveSan, setBotMoveSan] = useState("");
-  const [awaitingBotMove, setAwaitingBotMove] = useState(false);
+  const [oppMoveSan, setOppMoveSan] = useState("");
+  const [awaitingOppMove, setAwaitingOppMove] = useState(false);
   const [firstMove, setFirstMove] = useState(true);
   const [position, setPosition] = useState("");
+
   
   
   function safeGameMutate(modify) {
@@ -59,12 +60,12 @@ function Board(props) {
 
   
   useEffect(() => {
-    const makeBotMove = async () => {
-      if (botMoveSan) {
+    const makeOppMove = async () => {
+      if (oppMoveSan) {
         const updatedGame = new Chess();
         updatedGame.load(game.fen()); // Carica la posizione attuale della scacchiera
 
-        const move = updatedGame.move(botMoveSan);
+        const move = updatedGame.move(oppMoveSan);
         if (move) {
           // Ritarda l'esecuzione per un breve periodo per visualizzare l'animazione
           await new Promise(resolve => setTimeout(resolve, 300));
@@ -73,16 +74,16 @@ function Board(props) {
             game.move(move.san, { sloppy: true });
           });
 
-          setBotMoveSan(null);
+          setOppMoveSan(null);
         }
       }
     };
 
-    makeBotMove();
-  }, [botMoveSan]);
+    makeOppMove();
+  }, [oppMoveSan]);
 
   async function onSquareClick(square) {
-    if (awaitingBotMove) return;
+    if (awaitingOppMove) return;
     // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -195,29 +196,31 @@ function Board(props) {
 
   useEffect(()=>{
     if(!!moveSan){
-      if(firstMove){
+      if(firstMove)
         setFirstMove(false);
-        props.startTimer();
-      }
       props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
-
       setMoveSan(null);
-      setAwaitingBotMove(true);
+      setAwaitingOppMove(true);
     }
   },[moveSan])
 
 const [getPop, setGetPop] = useState(false);
 
   useEffect(()=>{
-    props.socket?.on("move", (san) =>{
-      setBotMoveSan(san.san);
-      setAwaitingBotMove(false);
+    props.socket?.on("move", (res) =>{
+      setOppMoveSan(res.san);
+      setAwaitingOppMove(false);
+      props.setWhiteTimer(res.time[0]);
+      props.setBlackTimer(res.time[1] ?? -1);
+      props.setTurn(0);
+      props.setTimerOn(true);
     });
-    props.socket?.on("end", (winner) =>{
-      if (winner.winner)
+    props.socket?.on("end", (res) =>{
+      if (res.winner)
         props.setVictory(true);
       else
         props.setShowGameOver(true);
+      props.socket.disconnect();
       // TODO 
       // else if (winner.winner === false){
       //   props.setShowGameOver(true);
@@ -255,7 +258,7 @@ const [getPop, setGetPop] = useState(false);
         game.undo();
         setPosition(game.fen());
         setMoveSan(null);
-        setBotMoveSan(null);
+        setOppMoveSan(null);
        
       }
       

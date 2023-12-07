@@ -1,6 +1,6 @@
 import { API } from "../const/const_api";
 import { parseCredentialsLogin, parseCredentialsSignup } from "../models/credentials";
-import { SERVER_ADDR } from '../const/const';
+import { SERVER_ADDR } from '../const/Const';
 import { joinPaths } from "../utils/path";
 
 /**
@@ -11,15 +11,15 @@ import { joinPaths } from "../utils/path";
  * @param {obj} api_obj reference to object of API constant object
  * @returns 
  */
-async function fetchData(input, init, api_obj) {
 
+async function fetchData(input, init, api_obj) {
 	// grant it's an array
 	const codes = (api_obj && typeof(api_obj.codes) === "object")
 		? Object.values(api_obj.codes.values)
 		: [];
-	
-	const response = await fetch(input, init);
 
+	const response = await fetch(input, {method: init.method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(init.body)});
+	console.log(response);
 	if(response.ok) {
 		return response;
 	} else {
@@ -38,16 +38,11 @@ async function fetchData(input, init, api_obj) {
 export async function login(credentials) {
 
 	const parsed = parseCredentialsLogin(credentials);
-
-	const response = await fetchData(joinPaths(SERVER_ADDR, API.login.endpoint),
-	{
+	const response = await fetchData(joinPaths(SERVER_ADDR, API.login.endpoint), {
 		method: API.login.method,
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(parsed)
-	});
-	
+		body: parsed
+	}, API.signup);
+
 	return response.json();
 	
 }
@@ -55,14 +50,9 @@ export async function login(credentials) {
 export async function signup(credentials) {
 
 	const parsed = parseCredentialsSignup(credentials);
-	
-	const response = await fetchData(joinPaths(SERVER_ADDR, API.signup.endpoint),
-	{
+	const response = await fetchData(joinPaths(SERVER_ADDR, API.signup.endpoint), {
 		method: API.signup.method,
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(parsed)
+		body: parsed
 	});
 	
 	return response.json();
