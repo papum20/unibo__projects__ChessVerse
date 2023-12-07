@@ -68,6 +68,7 @@ services:
     build:
       context: ./code/app
       dockerfile: Dockerfile
+    env_file: ./env/app.env
     ports:
       - "3000:3000"
 

@@ -4,11 +4,11 @@ import {Routes, Route, useLocation} from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
 import {useEffect, useState} from 'react';
-import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/Const.js";
-
+import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/const.js";
+import LoginOrSignupPage from './components/login/LoginOrSignupPage.jsx';
+import AppNavbar from './components/AppNavbar.jsx';
 
 //caricamento Lazy
-const LoginOrSignupPage = loadable(() => import('./components/login/LoginOrSignupPage.jsx'));
 const Game = loadable(() => import('./components/Game.jsx'));
 
 function App() {
@@ -37,11 +37,26 @@ function App() {
 
 
 
+  /* user data */
+  const [user, setUser] = useState(null);
+
+  const handleSignOut = () => {
+	// Sign the user out
+	setUser(null);
+  };
+
 
   return (
     <div data-testid="appPage">
       <Alert data-testid="alertDiv"/>
+
+		<AppNavbar 
+			user={user}
+			onSignOut={handleSignOut}
+		/>
+		
       <Routes location={location} key={location.pathname} data-testid="toGame">
+		
         <Route path={`/`} element={
           <Start
             mode={mode}
@@ -82,19 +97,14 @@ function App() {
           }
           data-testid="game"
         />
-        <Route
-          path={`/login`}
-          element={
-            <LoginOrSignupPage isLogin={true}  />
-          }
-        />
-
-        <Route
-          path={`/signup`}
-          element={
-            <LoginOrSignupPage isLogin={false}  />
-          }
-        />
+		<Route
+			path={`/login`}
+			element={
+				<LoginOrSignupPage
+					setUser={setUser}
+				/>
+			}
+		/>
 
         <Route path="*" element={<NoRoute/>}/>
       </Routes>

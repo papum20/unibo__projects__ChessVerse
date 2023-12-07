@@ -3,7 +3,7 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import Spinner from 'react-bootstrap/Spinner';
 import { toast } from "react-toastify";
-import {PVE, PVP} from "../const/Const.js";
+import {PVE, PVP} from "../const/const.js";
 
 
 function Board(props) {

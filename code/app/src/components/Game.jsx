@@ -10,7 +10,7 @@ import "../styles/Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import {PVE} from "../const/Const.js";
+import {PVE} from "../const/const.js";
 import ImageBlackTime from "../assets/blackTime.png";
 import ImageWhiteTime from "../assets/whiteTime.png";
 //import { useTimer } from 'react-timer-hook';

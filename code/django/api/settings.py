@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+<<<<<<< HEAD:code/django/api/settings.py
+=======
+from dotenv import load_dotenv
+>>>>>>> dev-login:code/backend/backend_api/settings.py
 import os
 
 env = os.environ.get("ENV", "development")
@@ -31,7 +35,11 @@ DATABASES = {
         'USER': DATABASE_USER,
         'PASSWORD': DATABASE_PASSWORD,
         'HOST': DATABASE_HOST,
+<<<<<<< HEAD:code/django/api/settings.py
         'PORT': "3306",
+=======
+        'PORT': '3306',
+>>>>>>> dev-login:code/backend/backend_api/settings.py
     }
 }
 
@@ -60,8 +68,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+<<<<<<< HEAD:code/django/api/settings.py
     'corsheaders',
     'backend',
+=======
+    'backend_django',
+>>>>>>> dev-login:code/backend/backend_api/settings.py
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -78,6 +90,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+<<<<<<< HEAD:code/django/api/settings.py
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:5173",
 # ]
@@ -85,6 +98,9 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'api.urls'
+=======
+ROOT_URLCONF = 'backend_api.urls'
+>>>>>>> dev-login:code/backend/backend_api/settings.py
 
 TEMPLATES = [
     {
@@ -102,7 +118,11 @@ TEMPLATES = [
     },
 ]
 
+<<<<<<< HEAD:code/django/api/settings.py
 WSGI_APPLICATION = 'api.wsgi.application'
+=======
+WSGI_APPLICATION = 'backend_api.wsgi.application'
+>>>>>>> dev-login:code/backend/backend_api/settings.py
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]

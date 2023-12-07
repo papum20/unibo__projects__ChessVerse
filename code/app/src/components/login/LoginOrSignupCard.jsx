@@ -1,27 +1,37 @@
 
+import PropTypes from "prop-types";
 import { useState } from 'react';
+import { Button, Card, Form } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
-import { Card, Form, Button, CloseButton } from 'react-bootstrap';
-import '../../styles/LoginOrSignupPage.css';
-import * as users_api from "../../network/users_api";
 import { parseCredentialsLogin, parseCredentialsSignup } from '../../models/credentials';
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import * as users_api from "../../network/users_api";
+import '../../styles/LoginOrSignupPage.css';
+import LoginButtonFacebook from './LoginButtonFacebook';
 
 
-function LoginOrSignupCard(props) {
+/**
+ * A card component for login or signup.
+ * It contains a login/signup form.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * @param {Function} props.onLoginSuccessful - Callback called on login or signup successful.
+ * 	@param {string} props.onLoginSuccessful.data - The response data json.
+ * @param {Function} props.onLoginSuccessful - Callback called on login or signup successful.
+ * 	@param {string} props.onLoginSuccessful.data - The response data json.
+ */
+function LoginOrSignupCard({ onLoginSuccessful, onSignupSuccessful }) {
 
 	const { register, handleSubmit, formState: {errors} } = useForm();
 	
-    const [isLogin, setIsLogin] = useState(props.isLogin);
+    const [isLogin, setIsLogin] = useState(true);
 
-	const navigator = useNavigate();
 
+	
 	async function onSubmit(credentials) {
 
-		if(!isLogin)//da togliere in futuro appena si fara' la seconda modalita'
-			credentials.eloSecondType = "200";
-		
+		console.log("sending these credentials obtained from the form:", credentials);
+		console.log("is login:", isLogin);
+
 		const credential_parsed = (isLogin
 			? parseCredentialsLogin(credentials)
 			: parseCredentialsSignup(credentials)
@@ -33,28 +43,35 @@ function LoginOrSignupCard(props) {
 				: users_api.signup(credential_parsed)
 			);
 
-			if(!isLogin)
-				toast.success("Signed up!", {className: "toast-message"});
+					
+			console.log("Logged in!");
+			console.log("res:", res);
+			
+			if(isLogin)
+				onLoginSuccessful(credential_parsed.username, "");
+			else
+				onSignupSuccessful(credential_parsed.username, "");
 			
 		} catch (error) {
-			toast.error(`${error}`, {className: "toast-message"});
+			console.error("Error:", error);
+			alert(error);
 		}
 	}
 
 
-
     return (
-            <Card className="login-signup-card" style={{color: "white"}}>
+            <Card className="login-signup-card">
                 <Card.Body>
-					<div style={{display: "flex", justifyContent: "space-between"}}>
-							<h1  >{isLogin ? 'Login' : 'Sign Up'}</h1>
-							<CloseButton onClick={()=>navigator(`../`, { relative: "path" })} variant="white"/>
-					</div>
+                    <h1 className="text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
+
+					{/*
+						fields form
+					*/}
 
                     <Form className="mb-3"
 						onSubmit={handleSubmit(onSubmit)}
-					>
-                        <Form.Group controlId="formUsername" style={{marginTop: "10px"}}>
+						>
+                        <Form.Group controlId="formUsername">
                             <Form.Label>Username</Form.Label>
                             <Form.Control name="username" placeholder="Enter username" type="text"
 								{...register("username", { required: true })}
@@ -62,52 +79,53 @@ function LoginOrSignupCard(props) {
 							{errors.username && <span>This field is required</span>}
                         </Form.Group>
 
-                        <Form.Group controlId="formPassword" style={{marginTop: "10px"}}>
+                        <Form.Group controlId="formPassword">
                             <Form.Label>Password</Form.Label>
                             <Form.Control name="password" placeholder="Password" type="password" 
 								{...register("password", { required: true })}
 							/>
 							{errors.password && <span>This field is required</span>}
                         </Form.Group>
-						{!isLogin &&
-						<>
-							<Form.Group controlId="formElo1" style={{marginTop: "10px"}}>
-								<Form.Label>Elo ReallyBadChess</Form.Label>
-								<Form.Control name="eloReallyBadChess" placeholder="Elo ReallyBadChess" type="number" 
-									{...register("eloReallyBadChess", { required: true })}
-								/>
-								{errors.eloReallyBadChess && <span>This field is required</span>}
-							</Form.Group>
-							{/*
-							<Form.Group controlId="formElo2" style={{marginTop: "10px"}}>
-								<Form.Label>Elo ??</Form.Label>
-								<Form.Control  name="eloSecondType" placeholder="Elo ??" type="number"
-									{...register("eloSecondType", { required: true })}
-								/>
-								{errors.eloSecondType && <span>This field is required</span>}
-							</Form.Group>
-							*/}
-						</>
+						
+						{ !isLogin && 
+							<>
+								<Form.Group controlId="formElo1">
+									<Form.Label>Elo ReallyBadChess</Form.Label>
+									<Form.Control name="elo1" placeholder="Elo ReallyBadChess" type="number" 
+										{...register("elo1", { required: true })}
+									/>
+									{errors.elo1 && <span>This field is required</span>}
+								</Form.Group>
+
+								<Form.Group controlId="formElo2">
+									<Form.Label>Elo ??</Form.Label>
+									<Form.Control name="elo2" placeholder="Elo ??" type="number" 
+										{...register("elo2", { required: true })}
+										/>
+									{errors.elo2 && <span>This field is required</span>}
+								</Form.Group>
+							</>
 						}
-						<div style={{marginTop: "10px", display: "flex", justifyContent: "flex-end"}}>
-							<Button id="buttonSubmit" className="mt-3" size="lg"  type="submit" variant="primary" >
-								{isLogin ? 'Login' : 'Sign Up'}
-							</Button>
-						</div>
-                        
+
+                        <Button id="buttonSubmit" className="mt-3" block="true" type="submit" variant="primary">
+                            {isLogin ? 'Login' : 'Sign Up'}
+                        </Button>
                     </Form>
-                    <span size="lg" id="buttonSwitchLoginSignup"  type="submit" 
-						onClick={() => { isLogin ? navigator(`../signup`, { relative: "path" }) : navigator(`../login`, { relative: "path" }); setIsLogin(!isLogin); }} 
-						style={{marginTop: "10px", cursor: "pointer"}} 
-						role="link"
-					>
+
+					{/*
+						switch login/signup
+					*/}
+
+                    <Button id="buttonSwitchLoginSignup" block="true" type="submit" variant="link"
+						onClick={() => setIsLogin(!isLogin)}
+						>
 						<strong>
 							{ isLogin
 								? "Don't have an account? Sign Up"
 								: "Already have an account? Login"
 							}
 						</strong>
-                    </span>
+                    </Button>
 
                 </Card.Body>
             </Card>
@@ -115,6 +133,11 @@ function LoginOrSignupCard(props) {
 
 }
 
-
+LoginOrSignupCard.propTypes = {
+	onLoginSuccessful: PropTypes.func.isRequired
+};
+LoginOrSignupCard.propTypes = {
+	onSignupSuccessful: PropTypes.func.isRequired
+};
 
 export default LoginOrSignupCard;

@@ -3,15 +3,31 @@ import asyncio
 import os
 import socketio
 import aiohttp
+<<<<<<< HEAD
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
 import ssl
 import mysql.connector
+=======
+from time import perf_counter
+import chess
+import chess.engine
+from PVEGame import PVEGame
+from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, TIME_OPTIONS
+
+
+class PVEGameHandler:
+    def __init__(self):
+        self.pveGames = {}
+        thread = threading.Thread(target=self.cleaner_thread)
+        thread.start()
+>>>>>>> dev-login
 
 active_clients = {}
 
+<<<<<<< HEAD
 
 class GameHandler:
     def __init__(self):
@@ -35,6 +51,11 @@ class GameHandler:
         #         session_id = value
         await Game.login(sid)
         await Game.sio.emit("connected", room=sid)
+=======
+    async def on_connect(self, sid, _):
+        print("connect ", sid)
+        await sio.emit("connected", room=sid)
+>>>>>>> dev-login
 
     async def on_disconnect(self, sid):
         if sid in Game.sid_to_id:
@@ -107,6 +128,7 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
+<<<<<<< HEAD
     conn = mysql.connector.connect(
         host=os.environ.get("DATABASE_HOST"),
         user=os.environ.get("DATABASE_USER"),
@@ -120,6 +142,9 @@ async def main():
     Game.sio = sio
     Game.cursor = cursor
     Game.conn = conn
+=======
+    handler = PVEGameHandler()
+>>>>>>> dev-login
     
     # Aggiorna le chiamate a handler
     sio.on('connect', handler.on_connect)
