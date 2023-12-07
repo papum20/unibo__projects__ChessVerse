@@ -66,7 +66,6 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
-        print(Game.games, Game.sid_to_id, Game.waiting_list)
         game = GameHandler.sid2game(sid)
         if game is None:
             await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
