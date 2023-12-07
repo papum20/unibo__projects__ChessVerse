@@ -1,7 +1,6 @@
 import chess
-import confighandler
 import Player
-import os
+import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS
 
@@ -16,8 +15,6 @@ class Game(ABC):
     __slots__ = ["fen", "board", "players", "turn", "popped"]
 
     def __init__(self, sids: [], rank: int, time: int) -> None:
-        if confighandler.get_configs() is None:
-            confighandler.load_configs(os.path.join(os.path.dirname(__file__), 'configs.csv'))
         self.fen = confighandler.gen_start_fen(rank)
         self.board = chess.Board(self.fen)
         self.players = []
