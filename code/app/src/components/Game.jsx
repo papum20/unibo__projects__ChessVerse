@@ -13,6 +13,7 @@ import PropTypes from "prop-types";
 import {PVE} from "../const/Const.js";
 import ImageBlackTime from "../assets/blackTime.png";
 import ImageWhiteTime from "../assets/whiteTime.png";
+//import { useTimer } from 'react-timer-hook';
 
 function Game({
                   gameTime,
@@ -55,12 +56,30 @@ function Game({
             },
         },
     });
+/*
+    const expiryTimestamp = new Date();
+    expiryTimestamp.setSeconds(expiryTimestamp.getSeconds() + (gameTime || 1));
+    const {
+        totalSecondsWhite,
+        startWhite,
+        pauseWhite,
+      } = useTimer({expiryTimestamp, onExpire: () =>  pauseBlack});
+    
+      const {
+        totalSecondsBlack,
+        startBlack,
+        pauseBlack,
+      } = useTimer({expiryTimestamp, onExpire: () =>  pauseWhite});
+    
+      useEffect(()=>{console.log(totalSecondsWhite)},[totalSecondsWhite])
+
 
     const [blackTimer, setBlackTimer] = useState(gameTime || 1);
     const [whiteTimer, setWhiteTimer] = useState(gameTime || 1);
 
     const [timerOn, setTimerOn] = useState(false);
     const [turn, setTurn] = useState(0);
+    */
     /*
         swapTurn:
             1) da al giocatore quanto e' passato dall'ultimo decremento
@@ -72,19 +91,59 @@ function Game({
     e quando cambi turno fai stop e resume cosi
 
     */
+/*
+    const [startTimer, setStartTimer] = useState(false);
 
     useEffect(()=>{
+        if(!startTimer)
+            setStartTimer(!startTimer)
 
-        setInterval(() => {
-            if (timerOn){
+    },[timerOn])
+
+    useEffect(()=>{
+        (() => {
+            // if (timerOn){
                 if(turn===0) setWhiteTimer(prevValue => prevValue - 0.1)
                 else setBlackTimer(prevValue => prevValue - 0.1)
-            }
+            // }
         }, 100);
 
-    },[])
+    },[startTimer])
 
+
+    useEffect(()=>{console.log("timerON ", timerOn)},[timerOn])
+
+
+*/
     
+const [timer, setTimer] = useState(gameTime || 1);
+const [timerId, setTimerId] = useState(null);
+
+const startTimer = () => {
+    const newTimerId = setInterval(() => {
+      setTimer((prevTime) => prevTime - 1);
+    }, 1000);
+    setTimerId(newTimerId);
+  };
+
+const stopTimer = () => {
+    clearInterval(timerId);
+    setTimerId(null);
+};
+
+const resumeTimer = () => {
+    if (timerId === null) {
+        startTimer();
+    }
+};
+
+useEffect(() => {
+    if (timer === 0) {
+        stopTimer();
+    }
+}, [timer])
+
+
     function handleMenu(){
         socket.emit("resign", {type: mode, id: roomId});
         setSocket(undefined);
@@ -122,8 +181,18 @@ function Game({
                             <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
                             <ExclamationDiamond size={40} color="red" />
                         </div>
-                        { 
-                        ((color === "white" && whiteTimer <= 0) || (color === "black" && blackTimer <= 0)) &&
+                        { /*
+                        ((color === "white" && totalSecondsWhite <= 0) || (color === "black" && totalSecondsBlack <= 0)) &&
+                          <div style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              fontSize: `${fontSize}`,
+                              marginTop: "20px"
+                          }}>
+                              <p>The time has run out</p>
+                          </div>
+                        */}
+                        {timer <= 0 &&
                           <div style={{
                               display: "flex",
                               justifyContent: "center",
@@ -133,6 +202,7 @@ function Game({
                               <p>The time has run out</p>
                           </div>
                         }
+
                         <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
                             <ThemeProvider theme={theme}>
                                 <Nav.Link
@@ -241,26 +311,33 @@ function Game({
                     <Row>
                         <Col>
                             <Row style={{marginBottom: "20px"}}>
+                                <Col style={{display:"flex", justifyContent:"flex-end"}}>
+                                    <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
+                                        <Clock size={30}/>
+                                        <p style={{marginLeft: "10px"}}>{timer}</p>
+                                    </div>
+                                </Col>
+                                    {/*
                                 <Col style={{marginTop: "20px", display:"flex", justifyContent: `${mode === PVE ? "flex-end" : "space-around"}`, marginLeft: `${mode === PVE ? "0px" : "20px"}` }}>
-                                    {
+                                    
                                         mode===PVE ?
                                             <div style={{ display: "flex", justifyContent: "center"}}>
                                                 <Clock size={30}/>
-                                                <p style={{marginLeft: "10px"}}>{Math.floor(whiteTimer)}</p>  
+                                                <p style={{marginLeft: "10px"}}>{Math.floor(totalSecondsWhite)}</p>  
                                             </div>
                                             :
                                             <>
                                                 <div>
                                                     <Image src={`${ImageWhiteTime}`} alt="clock black" style={{maxWidth: "30px", marginTop: "-3px"}}/>
-                                                    <span style={{marginLeft: "10px"}}>{Math.floor(whiteTimer)}</span>  
+                                                    <span style={{marginLeft: "10px"}}>{Math.floor(totalSecondsWhite)}</span>  
                                                 </div>
                                                 <div>
                                                     <Image src={`${ImageBlackTime}`} alt="clock whithe" style={{maxWidth: "30px", marginTop: "-3px"}}/>
-                                                    <span style={{marginLeft: "10px"}}>{Math.floor(blackTimer)}</span>  
+                                                    <span style={{marginLeft: "10px"}}>{Math.floor(totalSecondsBlack)}</span>  
                                                 </div>
                                             </>
-                                    }
-                                </Col>
+                                
+                                </Col>*/}
                                 <Col style={{display:"flex", justifyContent:"flex-end", marginRight: "-200px"}}>
                                     <Image src={`${ImageScacchi}`} style={{width: "50px", height: "50px", opacity: 0.8}} alt="immagine di scacchi" />
                                         <span style={{color: "white", fontSize: "2.7rem"}}>ChessVerse</span>
@@ -298,10 +375,12 @@ function Game({
                                   mode={mode}
                                   startFen={startFen}
                                   color={color}
-                                  setWhiteTimer={setWhiteTimer}
-                                  setBlackTimer={setBlackTimer}
-                                  setTurn={setTurn}
-                                  setTimerOn={setTimerOn}
+                                 // startWhite={startWhite}
+                                  //startBlack={startBlack}
+                                  //pauseWhite={pauseWhite}
+                                  //pauseBlack={pauseBlack}
+                                  startTimer={startTimer}
+                                  stopTimer={stopTimer}
                                   roomId={roomId}
                                 />
                             </div>

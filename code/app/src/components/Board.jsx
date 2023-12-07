@@ -196,9 +196,18 @@ function Board(props) {
 
   useEffect(()=>{
     if(!!moveSan){
-      if(firstMove)
+      if(firstMove){
         setFirstMove(false);
+        props.startTimer();
+      }
+      /*
+      if(props.mode===PVE || props.color==="white")
+        props.startWhite;
+      else
+        props.startBlack;
+*/
       props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
+      props.stopTimer();
       setMoveSan(null);
       setAwaitingOppMove(true);
     }
@@ -210,10 +219,19 @@ const [getPop, setGetPop] = useState(false);
     props.socket?.on("move", (res) =>{
       setOppMoveSan(res.san);
       setAwaitingOppMove(false);
-      props.setWhiteTimer(res.time[0]);
-      props.setBlackTimer(res.time[1] ?? -1);
-      props.setTurn(0);
-      props.setTimerOn(true);
+      props.startTimer();
+/*
+      if(props.color==="white")
+        props.startBlack;
+      else
+        props.startWhite;
+*/
+
+      //props.setWhiteTimer(res.time[0]);
+      //props.setBlackTimer(res.time[1] ?? -1);
+      //props.setTurn(0);
+     // props.setTimerOn(true);
+      console.log("prendo la mossa e setto il timer ON")
     });
     props.socket?.on("end", (res) =>{
       if (res.winner)
