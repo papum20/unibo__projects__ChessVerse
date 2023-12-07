@@ -120,6 +120,7 @@ class PVPGame(Game):
 		time = data["time"]
 		rank = round(max(min(int(data["rank"]), 100), 0) / 10) * 10
 		# vedere se ci sta il complementare
+		print(f"sid:  {sid}")
 		index = (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
 		if sid in Game.sid_to_id:
 			await Game.sio.emit("error", {"cause": "Started Matching", "fatal": True}, room=sid)
@@ -128,6 +129,7 @@ class PVPGame(Game):
 			found_guest = None
 			for waiting in Game.waiting_list[time][index]:
 				if abs(waiting["elo"]-session["elo"]) < 100:
+					print(f"waiting list:   {Game.waiting_list[time][index]}")
 					found_guest = waiting
 					break
 			if found_guest is not None:
@@ -140,6 +142,7 @@ class PVPGame(Game):
 				game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
 				Game.games[game_id] = cls(players, rank if first else 100 - rank, data["time"])
 				Game.waiting_list[time][index].remove(found_guest)
+				print(f"waiting list:   {Game.waiting_list[time][index]}")
 				Game.sid_to_id[players[0]] = game_id
 				Game.sid_to_id[players[1]] = game_id
 				await Game.sio.emit("config", {"fen": Game.games[game_id].fen, "id": game_id, "color": "white"}, room=players[0])
@@ -156,3 +159,4 @@ class PVPGame(Game):
 			Game.waiting_list[time][index].append({"sid": sid, "rank": rank, "elo": session["elo"]})
 			# serve per eliminarlo dalla entry
 			Game.sid_to_id[sid] = {"time": time, "index": index}
+			print(f"start {Game.waiting_list}")
