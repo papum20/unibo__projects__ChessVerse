@@ -14,8 +14,10 @@ import { joinPaths } from "../utils/path";
 
 async function fetchData(input, init, api_obj) {
         // grant it's an array
+        console.log(api_obj)
+        console.log(api_obj.codes)
         const codes = (api_obj && typeof(api_obj.codes) === "object")
-                ? Object.values(api_obj.codes.values)
+                ? Object.values(api_obj.codes)
                 : [];
 
         const response = await fetch(input, {method: init.method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(init.body)});
@@ -24,7 +26,7 @@ async function fetchData(input, init, api_obj) {
                 return response;
         } else {
                 const errorBody = await response.json();
-                const errorMessage = errorBody.error;
+                const errorMessage = errorBody.message;
 
                 if(codes.includes(response.status)) {
                         throw new Error(errorMessage);
@@ -36,12 +38,11 @@ async function fetchData(input, init, api_obj) {
 }
 
 export async function login(credentials) {
-
         const parsed = parseCredentialsLogin(credentials);
         const response = await fetchData(joinPaths(SERVER_ADDR, API.login.endpoint), {
                 method: API.login.method,
                 body: parsed
-        }, API.signup);
+        }, API.login);
 
         return response.json();
 
@@ -54,7 +55,7 @@ export async function signup(credentials) {
 	const response = await fetchData(joinPaths(SERVER_ADDR, API.signup.endpoint), {
 			method: API.signup.method,
 			body: parsed
-	});
+	}, API.signup);
 
 	return response.json();
 

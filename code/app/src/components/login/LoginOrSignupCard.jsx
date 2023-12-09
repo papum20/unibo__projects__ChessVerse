@@ -25,27 +25,19 @@ function LoginOrSignupCard(props) {
 
 	
 	async function onSubmit(credentials) {
-
-		
-
 		const credential_parsed = (isLogin
 			? parseCredentialsLogin(credentials)
 			: parseCredentialsSignup(credentials)
 		);
-		
 		try {
 			await (isLogin
 				? users_api.login(credential_parsed)
 				: users_api.signup(credential_parsed)
 			);
-
 			if(!isLogin)
 				toast.success("Signed up!", {className: "toast-message"});
-
-			
-			
-			
 		} catch (error) {
+			console.error(error);
 			toast.error(`${error}`, {className: "toast-message"});
 		}
 	}

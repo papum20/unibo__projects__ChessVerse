@@ -87,10 +87,9 @@ def user_signup(request):
             username = data.get('username')
             password = data.get('password')
             elo_really_bad_chess = data.get('eloReallyBadChess')
-            elo_second_type = data.get('eloSecondType')
 
             # Check if all required fields are provided
-            if not all([username, password, elo_really_bad_chess, elo_second_type]):
+            if not all([username, password, elo_really_bad_chess]):
                 return JsonResponse({'message': 'Missing required fields'}, status=400)
 
             User = RegisteredUsers
@@ -98,7 +97,6 @@ def user_signup(request):
                 username=username,
                 password=password,
                 EloReallyBadChess=elo_really_bad_chess,
-                EloSecondChess=elo_second_type
             )
 
             # Return a success response if the signup is successful

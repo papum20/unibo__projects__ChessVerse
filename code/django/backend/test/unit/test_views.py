@@ -44,7 +44,6 @@ class UserSignupViewTest(TestCase):
                 'username': 'test_user',
                 'password': 'secret',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -57,7 +56,6 @@ class UserSignupViewTest(TestCase):
                 'username': 'test_user',
                 'password': 'secret',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -75,7 +73,6 @@ class UserSignupViewTest(TestCase):
                 'username': 'test_user',
                 'password': 'secret',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -88,7 +85,6 @@ class UserSignupViewTest(TestCase):
                 'username': 'test_user',
                 'password': 'secret',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -100,7 +96,6 @@ class UserSignupViewTest(TestCase):
             json.dumps({
                 'password': 'secret',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -113,7 +108,6 @@ class UserSignupViewTest(TestCase):
             json.dumps({
                 'username': 'test_user',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -126,7 +120,6 @@ class UserSignupViewTest(TestCase):
             json.dumps({
                 'username': 'test_user',
                 'password': 'secret',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )
@@ -153,7 +146,6 @@ class UserSignupViewTest(TestCase):
                 'username': 'test_user',
                 'password': 'secret',
                 'eloReallyBadChess': '1000',
-                'eloSecondType': '1000'
             }),
             content_type='application/json'
         )

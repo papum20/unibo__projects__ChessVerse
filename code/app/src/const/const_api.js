@@ -38,7 +38,6 @@ export const API = {
 			"username",
 			"password",
 			"eloReallyBadChess",
-			"eloSecondType"
 		],
 		response : [
 			"message"

@@ -20,7 +20,6 @@ class Migration(migrations.Migration):
                 ('GameDraw', models.IntegerField(default=0)),
                 ('GamesLost', models.IntegerField(default=0)),
                 ('EloReallyBadChess', models.IntegerField(default=1000)),
-                ('EloSecondChess', models.IntegerField(default=1000)),
             ],
         ),
     ]

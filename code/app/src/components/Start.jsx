@@ -49,7 +49,8 @@ function Start({
             setBotDiff(MIN_BOT_DIFF);
         setShowModal(false);
         setIsLoadingGame(true);
-        const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
+        // const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
+        const host = "https://sbhbd9h0-8080.euw.devtunnels.ms/"
         const secure = import.meta.env.VITE_NODE_ENV == "production";
         const options = { transports: ["websocket"], secure}
         setSocket(io(host, options));

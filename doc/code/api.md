@@ -57,7 +57,6 @@ This API provides basic user authentication functionalities, including user logi
   - `username` (string): The desired username for the new user.
   - `password` (string): The password for the new user.
   - `eloReallyBadChess` (integer): The initial Elo rating for Really Bad Chess.
-  - `eloSecondType` (integer): The initial Elo rating for the second chess type.
 
 #### Response
 - `200 OK` with a JSON object containing the message "Signup successful" if the signup is successful.
