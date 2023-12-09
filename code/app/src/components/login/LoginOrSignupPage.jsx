@@ -12,12 +12,11 @@ import LoginOrSignupCard from './LoginOrSignupCard.jsx';
 
 function LoginOrSignupPage(props) {
  
-
     return (
         <Container className="login-signup-page d-flex align-items-center justify-content-center">
-
+           
             <LoginOrSignupCard
-				isLogin = {props.isLogin}
+				isLogin = {props.isLogin} setUser={props.setUser} setYouAreLogged={props.setYouAreLogged}
 
 			/>
 

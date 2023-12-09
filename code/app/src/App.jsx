@@ -24,6 +24,10 @@ function App() {
   const [startFen, setStartFen] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [color, setColor] = useState("white");
+  const [user,setUser] = useState(null);
+
+  const [youAreLogged, setYouAreLogged] = useState(false);
+
 
 
   useEffect(() => {
@@ -38,12 +42,10 @@ function App() {
 
 
 
-
   return (
     <div data-testid="appPage">
       <Alert data-testid="alertDiv"/>
 
-	
 		
       <Routes location={location} key={location.pathname} data-testid="toGame">
 		
@@ -64,7 +66,34 @@ function App() {
             setStartFen={setStartFen}
             setRoomId={setRoomId}
             setColor={setColor}
+            setUser={setUser}
+            user={user}
+            setYouAreLogged={setYouAreLogged}
+            youAreLogged={youAreLogged}
+          />
+        }/>
 
+        <Route path={`/options`} element={
+          <Start
+            mode={mode}
+            setMode={setMode}
+            gameImb={gameImb}
+            setGameImb={setGameImb}
+            botDiff={botDiff}
+            setBotDiff={setBotDiff}
+            gameTime={gameTime}
+            setGameTime={setGameTime}
+            setSocket={setSocket}
+            socket={socket}
+            setIsLoadingGame={setIsLoadingGame}
+            data={data}
+            setStartFen={setStartFen}
+            setRoomId={setRoomId}
+            setColor={setColor}
+            setUser={setUser}
+            user={user}
+            setYouAreLogged={setYouAreLogged}
+            youAreLogged={youAreLogged}
           />
         }/>
 
@@ -83,6 +112,8 @@ function App() {
               startFen={startFen}
               color={color}
               roomId={roomId}
+              user={user}
+           
             />
           }
           data-testid="game"
@@ -91,7 +122,7 @@ function App() {
 			path={`/login`}
 			element={
 				<LoginOrSignupPage
-            isLogin={true}
+          isLogin={true} setUser={setUser} setYouAreLogged={setYouAreLogged}
 				/>
 			}
 		/>
@@ -100,7 +131,7 @@ function App() {
 			path={`/signup`}
 			element={
 				<LoginOrSignupPage
-            isLogin={false}
+            isLogin={false} setUser={setUser}
 				/>
 			}
 		/>

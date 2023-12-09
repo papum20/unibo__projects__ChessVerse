@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Button, Card, Form, CloseButton } from 'react-bootstrap';
+import {EyeFill, EyeSlashFill} from "react-bootstrap-icons";
 import { useForm } from 'react-hook-form';
 import { parseCredentialsLogin, parseCredentialsSignup } from '../../models/credentials';
 import * as users_api from "../../network/users_api";
@@ -23,6 +24,7 @@ function LoginOrSignupCard(props) {
 
 	const navigator = useNavigate();
 
+	const [showPassw, setShowPassw] = useState(false);
 	
 	async function onSubmit(credentials) {
 		const credential_parsed = (isLogin
@@ -34,10 +36,18 @@ function LoginOrSignupCard(props) {
 				? users_api.login(credential_parsed)
 				: users_api.signup(credential_parsed)
 			);
-			if(!isLogin)
+			if(isLogin){
+				toast.success("Logged in successfully!", {className: "toast-message"});	
+				props.setYouAreLogged(true);			
+			}
+			else{
 				toast.success("Signed up!", {className: "toast-message"});
+			}
+			props.setUser(credentials.username);
+			navigator(`../options`, { relative: "path" });
+			
+
 		} catch (error) {
-			console.error(error);
 			toast.error(`${error}`, {className: "toast-message"});
 		}
 	}
@@ -66,17 +76,28 @@ function LoginOrSignupCard(props) {
 							{errors.username && <span>This field is required</span>}
                         </Form.Group>
 
-                        <Form.Group controlId="formPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control name="password" placeholder="Password" type="password" 
+                        <Form.Group style={{marginTop: "10px"}} controlId="formPassword">
+                            <Form.Label style={{display: "flex", justifyContent: "space-between"}}>
+								
+								<span>Password </span>
+
+								{showPassw ? 
+									<EyeSlashFill onClick={()=>setShowPassw(!showPassw)} style={{cursor: "pointer", marginTop: "3px"}} role="button" size={20} />
+								:
+									<EyeFill onClick={()=>setShowPassw(!showPassw)} style={{cursor: "pointer", marginTop: "3px"}} role="button" size={20} />
+								}
+
+							</Form.Label>
+                            <Form.Control name="password" placeholder="Password" type={showPassw ? "text" : "password" }
 								{...register("password", { required: true })}
 							/>
+							
 							{errors.password && <span>This field is required</span>}
                         </Form.Group>
 						
 						{ !isLogin && 
 							<>
-								<Form.Group controlId="formElo1" style={{marginTop: "10px"}}>
+								<Form.Group  controlId="formElo1" style={{marginTop: "10px"}}>
 									<Form.Label>Elo ReallyBadChess</Form.Label>
 									<Form.Control name="eloReallyBadChess" placeholder="Elo ReallyBadChess" type="number"
 											{...register("eloReallyBadChess", { required: true })}

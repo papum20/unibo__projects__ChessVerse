@@ -21,7 +21,7 @@ export const API = {
 	},
 	signout : {
 		endpoint: "backend/signout/",
-		method: "",
+		method: "POST",
 		codes : {
 			"ok" : 200
 		}
@@ -42,5 +42,10 @@ export const API = {
 		response : [
 			"message"
 		]
-	}
+	},
+	addGuest : {
+		endpoint: "backend/add_guest/",
+		method: "POST",
+		
+	},
 };

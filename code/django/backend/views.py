@@ -30,12 +30,15 @@ guest_nickname = ''
 
 
 def add_guest(requests):
-    global guest_nickname
-    guest_nickname = generate_random_nickname()
-    print('Guest name:' + guest_nickname)
-    guest = Guest(Username=guest_nickname)
-    guest.save()
-    return JsonResponse({"message": "Guest added successfully!"})
+    if requests.method == 'POST':
+        global guest_nickname
+        guest_nickname = generate_random_nickname()
+        print('Guest name:' + guest_nickname)
+        guest = Guest(Username=guest_nickname)
+        guest.save()
+    else:
+        return JsonResponse({"message": "Invalid request method"}, status=405)
+    return JsonResponse({"guest_nickname": guest_nickname})
 
 
 def get_guest_name(requests):
@@ -109,7 +112,7 @@ def user_signup(request):
         return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
-@login_required(login_url='/backend/login/')
+#@login_required(login_url='/backend/login/')
 def user_signout(request):
     # Handle user signout (logout)
     logout(request)

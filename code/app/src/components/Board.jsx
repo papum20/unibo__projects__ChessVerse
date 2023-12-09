@@ -190,8 +190,7 @@ function Board(props) {
     if (!moveSan) return;
     props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
     props.setMoves(prevValue => [...prevValue, moveSan]);
-    console.log("inviata mossa, cambio turno")
-    props.setTurn(prevValue => {console.log("vecchio:", prevValue, "nuovo:", 1-prevValue); return 1-prevValue;});
+    props.setTurn(prevValue => {return 1-prevValue;});
     setMoveSan(null);
     setAwaitingOppMove(true);
   },[moveSan]);
@@ -206,19 +205,20 @@ function Board(props) {
       props.setMoves(prevValue => [...prevValue, res.san]);
       setOppMoveSan(res.san);
       setAwaitingOppMove(false);
-      console.log("ricevuta mossa, cambio turno")
-      props.setTurn(prevValue => {console.log("vecchio:", prevValue, "nuovo:", 1-prevValue); return 1-prevValue;});
+      props.setTurn(prevValue => { return 1-prevValue;});
       props.updateTimers(res.time);
     });
     props.socket?.on("end", (res) =>{
-      if (res.winner) props.setShowVictory(true);
-      else if (res.winner === false) props.setShowGameOver(true);
-      else props.setShowTie(true);
+      props.setShowEndGame(true);
+      if (res.winner) props.setModalType("won");
+      else if (res.winner === false) props.setModalType("gameover");
+      else props.setModalType("tie");
       props.socket.disconnect();
     });
 
     props.socket?.on("timeout", (_data) =>{
-        props.setShowGameOver(true);
+        props.setShowEndGame(true);
+        props.setModalType("gameover");
     });
     
     props.socket?.on("pop", () => {
@@ -228,7 +228,7 @@ function Board(props) {
     props.socket?.on("error", (error) =>{
       toast.error(error.cause, {className: "toast-message"});
       if(error.fatal){
-        props.setSocket(undefined);
+        props.setSocket(null);
         props.socket?.off("pop");
         props.socket?.off("timeout");
         props.socket?.off("move");

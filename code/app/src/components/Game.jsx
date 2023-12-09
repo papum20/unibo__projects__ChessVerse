@@ -7,7 +7,7 @@ import { Gear, ExclamationDiamond } from 'react-bootstrap-icons';
 import { Button  } from "@mui/material";
 import "../styles/Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
-import { PVP } from "../const/const.js";
+import { PVP, PVE } from "../const/const.js";
 import ImageBlackTime from "../assets/blackTime.png";
 import ImageWhiteTime from "../assets/whiteTime.png";
 import Board from "./Board.jsx";
@@ -21,7 +21,8 @@ function Game({
   mode,
   startFen,
   color,
-  roomId
+  roomId,
+  user,
 }) {
     const { width, height } = useWindowDimensions();
     const [fontSize, setFontSize] = useState("20px");
@@ -41,9 +42,7 @@ function Game({
     const navigator = useNavigate();
     const [moves, setMoves] = useState([]);
     const [showModalMenu, setShowModalMenu] = useState(false);
-    const [showGameOver, setShowGameOver] = useState(false);
-    const [showVictory, setShowVictory] = useState(false);
-    const [showTie, setShowTie] = useState(false);
+    const [showEndGame, setShowEndGame] = useState(false);
     const [timers, setTimers] = useState([gameTime, gameTime]);
     const [timerInterval, setTimerInterval] = useState(null);
     const [turn, setTurn] = useState(null);
@@ -52,9 +51,12 @@ function Game({
 
     useEffect(() => {
         if (turn === null) return;
+
         const interval = 100;
+
         if (timerInterval !== null)
             clearInterval(timerInterval);
+
         setTimerInterval(setInterval(() => {
             setTimers((prevTime) => {
                 const updatedTime = [...prevTime];
@@ -68,7 +70,15 @@ function Game({
             setTimerInterval(null);
         }
       }, [turn]);
+    
 
+    useEffect(()=>{
+        if(timers[0] <=1 || timers[1] <=1)
+        {
+            clearInterval(timerInterval);
+            setTimerInterval(null);
+        }
+    },[timers])
 
     const theme = createTheme({
         palette: {
@@ -81,10 +91,6 @@ function Game({
         },
     });
 
-    function handleMenu(){
-        socket.emit("resign", {type: mode, id: roomId});
-        setSocket(undefined);
-    }
 
     function handleUndo (){
         socket.emit("pop", {type: mode, id: roomId});
@@ -100,119 +106,60 @@ function Game({
 
     //questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
     useEffect(()=>{
-        if (socket === undefined || socket === null) {
+        if (socket === null) {
             navigator(`../`, { relative: "path" });
+       
         }
+        else if(socket===undefined){
+            navigator(`../options`, { relative: "path" });
+        }
+        
     }, [socket]);
+
+
+    const [modalType, setModalType] = useState(null);
 
     return (
         <div data-testid="game">
             <Modal
-              show={showGameOver}
+              show={showEndGame}
               centered
               dialogClassName="my-modal"
             >
-                <div style={{border: "4px solid red"}}>
+                <div style={{border: `${modalType === "gameover" ? "4px solid red" : modalType === "won" ? "4px solid green" : "4px solid gray"}`}}>
                     <Modal.Body style={{backgroundColor: "#b6884e"}}>
                         <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
-                            <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
-                            <ExclamationDiamond size={40} color="red" />
+                            <span style={{fontWeight: "bold", marginRight: "10px"}}>{`${modalType === "gameover" ? "Game Over" : modalType === "won" ? "You won!" :  "It's a tie!"}`}</span>
+                            <ExclamationDiamond size={40} color={`${modalType === "gameover" ? "red" : modalType === "won" ? "green" : "gray"}`} />
                         </div>
                         <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
                             <ThemeProvider theme={theme}>
+
                                 <Nav.Link
                                   as={Link}
-                                  to="/"
+                                  to="/options"
                                   style={{display: "flex", justifyContent: "center"}}
-                                >
+    >
                                     <Button
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
                                       onClick={() => {socket.emit("resign", {type: mode, id: roomId}); 
-                                                        setSocket(undefined);
+                                                        setSocket(undefined); 
                                                     }}
                                       variant="contained"
                                     >
                                         Return to menu
                                     </Button>
-                                </Nav.Link>
+                                    </Nav.Link>
                             </ThemeProvider>
                         </div>
                     </Modal.Body>
                 </div>
             </Modal>
 
-            <Modal
-              show={showVictory}
-              centered
-              dialogClassName="my-modal"
-            >
-                <div style={{border: "4px solid green"}}>
-                    <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                        <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
-                            <span style={{fontWeight: "bold", marginRight: "10px"}}>You won!</span>
-                            <ExclamationDiamond size={40} color="green" />
-                        </div>
-                        
-                        <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
-                            <ThemeProvider theme={theme}>
-                                <Nav.Link
-                                  as={Link}
-                                  to="/"
-                                  style={{display: "flex", justifyContent: "center"}}
-                                >
-                                    <Button
-                                      style={{fontSize: "1.2rem"}}
-                                      size="large"
-                                      color="brown"
-                                      onClick={() => {setSocket(undefined); }}
-                                      variant="contained"
-                                    >
-                                        Return to menu
-                                    </Button>
-                                </Nav.Link>
-                            </ThemeProvider>
-                        </div>
-                    </Modal.Body>
-                </div>
-            </Modal>
-
-
-            <Modal
-              show={showTie}
-              centered
-              dialogClassName="my-modal"
-            >
-                <div style={{border: "4px solid gray"}}>
-                    <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                        <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
-                            <span style={{fontWeight: "bold", marginRight: "10px"}}>It's a tie!</span>
-                            <ExclamationDiamond size={40} color="gray" />
-                        </div>
-                        
-                        <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
-                            <ThemeProvider theme={theme}>
-                                <Nav.Link
-                                  as={Link}
-                                  to="/"
-                                  style={{display: "flex", justifyContent: "center"}}
-                                >
-                                    <Button
-                                      style={{fontSize: "1.2rem"}}
-                                      size="large"
-                                      color="brown"
-                                      onClick={() => {setSocket(undefined); }}
-                                      variant="contained"
-                                    >
-                                        Return to menu
-                                    </Button>
-                                </Nav.Link>
-                            </ThemeProvider>
-                        </div>
-                    </Modal.Body>
-                </div>
-            </Modal>
+            
+            
 
             <Modal
               show={showModalMenu}
@@ -237,20 +184,22 @@ function Game({
                             >
                                 No
                             </Button>
-                            <Nav.Link as={Link} to="/">
-                                <Button
-                                  style={{fontSize: "1.2rem"}}
-                                  size="large"
-                                  color="brown"
-                                  onClick={(e)=> {
-                                      e.stopPropagation();
-                                      handleMenu();
-                                  }}
-                                  variant="contained"
+
+                            <Nav.Link
+                                  as={Link}
+                                  to="/options"
+                                  style={{display: "flex", justifyContent: "center"}}
                                 >
-                                    Yes
-                                </Button>
-                            </Nav.Link>
+                                    <Button
+                                      style={{fontSize: "1.2rem"}}
+                                      size="large"
+                                      color="brown"
+                                      onClick={() => {setSocket(undefined); socket.emit("resign", {type: mode, id: roomId});}}
+                                      variant="contained"
+                                    >
+                                        Yes
+                                    </Button>
+                                </Nav.Link>
                         </ThemeProvider>
                     </div>
                 </Modal.Body>
@@ -262,19 +211,13 @@ function Game({
                     <Row>
                         <Col>
                             <Row style={{marginBottom: "20px"}}>
-                                <Col style={{display:"flex", justifyContent:"flex-end"}}>
-                                    <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
-                                        <img src={`${ImageWhiteTime}`} alt="clock white" style={{maxWidth: "30px", maxHeight: "30px", marginTop: "-6px"}}/>
-                                        <div style={{textAlign: 'center'}}>
-                                            <span>{`${String(Math.floor(timers[0] / 60)).padStart(2, '0')}:${String(Math.floor(timers[0] % 60)).padStart(2, '0')}`}</span>
-                                        </div>
+                                <Col >
+                                    <div style={{marginTop: "40px", marginLeft: "70px"}}>
+                                        <span style={{fontWeight: "bold"}}>{mode=== PVE ? "Stockfish" : "pippo"}</span>
                                         {mode === PVP &&
                                             <>
-                                                <span style={{marginLeft: "20px"}}></span>
-                                                <img src={`${ImageBlackTime}`} alt="clock black" style={{maxWidth: "30px", maxHeight: "30px", marginTop: "-6px"}}/>
-                                                <div style={{textAlign: 'center'}}>
+                                                <img src={`${ImageBlackTime}`} alt="clock black" style={{maxWidth: "30px", maxHeight: "30px", marginTop: "-6px", marginLeft: "10px"}}/>
                                                     <span>{`${String(Math.floor(timers[1] / 60)).padStart(2, '0')}:${String(Math.floor(timers[1] % 60)).padStart(2, '0')}`}</span>
-                                                </div>
                                             </>
                                         }
                                         </div>
@@ -303,11 +246,11 @@ function Game({
                             <div>
                                 <Board
                                   navigator={navigator}
-                                  setShowVictory={setShowVictory}
-                                  setShowTie={setShowTie}
+                                  
                                   width={width}
                                   height={height}
-                                  setShowGameOver={setShowGameOver}
+                                  setShowEndGame={setShowEndGame}
+                                  setModalType={setModalType}
                                   setMoves={setMoves}
                                   data={data}
                                   isLoadingGame={isLoadingGame}
@@ -394,6 +337,14 @@ function Game({
                     </Row>
                     </Col>
                 </Row>
+                <Row  >
+                    <Col style={{display: "flex", justifyContent: "center", marginTop: "20px", marginLeft: "-140px"}}>
+                        <span style={{marginRight: "15px", fontWeight: "bold"}}>{user}</span>
+                        <img src={`${ImageWhiteTime}`} alt="clock white" style={{maxWidth: "30px", maxHeight: "30px", marginTop: "-6px"}}/>
+                        <span>{`${String(Math.floor(timers[0] / 60)).padStart(2, '0')}:${String(Math.floor(timers[0] % 60)).padStart(2, '0')}`}</span>
+                    </Col>
+               
+                </Row>
                 </ThemeProvider>
             </div>
         </div>
@@ -410,7 +361,8 @@ Game.propTypes = {
     data: PropTypes.object,
     startFen: PropTypes.string,
     color: PropTypes.string,
-    roomId: PropTypes.string
+    roomId: PropTypes.string,
+    user: PropTypes.string,
 }
 
 export default Game;

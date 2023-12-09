@@ -11,12 +11,33 @@ Content-Type: application/json
 
 ###
 
-POST http://127.0.0.1:8000/backend/signup/
+POST https://chessverse.cloud:8000/backend/signup/
 Content-Type: application/json
 
 {
     
     "username": "adminerdffdrd",
     "password": "admin",
-    "eloReallyBadChess": 2932,
+    "eloReallyBadChess": 2932
+}
+
+
+###
+
+POST http://127.0.0.1:8000/backend/signout/
+Content-Type: application/json
+csrftoken: HnPlYdKD08NVOaM4fuGeKK8FUTKH8FsQ
+
+{
+    "csrftoken": "HnPlYdKD08NVOaM4fuGeKK8FUTKH8FsQ"
+}
+
+###
+
+POST http://127.0.0.1:8000/backend/login/
+Content-Type: application/json
+
+{
+    "username": "peppecasa",
+    "password": "ciao1234"
 }

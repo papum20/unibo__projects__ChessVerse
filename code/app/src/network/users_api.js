@@ -2,7 +2,7 @@ import { API } from "../const/const_api";
 import { parseCredentialsLogin, parseCredentialsSignup } from "../models/credentials";
 import { SERVER_ADDR } from '../const/const';
 import { joinPaths } from "../utils/path";
-
+import { toast } from "react-toastify";
 /**
  * Generical function for fetches.
  * Useful for defining only once generical errors and other handling stuff.
@@ -14,14 +14,11 @@ import { joinPaths } from "../utils/path";
 
 async function fetchData(input, init, api_obj) {
         // grant it's an array
-        console.log(api_obj)
-        console.log(api_obj.codes)
         const codes = (api_obj && typeof(api_obj.codes) === "object")
                 ? Object.values(api_obj.codes)
                 : [];
 
         const response = await fetch(input, {method: init.method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(init.body)});
-        console.log(response);
         if(response.ok) {
                 return response;
         } else {
@@ -61,4 +58,29 @@ export async function signup(credentials) {
 
 }
 
+export async function signout() {
+        const response = await fetch(joinPaths(SERVER_ADDR, API.signout.endpoint), {method: API.signout.method, headers: { "Content-Type": "application/json" }, body: {}});
+        
+        if(response.ok) {
+                toast.success("logout successfully!", {className: "toast-message"});
+        } else {
+                const errorBody = await response.json();
+                const errorMessage = errorBody.message;
+
+                toast.error(`${errorMessage}`, {className: "toast-message"});
+
+        }
+
+}
+
+export async function addGuest() {
+        const response = await fetch(joinPaths(SERVER_ADDR, API.addGuest.endpoint), {method: API.addGuest.method, headers: { "Content-Type": "application/json" }, body: {}});
+        if(response.ok) {
+                const json = await response.json();
+                return json.guest_nickname;
+        } 
+        else
+                toast.error(`error`, {className: "toast-message"});
+
+}
 
