@@ -1,11 +1,10 @@
-6
 /*
  * api specs, e.g. paths, methods, codes, data fields (req/res)
  */
 
 export const API = {
 	login : {
-		endpoint : "login",
+		endpoint : "backend/login/",
 		method : "POST",
 		codes : {
 			"ok" : 200,
@@ -21,14 +20,14 @@ export const API = {
 		]
 	},
 	signout : {
-		endpoint: "signout",
-		method: "",
+		endpoint: "backend/signout/",
+		method: "POST",
 		codes : {
 			"ok" : 200
 		}
 	},
 	signup : {
-		endpoint : "signup",
+		endpoint : "backend/signup/",
 		method : "POST",
 		codes : {
 			"ok" : 200,
@@ -38,11 +37,15 @@ export const API = {
 		data : [
 			"username",
 			"password",
-			"elo1",
-			"elo2"
+			"eloReallyBadChess",
 		],
 		response : [
 			"message"
 		]
-	}
+	},
+	addGuest : {
+		endpoint: "backend/add_guest/",
+		method: "POST",
+		
+	},
 };

@@ -3,25 +3,24 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import Spinner from 'react-bootstrap/Spinner';
 import { toast } from "react-toastify";
-import {PVE, PVP} from "../const/Const.js";
- 
+import {PVE, PVP} from "../const/const.js";
+
 
 function Board(props) {
-  const [game, setGame] = useState(null);
+ 
   const [moveSan, setMoveSan] = useState(null);
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
-  const [botMoveSan, setBotMoveSan] = useState("");
-  const [awaitingBotMove, setAwaitingBotMove] = useState(false);
-  const [firstMove, setFirstMove] = useState(true);
+  const [oppMoveSan, setOppMoveSan] = useState("");
+  const [awaitingOppMove, setAwaitingOppMove] = useState(false);
   const [position, setPosition] = useState("");
-  
+
   
   function safeGameMutate(modify) {
-    setGame((g) => {
+    props.setGame((g) => {
       const update = { ...g };
       modify(update);
       return update;
@@ -29,7 +28,7 @@ function Board(props) {
   }
 
   function getMoveOptions(square) {
-    const moves = game.moves({
+    const moves = props.game.moves({
       square,
       verbose: true,
     });
@@ -42,8 +41,8 @@ function Board(props) {
     moves.map((move) => {
       newSquares[move.to] = {
         background:
-          game.get(move.to) &&
-          game.get(move.to).color !== game.get(square).color
+          props.game.get(move.to) &&
+          props.game.get(move.to).color !== props.game.get(square).color
             ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
             : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
         borderRadius: "50%",
@@ -59,30 +58,30 @@ function Board(props) {
 
   
   useEffect(() => {
-    const makeBotMove = async () => {
-      if (botMoveSan) {
+    const makeOppMove = async () => {
+      if (oppMoveSan) {
         const updatedGame = new Chess();
-        updatedGame.load(game.fen()); // Carica la posizione attuale della scacchiera
+        updatedGame.load(props.game.fen()); // Carica la posizione attuale della scacchiera
 
-        const move = updatedGame.move(botMoveSan);
+        const move = updatedGame.move(oppMoveSan);
         if (move) {
           // Ritarda l'esecuzione per un breve periodo per visualizzare l'animazione
           await new Promise(resolve => setTimeout(resolve, 300));
 
           safeGameMutate((game) => {
-            game.move(move.san, { sloppy: true });
+            props.game.move(move.san, { sloppy: true });
           });
 
-          setBotMoveSan(null);
+          setOppMoveSan(null);
         }
       }
     };
 
-    makeBotMove();
-  }, [botMoveSan]);
+    makeOppMove();
+  }, [oppMoveSan]);
 
   async function onSquareClick(square) {
-    if (awaitingBotMove) return;
+    if (awaitingOppMove) return;
     // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -93,7 +92,7 @@ function Board(props) {
     // to square
     if (!moveTo) {
       // check if valid move before showing dialog
-      const moves = game.moves({
+      const moves = props.game.moves({
         square: moveFrom,
         verbose: true,
       });
@@ -126,7 +125,7 @@ function Board(props) {
       }
       
       // is normal move
-      const gameCopy = { ...game };
+      const gameCopy = { ...props.game };
       // const gameCopy = async;
       const move = gameCopy.move({
         from: moveFrom,
@@ -141,7 +140,7 @@ function Board(props) {
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-      setGame(gameCopy);
+      props.setGame(gameCopy);
 
       resetMove();
     }
@@ -150,14 +149,14 @@ function Board(props) {
   async function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
-      const gameCopy = { ...game };
+      const gameCopy = { ...props.game };
       const move = gameCopy.move({
         from: moveFrom,
         to: moveTo,
         promotion: piece[1].toLowerCase() ?? "q",
       });
       setMoveSan(move.san);
-      setGame(gameCopy);
+      props.setGame(gameCopy);
     }
 
     setShowPromotionDialog(false);
@@ -175,70 +174,61 @@ function Board(props) {
     if(props.startFen){
       const newGame = new Chess();
           newGame.load(props.startFen);
-          setGame(newGame);
+          props.setGame(newGame);
     }
   },[props.startFen])
 
   useEffect(()=>{
-
     async function wait (){
       await new Promise((resolve) => setTimeout(resolve, 600));
       props.setIsLoadingGame(false);
-
     } 
-    if(!!game){
-      wait();
-    }
-    
-
-  },[game])
+    if(!!props.game) wait(); 
+  },[props.game]);
 
   useEffect(()=>{
-    if(!!moveSan){
-      if(firstMove){
-        setFirstMove(false);
-        props.startTimer();
-      }
-      props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
+    if (!moveSan) return;
+    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
+    props.setMoves(prevValue => [...prevValue, moveSan]);
+    props.setTurn(prevValue => {return 1-prevValue;});
+    setMoveSan(null);
+    setAwaitingOppMove(true);
+  },[moveSan]);
 
-      setMoveSan(null);
-      setAwaitingBotMove(true);
-    }
-  },[moveSan])
-
-const [getPop, setGetPop] = useState(false);
+  const [getPop, setGetPop] = useState(false);
 
   useEffect(()=>{
-    props.socket?.on("move", (san) =>{
-      setBotMoveSan(san.san);
-      setAwaitingBotMove(false);
+    props.socket?.on("ack", (res) =>{
+      props.updateTimers(res.time);
     });
-    props.socket?.on("end", (winner) =>{
-      if (winner.winner)
-        props.setVictory(true);
-      else
-        props.setShowGameOver(true);
-      // TODO 
-      // else if (winner.winner === false){
-      //   props.setShowGameOver(true);
-      // }
-      // else {
-      //   props.setShowTie(true);
-      // }
-    
-    })
+    props.socket?.on("move", (res) =>{
+      props.setMoves(prevValue => [...prevValue, res.san]);
+      setOppMoveSan(res.san);
+      setAwaitingOppMove(false);
+      props.setTurn(prevValue => { return 1-prevValue;});
+      props.updateTimers(res.time);
+    });
+    props.socket?.on("end", (res) =>{
+      props.setShowEndGame(true);
+      if (res.winner) props.setModalType("won");
+      else if (res.winner === false) props.setModalType("gameover");
+      else props.setModalType("tie");
+      props.socket.disconnect();
+    });
 
     props.socket?.on("timeout", (_data) =>{
-        props.setShowGameOver(true);
-    })
+        props.setShowEndGame(true);
+        props.setModalType("gameover");
+    });
     
     props.socket?.on("pop", () => {
       setGetPop(prevValue => !prevValue);
-    })
+    });
+
     props.socket?.on("error", (error) =>{
       toast.error(error.cause, {className: "toast-message"});
       if(error.fatal){
-        props.setSocket(undefined);
+        props.setSocket(null);
         props.socket?.off("pop");
         props.socket?.off("timeout");
         props.socket?.off("move");
@@ -247,33 +237,27 @@ const [getPop, setGetPop] = useState(false);
         props.navigator(`../`, { relative: "path" });
       }
     })
-  },[])
+  },[]);
 
   useEffect(()=>{
-      if(!!game){
-        game.undo();
-        game.undo();
-        setPosition(game.fen());
+      if(!!props.game){
+        props.game.undo();
+        props.game.undo();
+        setPosition(props.game.fen());
         setMoveSan(null);
-        setBotMoveSan(null);
-       
+        setOppMoveSan(null);
       }
-      
-  },[getPop])
+  },[getPop]);
+
+
 
 
   useEffect(()=>{
-    if(game){
-      props.setMoves(game.history());
+    if (props.game){
+      setPosition(props.game.fen());
+      props.setTurn(0);
     }
-  },[game, getPop])
-
-
-  useEffect(()=>{
-    if (game){
-      setPosition(game.fen());
-    }
-  },[game])
+  },[props.game]);
 
   return (
     <>

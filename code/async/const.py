@@ -1,9 +1,5 @@
 from enum import IntEnum
 
-class GameType(IntEnum):
-    PVP = 0
-    PVE = 1
-
 # Enums
 class EventType(IntEnum):
     ERROR = -1
@@ -14,6 +10,11 @@ class EventType(IntEnum):
     CONFIG = 4
     END = 5
     START = 999
+
+
+class GameType(IntEnum):
+    PVP = 0
+    PVE = 1
 
 
 class AckType(IntEnum):

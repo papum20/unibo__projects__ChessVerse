@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button, Typography, Slider  } from "@mui/material";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -9,9 +9,9 @@ import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
 import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME, PVP, PVE, TIME_OPTIONS} from "../const/Const.js";
+import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME, PVP, PVE, TIME_OPTIONS} from "../const/const.js";
 import { io } from "socket.io-client";
-
+import * as users_api from "../network/users_api";
 
 function Start({
                    mode, setMode,
@@ -23,7 +23,12 @@ function Start({
                    data,
                    setStartFen,
                    setRoomId,
-                   setColor
+                   setColor,
+                   setUser,
+                   user,
+                   setYouAreLogged,
+                   youAreLogged,
+                   
                })
 {
     const theme = createTheme({
@@ -37,12 +42,13 @@ function Start({
         },
     });
 
+
+    const location = useLocation();
+
     const navigator = useNavigate();
-    const [showOptions, setShowOptions] = useState(false);
+
     const [showModal, setShowModal] = useState(false);
 
-  
-    
     async function handleSubmit (e) {
         e.preventDefault();
         if(botDiff === 0)
@@ -50,8 +56,8 @@ function Start({
         setShowModal(false);
         setIsLoadingGame(true);
         const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
-	const secure = import.meta.env.VITE_NODE_ENV == "production";
-	const options = { transports: ["websocket"], secure}
+        const secure = import.meta.env.VITE_NODE_ENV == "production";
+        const options = { transports: ["websocket"], secure}
         setSocket(io(host, options));
     }
 
@@ -64,21 +70,34 @@ function Start({
                       props.socket?.on("start", props.data);
                     }
                     else {
-                      setStartFen(data.fen);
-                      setColor(data.color);
-                      setRoomId(data.id);
+                        setStartFen(data.fen);
+                        setColor(data.color);
+                        setRoomId(data.id);
+                        setIsLoadingGame(false);
                     }
                   })
 
                 socket.emit('start', data);
                 
             });
-            navigator('./game', { relative: "path" });
+            navigator('../game', { relative: "path" });
         }
     }, [socket]);
 
     
+    function getShowOptions (){
+        if(location.pathname[1]===undefined)
+            return false;
+        else
+            return true;
+    }
 
+    //serve per quando sei nelle opzioni e ricarichi la pagina
+    useEffect(()=>{
+        if( user === null){
+            navigator('../', { relative: "path" });
+        } 
+    },[socket])
 
     return (
         <div data-testid="startPage">
@@ -151,14 +170,15 @@ function Start({
                         :
                         <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
                             <Form.Label style={{marginRight: "20px"}}>
-                                Clocktime in sec: 
+                                Clocktime in minutes: 
                             </Form.Label>
                             {
                                 TIME_OPTIONS.map((el,i) => 
                                 <Form.Check
                                     key={i}
                                     inline
-                                    label={el}
+                                    // label={`${el%60}`}
+                                    label={`${Math.floor(el/60)}`}
                                     type="radio"
                                     id={el}
                                     name="clocktime"
@@ -180,17 +200,18 @@ function Start({
 
             <div style={{
                 fontFamily: "Helvetica Neue",
-                backgroundImage: `${!showOptions ? `url(${ChessBoardImg})` : "" }`,
+                backgroundImage: `${!getShowOptions() ? `url(${ChessBoardImg})` : "" }`,
                 backgroundSize: "cover",
                 backgroundAttachment: "fixed",
                 backgroundRepeat: "no-repeat",
-                backgroundColor: `${showOptions ? "#b99b69" : ""}`,
+                backgroundColor: `${getShowOptions() ? "#b99b69" : ""}`,
                 width: "100vw",
                 height: "100vh"
             }}>
                 <ThemeProvider theme={theme}>
-                <div style={{ paddingTop: "20vh"}}>
-                    {!showOptions ?
+                <span style={{display: "flex", justifyContent: "flex-end", fontWeight: "bold", marginRight: "20px", fontSize: "25px"}}>{user}</span>
+                <div style={{ paddingTop: "18vh"}}>
+                    {!getShowOptions() ?
                     <>
                         <div style={{display: "flex", justifyContent: "center"}}>
                             <Image
@@ -200,7 +221,7 @@ function Start({
                                   width: "100px",
                                   height: "100px",
                                   opacity: 0.8,
-                                  marginTop: "-60px"
+                                  marginTop: "-5px"
                               }}
                             />
                             <span style={{color: "white", fontSize: "5rem"}}>ChessVerse</span>
@@ -225,7 +246,7 @@ function Start({
                             <Button
                               color="brown"
                               style={{fontSize: "1.5rem"}}
-                              onClick={() => setShowOptions(true) }
+                              onClick={async () => { const guest = await users_api.addGuest(); setUser(guest); setYouAreLogged(false); navigator('./options', { relative: "path" });} }
                               variant="contained"
                             >
                                 Play as guest
@@ -261,11 +282,11 @@ function Start({
                                       style={{
                                           width: "30px",
                                           height: "30px",
-                                          marginBottom: "-5px",
-                                          marginRight: "5px"
+                                          marginBottom: "5px",
+                                          marginRight: "2px"
                                       }}
                                     />
-                                    <span>Single Player</span>
+                                    <span>freeplay</span>
                                 </div>
                             </Button>
                         </div>
@@ -277,7 +298,7 @@ function Start({
                                   setMode(PVP);
                                   setShowModal(true);
                               }}
-                              style={{fontSize: "1.5rem", borderRadius: "20px"}}
+                              style={{fontSize: "1.5rem", borderRadius: "20px", width: "200px"}}
                               variant="contained"
                             >
                                 <div style={{marginTop: "5px", marginBottom: "5px"}}>
@@ -287,11 +308,11 @@ function Start({
                                       style={{
                                           width: "50px",
                                           height: "30px",
-                                          marginBottom: "-5px",
+                                          marginBottom: "2px",
                                           marginRight: "10px"
                                       }}
                                     />
-                                    <span>MultiPlayer</span>
+                                    <span>1v1</span>
                                 </div>
                             </Button>
                         </div>
@@ -299,7 +320,7 @@ function Start({
                             <Button
                               color="brown"
                               style={{fontSize: "1.5rem", borderRadius: "20px"}}
-                              onClick={() => setShowOptions(false)}
+                              onClick={ async () => {navigator('../', { relative: "path" }); setUser(null);  if(youAreLogged) await users_api.signout();  setYouAreLogged(false);}}
                               variant="contained"
                             >
                                 <div style={{marginTop: "5px", marginBottom: "5px"}}>
@@ -336,7 +357,11 @@ Start.propTypes = {
     data: PropTypes.object,
     setStartFen: PropTypes.func,
     setColor: PropTypes.func,
-    setRoomId: PropTypes.func
+    setUser: PropTypes.func,
+    setRoomId: PropTypes.func,
+    user: PropTypes.string,
+    setYouAreLogged: PropTypes.func,
+    youAreLogged: PropTypes.bool,
 }
 
 export default Start;

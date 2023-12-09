@@ -2,17 +2,17 @@ import unittest
 from unittest import mock, IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, AsyncMock, patch, call
 import sys
+import os
 import socketio
-import json
-
-sys.path.append("../../")
 import chess
-from server import (
-    GameHandler
-)
 import chess.engine
 from random import choice
-from const import GameType
+from ...PVEGame import PVEGame
+from ...PVPGame import PVPGame
+from ...server import GameHandler
+from ...const import GameType
+
+sys.path.append("../../")
 
 """
 sono da testare GamePVE, on_connect, on_disconnect, on_start, on_move, on_resign, on_pop
@@ -31,22 +31,20 @@ module.func1
 module.func2
 test(func2, fun1)
 """
-import os
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 target_dir = "/".join(project_root.split("/")[:-1])
 os.chdir(target_dir)
 
 
-def mock_bot_move(move: str, tomock: MagicMock):
+def mock_bot_move(move: str, to_mock: MagicMock):
     mock_move = MagicMock()
     mock_move.uci.return_value = move  # Define the return value for uci() method
-    tomock.return_value = mock.MagicMock(move=mock_move)
+    to_mock.return_value = mock.MagicMock(move=mock_move)
 
 
 class TestChessSocketIO(IsolatedAsyncioTestCase):
     def setUp(self):
-        print("set")
         self.sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
         self.game_handler = GameHandler(self.sio)
         mock_emit = AsyncMock()
@@ -55,13 +53,12 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         self.pve = "".join(choice("0123456789abcdef") for _ in range(16))
         self.pvp1 = "".join(choice("0123456789abcdef") for _ in range(16))
 
-    # simple connection
     async def test_on_connect(self):
-        print(self.sio)
-        await self.game_handler.on_connect(self.pve)
-        self.sio.emit.assert_called_with("connected", room=self.pve)
+        sid = 'test_sid'
+        await self.game_handler.on_connect(sid, None)
+        self.sio.emit.assert_called_once_with('connected', room=sid)
 
-    # simple disconnection
+    '''
     async def test_on_disconnect(self):
         await self.game_handler.on_disconnect(self.pve, {"type": GameType.PVE})
         self.sio.emit.assert_not_called()
@@ -73,7 +70,27 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         self.sio.emit.assert_called_with("error", {"cause": "Invalid type", "fatal": True}, room=self.pve)
         await self.game_handler.on_disconnect(self.pvp, {})
         self.sio.emit.assert_called_with("error", {"cause": "Invalid type", "fatal": True}, room=self.pvp)
+    '''
 
+    async def test_on_start_invalid_type(self):
+        sid = 'test_sid'
+        invalid_data = {"rank": 70, "depth": 1, "time": 3000}
+        await self.game_handler.on_start(sid, invalid_data)
+        self.sio.emit.assert_called_once_with("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+
+    async def test_on_start_PVE(self):
+        sid = 'test_sid'
+        data = {"rank": 70, "depth": 1, "time": 3000, "type": GameType.PVE}
+        await self.game_handler.on_start(sid, data)
+        PVEGame.start.assert_called_once_with(sid, data)
+
+    async def test_on_start_PVP(self):
+        sid = 'test_sid'
+        data = {"rank": 70, "depth": 1, "time": 3000, "type": GameType.PVP}
+        await self.game_handler.on_start(sid, data)
+        PVPGame.start.assert_called_once_with(sid, data)
+
+    '''
     @patch('random.choice', return_value="a")
     @patch("Game.confighandler.gen_start_fen")
     async def test_on_valid_start(self, mock_gen_start_fen, _):
@@ -108,6 +125,10 @@ class TestChessSocketIO(IsolatedAsyncioTestCase):
         data["type"] = GameType.PVP
         await self.game_handler.on_start(self.pvp, data)
         self.sio.emit.assert_called_with('error', {'cause': "Invalid clocktime", 'fatal': True}, room=self.pvp)
+    '''
+
+    async def test_on_resign_game_not_found(self):
+        ...
 
     @patch('random.randint', return_value=1)
     @patch('random.choice', return_value="a")

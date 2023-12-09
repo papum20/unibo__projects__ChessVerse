@@ -1,29 +1,29 @@
 import ImageScacchi from "../assets/logo.png";
-import { Image, Row, Col, Card, Modal, Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { useRef, useEffect, useState, useLayoutEffect } from "react";
-import Board from "./Board.jsx";
-import { createTheme,ThemeProvider } from '@mui/material/styles';
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Card, Col, Image, Modal, Nav, Row } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Gear, ExclamationDiamond } from 'react-bootstrap-icons';
 import { Button  } from "@mui/material";
-import {Gear, Clock, ExclamationDiamond} from 'react-bootstrap-icons';
 import "../styles/Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
-import { useNavigate } from "react-router-dom";
+import { PVP, PVE } from "../const/const.js";
+import ImageBlackTime from "../assets/blackTime.png";
+import ImageWhiteTime from "../assets/whiteTime.png";
+import Board from "./Board.jsx";
 import PropTypes from "prop-types";
 
 function Game({
-                  gameTime,
-                  botDiff,
-                  isLoadingGame, setIsLoadingGame,
-                  socket, setSocket,
-                  data,
-                  gameImb,
-                  mode,
-                  startFen,
-                  color,
-                  roomId
-              })
-{
+  gameTime,
+  isLoadingGame, setIsLoadingGame,
+  socket, setSocket,
+  data,
+  mode,
+  startFen,
+  color,
+  roomId,
+  user,
+}) {
     const { width, height } = useWindowDimensions();
     const [fontSize, setFontSize] = useState("20px");
 
@@ -36,13 +36,49 @@ function Game({
             setFontSize("26px");
     },[width]);
 
+    const defaultTime = new Date();
+    defaultTime.setSeconds(defaultTime.getSeconds() + gameTime);
+
     const navigator = useNavigate();
     const [moves, setMoves] = useState([]);
-    const [botMessages, setBotMessages] = useState(["ciao", "pippo", "pluto", "paperino", "ciao", "peppecasa", "pippo", "pluto", "paperino", "ciao", "pippo", "pluto", "paperino"]);
     const [showModalMenu, setShowModalMenu] = useState(false);
-    const [showGameOver, setShowGameOver] = useState(false);
-    const [showVictory, setVictory] = useState(false);
+    const [showEndGame, setShowEndGame] = useState(false);
+    const [timers, setTimers] = useState([gameTime, gameTime]);
+    const [timerInterval, setTimerInterval] = useState(null);
+    const [turn, setTurn] = useState(null);
+    const [game, setGame] = useState(null);
     const movesRef = useRef(null);
+
+    useEffect(() => {
+        if (turn === null) return;
+
+        const interval = 100;
+
+        if (timerInterval !== null)
+            clearInterval(timerInterval);
+
+        setTimerInterval(setInterval(() => {
+            setTimers((prevTime) => {
+                const updatedTime = [...prevTime];
+                updatedTime[Number(game.turn()==="b")]-=interval/1000;
+                return updatedTime;
+                });
+        }, interval));
+    
+        return () => {
+            clearInterval(timerInterval);
+            setTimerInterval(null);
+        }
+      }, [turn]);
+    
+
+    useEffect(()=>{
+        if(timers[0] <=1 || timers[1] <=1)
+        {
+            clearInterval(timerInterval);
+            setTimerInterval(null);
+        }
+    },[timers])
 
     const theme = createTheme({
         palette: {
@@ -55,62 +91,6 @@ function Game({
         },
     });
 
-    //inizio
-    class EventType {
-        static ERROR = new EventType(-1);
-        static RESIGN = new EventType(0);
-        static MOVE = new EventType(1);
-        static POP = new EventType(2);
-        static ACK = new EventType(3);
-        static CONFIG = new EventType(4);
-        static END = new EventType(5);
-        static START = new EventType(999);
-        #val
-
-        constructor(val) {
-            this.#val = val;
-        }
-
-        get value() {
-            return this.#val;
-        }
-
-        toString() {
-            return this.#val;
-        }
-    }
-
-    const [timer, setTimer] = useState(gameTime || 1);
-    const [timerId, setTimerId] = useState(null);
-
-    const startTimer = () => {
-        const newTimerId = setInterval(() => {
-          setTimer((prevTime) => prevTime - 1);
-        }, 1000);
-        setTimerId(newTimerId);
-      };
-
-    const stopTimer = () => {
-        clearInterval(timerId);
-        setTimerId(null);
-    };
-
-    const resumeTimer = () => {
-        if (timerId === null) {
-            startTimer();
-        }
-    };
-
-    useEffect(() => {
-        if (timer === 0) {
-            stopTimer();
-        }
-    }, [timer])
-    
-    function handleMenu(){
-        socket.emit("resign", {type: mode, id: roomId});
-        setSocket(undefined);
-    }
 
     function handleUndo (){
         socket.emit("pop", {type: mode, id: roomId});
@@ -126,93 +106,60 @@ function Game({
 
     //questo useEffect serve a fare in modo che se refreshi game ti fa tornare al menu
     useEffect(()=>{
-        if (socket === undefined || socket === null) {
+        if (socket === null) {
             navigator(`../`, { relative: "path" });
+       
         }
-    }, [socket])
+        else if(socket===undefined){
+            navigator(`../options`, { relative: "path" });
+        }
+        
+    }, [socket]);
+
+
+    const [modalType, setModalType] = useState(null);
 
     return (
         <div data-testid="game">
             <Modal
-              show={showGameOver}
+              show={showEndGame}
               centered
               dialogClassName="my-modal"
             >
-                <div style={{border: "4px solid red"}}>
+                <div style={{border: `${modalType === "gameover" ? "4px solid red" : modalType === "won" ? "4px solid green" : "4px solid gray"}`}}>
                     <Modal.Body style={{backgroundColor: "#b6884e"}}>
                         <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
-                            <span style={{fontWeight: "bold", marginRight: "10px"}}>Game Over</span>
-                            <ExclamationDiamond size={40} color="red" />
+                            <span style={{fontWeight: "bold", marginRight: "10px"}}>{`${modalType === "gameover" ? "Game Over" : modalType === "won" ? "You won!" :  "It's a tie!"}`}</span>
+                            <ExclamationDiamond size={40} color={`${modalType === "gameover" ? "red" : modalType === "won" ? "green" : "gray"}`} />
                         </div>
-                        {timer <= 0 &&
-                          <div style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              fontSize: `${fontSize}`,
-                              marginTop: "20px"
-                          }}>
-                              <p>The time has run out</p>
-                          </div>
-                        }
                         <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
                             <ThemeProvider theme={theme}>
+
                                 <Nav.Link
                                   as={Link}
-                                  to="/"
+                                  to="/options"
                                   style={{display: "flex", justifyContent: "center"}}
-                                >
+    >
                                     <Button
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
                                       onClick={() => {socket.emit("resign", {type: mode, id: roomId}); 
-                                                        setSocket(undefined);
+                                                        setSocket(undefined); 
                                                     }}
                                       variant="contained"
                                     >
                                         Return to menu
                                     </Button>
-                                </Nav.Link>
+                                    </Nav.Link>
                             </ThemeProvider>
                         </div>
                     </Modal.Body>
                 </div>
             </Modal>
 
-            <Modal
-              show={showVictory}
-              centered
-              dialogClassName="my-modal"
-            >
-                <div style={{border: "4px solid green"}}>
-                    <Modal.Body style={{backgroundColor: "#b6884e"}}>
-                        <div style={{display: "flex", justifyContent: "center", fontSize: `${fontSize}`}}>
-                            <span style={{fontWeight: "bold", marginRight: "10px"}}>You won!</span>
-                            <ExclamationDiamond size={40} color="green" />
-                        </div>
-                        
-                        <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
-                            <ThemeProvider theme={theme}>
-                                <Nav.Link
-                                  as={Link}
-                                  to="/"
-                                  style={{display: "flex", justifyContent: "center"}}
-                                >
-                                    <Button
-                                      style={{fontSize: "1.2rem"}}
-                                      size="large"
-                                      color="brown"
-                                      onClick={() => {setSocket(undefined); }}
-                                      variant="contained"
-                                    >
-                                        Return to menu
-                                    </Button>
-                                </Nav.Link>
-                            </ThemeProvider>
-                        </div>
-                    </Modal.Body>
-                </div>
-            </Modal>
+            
+            
 
             <Modal
               show={showModalMenu}
@@ -237,20 +184,22 @@ function Game({
                             >
                                 No
                             </Button>
-                            <Nav.Link as={Link} to="/">
-                                <Button
-                                  style={{fontSize: "1.2rem"}}
-                                  size="large"
-                                  color="brown"
-                                  onClick={(e)=> {
-                                      e.stopPropagation();
-                                      handleMenu();
-                                  }}
-                                  variant="contained"
+
+                            <Nav.Link
+                                  as={Link}
+                                  to="/options"
+                                  style={{display: "flex", justifyContent: "center"}}
                                 >
-                                    Yes
-                                </Button>
-                            </Nav.Link>
+                                    <Button
+                                      style={{fontSize: "1.2rem"}}
+                                      size="large"
+                                      color="brown"
+                                      onClick={() => {setSocket(undefined); socket.emit("resign", {type: mode, id: roomId});}}
+                                      variant="contained"
+                                    >
+                                        Yes
+                                    </Button>
+                                </Nav.Link>
                         </ThemeProvider>
                     </div>
                 </Modal.Body>
@@ -262,11 +211,16 @@ function Game({
                     <Row>
                         <Col>
                             <Row style={{marginBottom: "20px"}}>
-                                <Col style={{display:"flex", justifyContent:"flex-end"}}>
-                                    <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
-                                        <Clock size={30}/>
-                                        <p style={{marginLeft: "10px"}}>{timer}</p>
-                                    </div>
+                                <Col >
+                                    <div style={{marginTop: "40px", marginLeft: "70px"}}>
+                                        <span style={{fontWeight: "bold"}}>{mode=== PVE ? "Stockfish" : "pippo"}</span>
+                                        {mode === PVP &&
+                                            <>
+                                                <img src={`${ImageBlackTime}`} alt="clock black" style={{maxWidth: "30px", maxHeight: "30px", marginTop: "-6px", marginLeft: "10px"}}/>
+                                                    <span>{`${String(Math.floor(timers[1] / 60)).padStart(2, '0')}:${String(Math.floor(timers[1] % 60)).padStart(2, '0')}`}</span>
+                                            </>
+                                        }
+                                        </div>
                                 </Col>
                                 <Col style={{display:"flex", justifyContent:"flex-end", marginRight: "-200px"}}>
                                     <Image src={`${ImageScacchi}`} style={{width: "50px", height: "50px", opacity: 0.8}} alt="immagine di scacchi" />
@@ -292,11 +246,11 @@ function Game({
                             <div>
                                 <Board
                                   navigator={navigator}
-                                  setVictory={setVictory}
+                                  
                                   width={width}
                                   height={height}
-                                  startTimer={startTimer}
-                                  setShowGameOver={setShowGameOver}
+                                  setShowEndGame={setShowEndGame}
+                                  setModalType={setModalType}
                                   setMoves={setMoves}
                                   data={data}
                                   isLoadingGame={isLoadingGame}
@@ -306,7 +260,11 @@ function Game({
                                   mode={mode}
                                   startFen={startFen}
                                   color={color}
+                                  setTurn={setTurn}
+                                  updateTimers={setTimers}
                                   roomId={roomId}
+                                  game={game}
+                                  setGame={setGame}
                                 />
                             </div>
                         </div>
@@ -314,7 +272,7 @@ function Game({
                     <Col style={{maxWidth:"50vw"}}>
                     <Row>
                     <Col>
-                    <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
+                    <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px", marginRight: "10px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>
                                     Moves History
@@ -322,18 +280,32 @@ function Game({
                             </Card.Title>
                             <Card.Body ref={movesRef} style={{overflow: "auto", height: `calc(${height}px / 2)`, marginLeft: "20px", marginBottom: "20px", overflowY:"auto"}}>
                                 <Row>
-                                    <Col>
+                                    <Col sm={2}>
+                                        {moves.map((el, i) =>{
+                                            if(i % 2 === 0) {
+                                                return (
+                                                    <span  style={{fontWeight: "bold", display: "flex", alignItems: "center", paddingTop: "8px", paddingBottom: "8px", marginBottom: "10px", }} key={i}> 
+                                                        {Math.floor(i/2)+1}.
+                                                    </span>
+                                                )
+                                            }
+                                        })
+                                        
+                                        }
+                                    </Col>
+                                    <Col sm={5}>
                                     {moves.map((el,i) => {
                                         if(i % 2 === 0) {
                                             return (
-                                            <Card style={{marginBottom: "10px", backgroundColor: "#9f7a48", border: `3px solid white`, display: "flex", alignItems: "center" }} key={i}>
-                                                <span style={{paddingTop: "5px", paddingBottom: "5px"}}>{el}</span>
-                                            </Card>
+                                                    <Card style={{marginBottom: "10px", backgroundColor: "#9f7a48", border: `3px solid white`, display: "flex", alignItems: "center" }} key={i}>         
+                                                        <span style={{paddingTop: "5px", paddingBottom: "5px"}}>{el}</span>
+                                                    </Card>
+                                                
                                             )
                                         }
                                     })}
                                     </Col>
-                                    <Col>
+                                    <Col sm={5}>
                                     {moves.map((el,i) => {
                                         if(i % 2 === 1){
                                             return (
@@ -362,47 +334,35 @@ function Game({
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col>
-                        <Card style={{marginRight: "30px", backgroundColor: "#b6884e", marginTop: "120px"}}> 
-                            <Card.Title style={{display: 'flex', justifyContent: "center"}}>
-                                <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>
-                                    Chat
-                                </p>
-                            </Card.Title>
-                            <Card.Body style={{overflow: "auto", height: `calc(${height}px / 2)`, marginLeft: "20px", marginBottom: "20px", overflowY: "auto"}}>
-                                {botMessages.map((el,i) => 
-                                    <Card style={{marginTop: "10px", marginBottom: "10px", backgroundColor: "#9f7a48"}} key={i}>
-                                        <Card.Body>
-                                            <p>{el}</p>
-                                        </Card.Body>
-                                    </Card>
-                                )
-                                }
-                            </Card.Body>
-                        </Card>
-                    </Col>
                     </Row>
                     </Col>
+                </Row>
+                <Row  >
+                    <Col style={{display: "flex", justifyContent: "center", marginTop: "20px", marginLeft: "-140px"}}>
+                        <span style={{marginRight: "15px", fontWeight: "bold"}}>{user}</span>
+                        <img src={`${ImageWhiteTime}`} alt="clock white" style={{maxWidth: "30px", maxHeight: "30px", marginTop: "-6px"}}/>
+                        <span>{`${String(Math.floor(timers[0] / 60)).padStart(2, '0')}:${String(Math.floor(timers[0] % 60)).padStart(2, '0')}`}</span>
+                    </Col>
+               
                 </Row>
                 </ThemeProvider>
             </div>
         </div>
-    )
+    );
 }
 
 Game.propTypes = {
     gameTime: PropTypes.number,
-    botDiff: PropTypes.number,
     isLoadingGame: PropTypes.bool,
     setIsLoadingGame: PropTypes.func,
     socket: PropTypes.object,
     setSocket: PropTypes.func,
-    gameImb: PropTypes.number,
     mode: PropTypes.number,
     data: PropTypes.object,
     startFen: PropTypes.string,
     color: PropTypes.string,
-    roomId: PropTypes.string
+    roomId: PropTypes.string,
+    user: PropTypes.string,
 }
 
 export default Game;

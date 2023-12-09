@@ -7,10 +7,13 @@ from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
+from time import perf_counter
 import ssl
 import mysql.connector
 
 active_clients = {}
+
+
 class GameHandler:
     def __init__(self):
         pass
@@ -38,25 +41,24 @@ class GameHandler:
         if sid in Game.sid_to_id:
             game_id = Game.sid_to_id[sid]
             if isinstance(game_id, dict):
-                if game_id in Game.waiting_list[game_id["time"]][game_id["index"]]:
-                    Game.waiting_list[game_id["time"]][game_id["index"]].remove(game_id)
+                Game.waiting_list[game_id["time"]][game_id["index"]] = [waiting for waiting in Game.waiting_list[game_id["time"]][game_id["index"]] if waiting["sid"] != sid]
+                del Game.sid_to_id[sid]
             else:
                 if game_id in Game.games:
                     await Game.games[game_id].disconnect(sid)
 
     async def on_start(self, sid, data):
-        print(Game.games, Game.sid_to_id, Game.waiting_list)
         if("type" not in data.keys()):
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-        elif(data["type"] == GameType.PVE):
+        elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
-        elif(data["type"] == GameType.PVP):
+        elif data["type"] == GameType.PVP:
             await PVPGame.start(sid, data)
         else:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
-        if("type" not in data.keys()):
+        if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
         if game is None:
@@ -65,7 +67,6 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
-        print(Game.games, Game.sid_to_id, Game.waiting_list)
         game = GameHandler.sid2game(sid)
         if game is None:
             await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
@@ -73,8 +74,8 @@ class GameHandler:
         await game.disconnect(sid)
 
     async def on_pop(self, sid, data):
-        if("type" not in data.keys()):
-            await self.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
         if game is None:
             await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
@@ -87,9 +88,9 @@ class GameHandler:
             for id in list(Game.games.keys()):
                 if id not in Game.games:
                     continue
-
                 for player in Game.games[id].players:
-                    if not player.has_time():
+                    player_time = player.remaining_time - (perf_counter() - player.latest_timestamp)
+                    if player.is_timed and player_time <= 0:
                         await Game.sio.emit("timeout", {}, room=player.sid)
                         await self.on_disconnect(player.sid)
 

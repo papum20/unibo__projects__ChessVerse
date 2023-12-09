@@ -1,10 +1,9 @@
 import chess
-import confighandler
 import Player
-import os
-from socketio import AsyncServer
+import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS
+
 
 class Game(ABC):
     sio = None
@@ -16,8 +15,6 @@ class Game(ABC):
     __slots__ = ["fen", "board", "players", "turn", "popped"]
 
     def __init__(self, sids: [], rank: int, time: int) -> None:
-        if confighandler.get_configs() is None:
-            confighandler.load_configs(os.path.join(os.path.dirname(__file__), 'configs.csv'))
         self.fen = confighandler.gen_start_fen(rank)
         self.board = chess.Board(self.fen)
         self.players = []
@@ -88,3 +85,6 @@ class Game(ABC):
             await self.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
             return False
         return True
+
+    def get_times(self):
+        return [player.remaining_time for player in self.players]
