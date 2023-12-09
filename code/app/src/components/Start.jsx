@@ -50,8 +50,8 @@ function Start({
         setShowModal(false);
         setIsLoadingGame(true);
         const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
-	const secure = import.meta.env.VITE_NODE_ENV == "production";
-	const options = { transports: ["websocket"], secure}
+        const secure = import.meta.env.VITE_NODE_ENV == "production";
+        const options = { transports: ["websocket"], secure}
         setSocket(io(host, options));
     }
 
@@ -60,15 +60,14 @@ function Start({
             socket.connect();
             socket.on('connect', () => {
                 socket.on("config", (data) => {
-                    console.log("config", data);
                     if(!data){
                       props.socket?.on("start", props.data);
                     }
                     else {
-                      setStartFen(data.fen);
-                      setColor(data.color);
-                      setRoomId(data.id);
-                      setIsLoadingGame(false);
+                        setStartFen(data.fen);
+                        setColor(data.color);
+                        setRoomId(data.id);
+                        setIsLoadingGame(false);
                     }
                   })
 
@@ -153,14 +152,15 @@ function Start({
                         :
                         <div style={{marginTop: "20px", display: "flex", justifyContent: "center"}}>
                             <Form.Label style={{marginRight: "20px"}}>
-                                Clocktime in sec: 
+                                Clocktime in minutes: 
                             </Form.Label>
                             {
                                 TIME_OPTIONS.map((el,i) => 
                                 <Form.Check
                                     key={i}
                                     inline
-                                    label={el}
+                                    // label={`${el%60}`}
+                                    label={`${Math.floor(el/60)}`}
                                     type="radio"
                                     id={el}
                                     name="clocktime"
@@ -202,7 +202,7 @@ function Start({
                                   width: "100px",
                                   height: "100px",
                                   opacity: 0.8,
-                                  marginTop: "-60px"
+                                  marginTop: "-5px"
                               }}
                             />
                             <span style={{color: "white", fontSize: "5rem"}}>ChessVerse</span>
@@ -263,8 +263,8 @@ function Start({
                                       style={{
                                           width: "30px",
                                           height: "30px",
-                                          marginBottom: "-5px",
-                                          marginRight: "5px"
+                                          marginBottom: "5px",
+                                          marginRight: "2px"
                                       }}
                                     />
                                     <span>Single Player</span>
@@ -289,7 +289,7 @@ function Start({
                                       style={{
                                           width: "50px",
                                           height: "30px",
-                                          marginBottom: "-5px",
+                                          marginBottom: "2px",
                                           marginRight: "10px"
                                       }}
                                     />

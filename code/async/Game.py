@@ -87,4 +87,4 @@ class Game(ABC):
         return True
 
     def get_times(self):
-        return [player.time for player in self.players]
+        return [player.remaining_time for player in self.players]

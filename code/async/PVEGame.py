@@ -43,8 +43,10 @@ class PVEGame(Game):
 
     async def disconnect(self, sid: str) -> None:
         await self.bot.quit()
-        del Game.games[sid]
-        del Game.sid_to_id[sid]
+        if sid in Game.games:
+            del Game.games[sid]
+        if sid in Game.sid_to_id:
+            del Game.sid_to_id[sid]
 
     async def instantiate_bot(self) -> None:
         self.bot = (await popen_uci("./stockfish"))[1]
@@ -56,7 +58,7 @@ class PVEGame(Game):
         if data["san"] is None:
             await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
             return
-        if not self.current.has_time():
+        if not self.current.has_time(True):
             return
         try:
             uci_move = self.board.parse_san(data["san"]).uci()
@@ -82,7 +84,6 @@ class PVEGame(Game):
         self.popped = False
         end = perf_counter()
         self.current.add_time(end - start)
-        self.current.first_move = False
         await Game.sio.emit("move", {"san": san_bot_move, "time": self.get_times()}, room=sid)
 
     async def pop(self, sid: str) -> None:

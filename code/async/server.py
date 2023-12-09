@@ -7,6 +7,7 @@ from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
+from time import perf_counter
 import ssl
 import mysql.connector
 
@@ -87,9 +88,9 @@ class GameHandler:
             for id in list(Game.games.keys()):
                 if id not in Game.games:
                     continue
-
                 for player in Game.games[id].players:
-                    if not player.has_time():
+                    player_time = player.remaining_time - (perf_counter() - player.latest_timestamp)
+                    if player.is_timed and player_time <= 0:
                         await Game.sio.emit("timeout", {}, room=player.sid)
                         await self.on_disconnect(player.sid)
 

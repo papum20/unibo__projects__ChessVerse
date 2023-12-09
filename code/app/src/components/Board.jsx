@@ -7,7 +7,7 @@ import {PVE, PVP} from "../const/const.js";
 
 
 function Board(props) {
-  const [game, setGame] = useState(null);
+ 
   const [moveSan, setMoveSan] = useState(null);
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -16,13 +16,11 @@ function Board(props) {
   const [optionSquares, setOptionSquares] = useState({});
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
-  const [firstMove, setFirstMove] = useState(true);
   const [position, setPosition] = useState("");
 
   
-  
   function safeGameMutate(modify) {
-    setGame((g) => {
+    props.setGame((g) => {
       const update = { ...g };
       modify(update);
       return update;
@@ -30,7 +28,7 @@ function Board(props) {
   }
 
   function getMoveOptions(square) {
-    const moves = game.moves({
+    const moves = props.game.moves({
       square,
       verbose: true,
     });
@@ -43,8 +41,8 @@ function Board(props) {
     moves.map((move) => {
       newSquares[move.to] = {
         background:
-          game.get(move.to) &&
-          game.get(move.to).color !== game.get(square).color
+          props.game.get(move.to) &&
+          props.game.get(move.to).color !== props.game.get(square).color
             ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
             : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
         borderRadius: "50%",
@@ -63,7 +61,7 @@ function Board(props) {
     const makeOppMove = async () => {
       if (oppMoveSan) {
         const updatedGame = new Chess();
-        updatedGame.load(game.fen()); // Carica la posizione attuale della scacchiera
+        updatedGame.load(props.game.fen()); // Carica la posizione attuale della scacchiera
 
         const move = updatedGame.move(oppMoveSan);
         if (move) {
@@ -71,7 +69,7 @@ function Board(props) {
           await new Promise(resolve => setTimeout(resolve, 300));
 
           safeGameMutate((game) => {
-            game.move(move.san, { sloppy: true });
+            props.game.move(move.san, { sloppy: true });
           });
 
           setOppMoveSan(null);
@@ -94,7 +92,7 @@ function Board(props) {
     // to square
     if (!moveTo) {
       // check if valid move before showing dialog
-      const moves = game.moves({
+      const moves = props.game.moves({
         square: moveFrom,
         verbose: true,
       });
@@ -127,7 +125,7 @@ function Board(props) {
       }
       
       // is normal move
-      const gameCopy = { ...game };
+      const gameCopy = { ...props.game };
       // const gameCopy = async;
       const move = gameCopy.move({
         from: moveFrom,
@@ -142,7 +140,7 @@ function Board(props) {
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-      setGame(gameCopy);
+      props.setGame(gameCopy);
 
       resetMove();
     }
@@ -151,14 +149,14 @@ function Board(props) {
   async function onPromotionPieceSelect(piece) {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
-      const gameCopy = { ...game };
+      const gameCopy = { ...props.game };
       const move = gameCopy.move({
         from: moveFrom,
         to: moveTo,
         promotion: piece[1].toLowerCase() ?? "q",
       });
       setMoveSan(move.san);
-      setGame(gameCopy);
+      props.setGame(gameCopy);
     }
 
     setShowPromotionDialog(false);
@@ -176,86 +174,57 @@ function Board(props) {
     if(props.startFen){
       const newGame = new Chess();
           newGame.load(props.startFen);
-          setGame(newGame);
+          props.setGame(newGame);
     }
   },[props.startFen])
 
   useEffect(()=>{
-
     async function wait (){
       await new Promise((resolve) => setTimeout(resolve, 600));
       props.setIsLoadingGame(false);
-
     } 
-    if(!!game){
-      wait();
-    }
-    
-
-  },[game])
+    if(!!props.game) wait(); 
+  },[props.game]);
 
   useEffect(()=>{
-    if(!!moveSan){
-      if(firstMove){
-        setFirstMove(false);
-        props.startTimer();
-      }
-      /*
-      if(props.mode===PVE || props.color==="white")
-        props.startWhite;
-      else
-        props.startBlack;
-*/
-      props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
-      props.stopTimer();
-      setMoveSan(null);
-      setAwaitingOppMove(true);
-    }
-  },[moveSan])
+    if (!moveSan) return;
+    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
+    props.setMoves(prevValue => [...prevValue, moveSan]);
+    console.log("inviata mossa, cambio turno")
+    props.setTurn(prevValue => {console.log("vecchio:", prevValue, "nuovo:", 1-prevValue); return 1-prevValue;});
+    setMoveSan(null);
+    setAwaitingOppMove(true);
+  },[moveSan]);
 
-const [getPop, setGetPop] = useState(false);
+  const [getPop, setGetPop] = useState(false);
 
   useEffect(()=>{
+    props.socket?.on("ack", (res) =>{
+      props.updateTimers(res.time);
+    });
     props.socket?.on("move", (res) =>{
+      props.setMoves(prevValue => [...prevValue, res.san]);
       setOppMoveSan(res.san);
       setAwaitingOppMove(false);
-      props.startTimer();
-/*
-      if(props.color==="white")
-        props.startBlack;
-      else
-        props.startWhite;
-*/
-
-      //props.setWhiteTimer(res.time[0]);
-      //props.setBlackTimer(res.time[1] ?? -1);
-      //props.setTurn(0);
-     // props.setTimerOn(true);
-      console.log("prendo la mossa e setto il timer ON")
+      console.log("ricevuta mossa, cambio turno")
+      props.setTurn(prevValue => {console.log("vecchio:", prevValue, "nuovo:", 1-prevValue); return 1-prevValue;});
+      props.updateTimers(res.time);
     });
     props.socket?.on("end", (res) =>{
-      if (res.winner)
-        props.setVictory(true);
-      else
-        props.setShowGameOver(true);
+      if (res.winner) props.setShowVictory(true);
+      else if (res.winner === false) props.setShowGameOver(true);
+      else props.setShowTie(true);
       props.socket.disconnect();
-      // TODO 
-      // else if (winner.winner === false){
-      //   props.setShowGameOver(true);
-      // }
-      // else {
-      //   props.setShowTie(true);
-      // }
-    
-    })
+    });
 
     props.socket?.on("timeout", (_data) =>{
         props.setShowGameOver(true);
-    })
+    });
     
     props.socket?.on("pop", () => {
       setGetPop(prevValue => !prevValue);
-    })
+    });
+
     props.socket?.on("error", (error) =>{
       toast.error(error.cause, {className: "toast-message"});
       if(error.fatal){
@@ -268,33 +237,27 @@ const [getPop, setGetPop] = useState(false);
         props.navigator(`../`, { relative: "path" });
       }
     })
-  },[])
+  },[]);
 
   useEffect(()=>{
-      if(!!game){
-        game.undo();
-        game.undo();
-        setPosition(game.fen());
+      if(!!props.game){
+        props.game.undo();
+        props.game.undo();
+        setPosition(props.game.fen());
         setMoveSan(null);
         setOppMoveSan(null);
-       
       }
-      
-  },[getPop])
+  },[getPop]);
+
+
 
 
   useEffect(()=>{
-    if(game){
-      props.setMoves(game.history());
+    if (props.game){
+      setPosition(props.game.fen());
+      props.setTurn(0);
     }
-  },[game, getPop])
-
-
-  useEffect(()=>{
-    if (game){
-      setPosition(game.fen());
-    }
-  },[game])
+  },[props.game]);
 
   return (
     <>

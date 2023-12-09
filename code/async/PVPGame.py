@@ -1,4 +1,5 @@
 from Game import Game
+from time import perf_counter
 import json
 import random
 from const import TIME_OPTIONS, MIN_RANK, MAX_RANK
@@ -23,14 +24,16 @@ class PVPGame(Game):
 	async def disconnect(self, sid: str) -> None:
 		await self.update_win_database(sid=self.opponent(sid).sid)
 		await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
-		await Game.sio.disconnect(sid=self.opponent(sid).sid)
+		[await Game.sio.disconnect(sid=player.sid) for player in self.players]
 		if sid not in Game.sid_to_id:
 			return
-		elif Game.sid_to_id[sid] in Game.games:
+		else:
+			for player in self.players:
+				if player.sid in Game.sid_to_id:
+					del Game.sid_to_id[player.sid]
+			del Game.games[Game.sid_to_id[sid]]
 			if self.opponent(sid).sid in Game.sid_to_id:
 				del Game.sid_to_id[self.opponent(sid).sid]
-			del Game.games[Game.sid_to_id[sid]]
-			del Game.sid_to_id[sid]
 
 	async def pop(self, sid: str) -> None:
 		if sid not in Game.sid_to_id:
@@ -84,8 +87,9 @@ class PVPGame(Game):
 			await self.disconnect(self.next.sid)
 			return
 		self.popped = False
-		self.current.first_move = False
+		await Game.sio.emit("ack", {"time": self.get_times()}, room=self.current.sid)
 		self.swap()
+		self.current.latest_timestamp = perf_counter()
 		await Game.sio.emit("move", {"san": san_move, "time": self.get_times()}, room=self.current.sid)
 
 	@classmethod
