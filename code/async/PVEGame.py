@@ -4,8 +4,14 @@ from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from time import perf_counter
 
+
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
+
+    def __init__(self, player: str, rank: int, depth: int, time: int) -> None:
+        super().__init__([player], rank, time)
+        self.bot = None
+        self.depth = depth
 
     @classmethod
     async def start(cls, sid: str, data: dict[str, str]) -> None:
@@ -30,22 +36,19 @@ class PVEGame(Game):
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid # solo in PVE;
             Game.games[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]))
-            await Game.games[sid].instanciate_bot()
+            await Game.games[sid].instantiate_bot()
             await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
         else:
             await Game.sio.emit("error", {"cause": "SID already used", "fatal": True}, room=sid)
 
-    def __init__(self, player: str, rank: int, depth: int, time: int) -> None:
-        super().__init__([player], rank, time)
-        self.bot = None
-        self.depth = depth
-
     async def disconnect(self, sid: str) -> None:
         await self.bot.quit()
-        del Game.games[sid]
-        del Game.sid_to_id[sid]
+        if sid in Game.games:
+            del Game.games[sid]
+        if sid in Game.sid_to_id:
+            del Game.sid_to_id[sid]
 
-    async def instanciate_bot(self) -> None:
+    async def instantiate_bot(self) -> None:
         self.bot = (await popen_uci("./stockfish"))[1]
 
     async def move(self, sid: str, data: dict[str, str]) -> None:
@@ -55,7 +58,7 @@ class PVEGame(Game):
         if data["san"] is None:
             await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
             return
-        if not self.current.has_time():
+        if not self.current.has_time(True):
             return
         try:
             uci_move = self.board.parse_san(data["san"]).uci()
@@ -81,8 +84,7 @@ class PVEGame(Game):
         self.popped = False
         end = perf_counter()
         self.current.add_time(end - start)
-        self.current.first_move = False
-        await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
+        await Game.sio.emit("move", {"san": san_bot_move, "time": self.get_times()}, room=sid)
 
     async def pop(self, sid: str) -> None:
         if self.popped:
@@ -93,4 +95,4 @@ class PVEGame(Game):
             self.board.pop()
             self.board.pop()
             self.popped = True
-            await Game.sio.emit("pop", {}, room=sid)
+            await Game.sio.emit("pop", {"time": self.get_times()}, room=sid)

@@ -11,4 +11,11 @@ export default defineConfig({
     assetsInlineLimit: 0,
     minify: "terser",
   },
+  server: {
+    //port: process.env.REACT_APP_PORT,
+    https: process.env.IS_LOCAL === 'true' ? {
+      key: './cert/key.pem',
+      cert: './cert/cert.pem',
+    } : false,
+  },
 });

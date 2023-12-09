@@ -82,17 +82,6 @@ class RegisteredUsersModelTest(TestCase):
         default = user._meta.get_field('EloReallyBadChess').default
         self.assertEqual(default, 1000)
 
-    '''test_elo_sc'''
-    def test_elo_sc_label(self):
-        user = RegisteredUsers.objects.get(username='test_user')
-        field_label = user._meta.get_field('EloSecondChess').verbose_name
-        self.assertEqual(field_label, 'EloSecondChess')
-
-    def test_elo_sc_default(self):
-        user = RegisteredUsers.objects.get(username='test_user')
-        default = user._meta.get_field('EloSecondChess').default
-        self.assertEqual(default, 1000)
-
     '''test_session_id'''
     def test_session_id_label(self):
         user = RegisteredUsers.objects.get(username='test_user')

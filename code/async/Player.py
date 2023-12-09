@@ -11,7 +11,6 @@ class Player:
         if self.is_timed:
             self.remaining_time = time
             self.latest_timestamp = perf_counter()
-        self.first_move = True
 
     def __eq__(self, sid: str):
         return self.sid == sid
@@ -22,8 +21,7 @@ class Player:
 
     def update_time(self):
         if self.is_timed:
-            if not self.first_move:
-                self.remaining_time -= perf_counter() - self.latest_timestamp
+            self.remaining_time -= perf_counter() - self.latest_timestamp
             self.latest_timestamp = perf_counter()
 
     def has_time(self, update=True):
