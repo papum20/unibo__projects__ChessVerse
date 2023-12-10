@@ -41,3 +41,19 @@ Content-Type: application/json
     "username": "peppecasa",
     "password": "ciao1234"
 }
+
+###
+GET http://127.0.0.1:8000/backend/get_daily_leaderboard/
+Content-Type: application/json
+
+{
+
+}
+
+###
+GET http://127.0.0.1:8000/backend/get_weekly_leaderboard/
+Content-Type: application/json
+
+{
+
+}
