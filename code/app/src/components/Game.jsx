@@ -1,7 +1,7 @@
 import ImageScacchi from "../assets/logo.png";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Card, Col, Image, Modal, Nav, Row } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Gear, ExclamationDiamond } from 'react-bootstrap-icons';
 import { Button  } from "@mui/material";
@@ -12,6 +12,8 @@ import ImageBlackTime from "../assets/blackTime.png";
 import ImageWhiteTime from "../assets/whiteTime.png";
 import Board from "./Board.jsx";
 import PropTypes from "prop-types";
+import Social from "./Social.jsx";
+
 
 function Game({
   gameTime,
@@ -26,6 +28,8 @@ function Game({
 }) {
     const { width, height } = useWindowDimensions();
     const [fontSize, setFontSize] = useState("20px");
+
+
 
     useLayoutEffect(()=>{
         if(width < 440)
@@ -71,6 +75,8 @@ function Game({
         }
       }, [turn]);
     
+
+    var location = useLocation();
 
     useEffect(()=>{
         if(timers[0] <=1 || timers[1] <=1)
@@ -119,6 +125,8 @@ function Game({
 
     const [modalType, setModalType] = useState(null);
 
+
+
     return (
         <div data-testid="game">
             <Modal
@@ -132,13 +140,12 @@ function Game({
                             <span style={{fontWeight: "bold", marginRight: "10px"}}>{`${modalType === "gameover" ? "Game Over" : modalType === "won" ? "You won!" :  "It's a tie!"}`}</span>
                             <ExclamationDiamond size={40} color={`${modalType === "gameover" ? "red" : modalType === "won" ? "green" : "gray"}`} />
                         </div>
-                        <div style={{display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px"}}>
+                        <div style={{display: "flex", justifyContent: "space-around", marginTop: "40px", marginBottom: "15px"}}>
                             <ThemeProvider theme={theme}>
 
-                                <Nav.Link
+                                <Nav.Link 
                                   as={Link}
                                   to="/options"
-                                  style={{display: "flex", justifyContent: "center"}}
     >
                                     <Button
                                       style={{fontSize: "1.2rem"}}
@@ -150,8 +157,11 @@ function Game({
                                       variant="contained"
                                     >
                                         Return to menu
-                                    </Button>
-                                    </Nav.Link>
+                                    </Button>   
+                                </Nav.Link>
+                                <div style={{marginTop: "10px"}}>
+                                    <Social url={import.meta.env.VITE_SITO + location.pathname} modalType={modalType} enemyUser={`${mode === PVE ? "Stockfish" : "pippo"}`} diff={`${mode === PVE ? data.depth : "elo del nemico"}`} mode={mode}/>       
+                                </div>
                             </ThemeProvider>
                         </div>
                     </Modal.Body>
@@ -246,11 +256,11 @@ function Game({
                             <div>
                                 <Board
                                   navigator={navigator}
-                                  
                                   width={width}
                                   height={height}
                                   setShowEndGame={setShowEndGame}
                                   setModalType={setModalType}
+                                  moves={moves}
                                   setMoves={setMoves}
                                   data={data}
                                   isLoadingGame={isLoadingGame}
@@ -282,10 +292,10 @@ function Game({
                                 <Row>
                                     <Col sm={2}>
                                         {moves.map((el, i) =>{
-                                            if(i % 2 === 0) {
+                                            if(el.index % 2 === 0) {
                                                 return (
                                                     <span  style={{fontWeight: "bold", display: "flex", alignItems: "center", paddingTop: "8px", paddingBottom: "8px", marginBottom: "10px", }} key={i}> 
-                                                        {Math.floor(i/2)+1}.
+                                                        {Math.floor(el.index/2)+1}.
                                                     </span>
                                                 )
                                             }
@@ -295,10 +305,10 @@ function Game({
                                     </Col>
                                     <Col sm={5}>
                                     {moves.map((el,i) => {
-                                        if(i % 2 === 0) {
+                                        if(el.index % 2 === 0) {
                                             return (
-                                                    <Card style={{marginBottom: "10px", backgroundColor: "#9f7a48", border: `3px solid white`, display: "flex", alignItems: "center" }} key={i}>         
-                                                        <span style={{paddingTop: "5px", paddingBottom: "5px"}}>{el}</span>
+                                                    <Card style={{marginBottom: "10px", backgroundColor: "#9f7a48", border: `${el.isUndo ? "3px solid red" : "3px solid white"}`, display: "flex", alignItems: "center" }} key={i}>         
+                                                        <span style={{paddingTop: "5px", paddingBottom: "5px"}}>{el.move}</span>
                                                     </Card>
                                                 
                                             )
@@ -307,18 +317,18 @@ function Game({
                                     </Col>
                                     <Col sm={5}>
                                     {moves.map((el,i) => {
-                                        if(i % 2 === 1){
+                                        if(el.index % 2 === 1){
                                             return (
                                               <Card style={{
                                                   marginBottom: "10px",
                                                   backgroundColor: "#9f7a48",
-                                                  border: `3px solid black`,
+                                                  border: `${el.isUndo ? "3px solid red" : "3px solid black"}`,
                                                   display: "flex",
                                                   alignItems: "center"
                                               }} key={i}
                                               >
                                                   <span style={{paddingTop: "5px", paddingBottom: "5px"}}>
-                                                      {el}
+                                                      {el.move}
                                                   </span>
                                               </Card>
                                             )

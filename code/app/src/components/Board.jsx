@@ -188,8 +188,8 @@ function Board(props) {
 
   useEffect(()=>{
     if (!moveSan) return;
-    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});
-    props.setMoves(prevValue => [...prevValue, moveSan]);
+    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});       
+    props.setMoves(prevValue => [...prevValue, {index: prevValue.length, move: moveSan, isUndo: false}]);
     props.setTurn(prevValue => {return 1-prevValue;});
     setMoveSan(null);
     setAwaitingOppMove(true);
@@ -202,7 +202,7 @@ function Board(props) {
       props.updateTimers(res.time);
     });
     props.socket?.on("move", (res) =>{
-      props.setMoves(prevValue => [...prevValue, res.san]);
+      props.setMoves(prevValue => [...prevValue, {index: prevValue.length, move: res.san, isUndo: false}]);
       setOppMoveSan(res.san);
       setAwaitingOppMove(false);
       props.setTurn(prevValue => { return 1-prevValue;});
@@ -241,6 +241,12 @@ function Board(props) {
 
   useEffect(()=>{
       if(!!props.game){
+
+        const currentMoves = [...props.moves];
+        currentMoves[currentMoves.length - 1].isUndo = true;
+        currentMoves[currentMoves.length - 2].isUndo = true;
+        props.setMoves(currentMoves);
+
         props.game.undo();
         props.game.undo();
         setPosition(props.game.fen());
@@ -258,6 +264,8 @@ function Board(props) {
       props.setTurn(0);
     }
   },[props.game]);
+
+  
 
   return (
     <>

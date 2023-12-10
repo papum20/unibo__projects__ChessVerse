@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
 # only install production dependencies
 ENV VITE_NODE_ENV production
 ENV VITE_ASYNC_HOST https://www.chessverse.cloud:8080
+ENV VITE_SITO https://www.chessverse.cloud
 WORKDIR /usr/src/app
 # don't run as root #1
 COPY --chown=node:node . .
