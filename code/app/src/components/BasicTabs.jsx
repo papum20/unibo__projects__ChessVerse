@@ -56,14 +56,14 @@ export default function BasicTabs(props) {
         sx={{ borderRight: 1, borderColor: 'divider' }}
       >
         <Tab style={{color: "white", marginTop: "20px"}} onClick={()=> props.setFocus("daily board")} label="Daily Board" {...a11yProps(0)} />
-        <Tab style={{color: "white"}} label="Weekly challenge" onClick={()=> props.setFocus("weekly board")} {...a11yProps(1)} />
+        <Tab style={{color: "white"}} label="Weekly challenge" onClick={()=> props.setFocus("weekly challenge")} {...a11yProps(1)} />
         <Tab style={{color: "white"}} label="Ranked" onClick={()=> props.setFocus("ranked")} {...a11yProps(2)} />
         <Tab style={{color: "white"}} label="1v1" onClick={()=> props.setFocus("1v1")} {...a11yProps(3)} />
       </Tabs>
       
       <div style={{backgroundColor: "rgb(150, 111, 51)", width: "95vw"}}>
         <TabPanel value={value} index={0}>
-            <Row >
+            <Row style={{marginBottom: "20px"}}>
                 <Col style={{display: "flex", justifyContent: "center"}}>
                     <span style={{fontWeight: "bold", fontSize: "22px"}}>Username</span>
                 </Col>
@@ -74,9 +74,25 @@ export default function BasicTabs(props) {
                     <CloseButton onClick={()=>props.setShowModal(false)}/>
                 </Col>
             </Row>
+            
+            {
+              props.data.map((el,i)=>
+                <Row style={{marginBottom: "10px"}} key={i}>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.username}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.minMoves}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "flex-end"}}>
+                      
+                  </Col>
+                </Row>
+              )
+            }
         </TabPanel>
         <TabPanel value={value} index={1}>
-            <Row>
+            <Row style={{marginBottom: "20px"}}>
                 <Col style={{display: "flex", justifyContent: "center"}}>
                     <span style={{fontWeight: "bold", fontSize: "22px"}}>Username</span>
                 </Col>
@@ -87,9 +103,24 @@ export default function BasicTabs(props) {
                     <CloseButton onClick={()=>props.setShowModal(false)} />
                 </Col>
             </Row>
+            {
+              props.data.map((el,i)=>
+                <Row style={{marginBottom: "10px"}} key={i}>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.username}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.minMoves}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "flex-end"}}>
+                      
+                  </Col>
+                </Row>
+              )
+            }
         </TabPanel>
         <TabPanel value={value} index={2}>
-            <Row>
+            <Row style={{marginBottom: "20px"}}>
                 <Col style={{display: "flex", justifyContent: "center"}}>
                     <span style={{fontWeight: "bold", fontSize: "22px"}}>Username</span>
                 </Col>
@@ -100,9 +131,24 @@ export default function BasicTabs(props) {
                     <CloseButton onClick={()=>props.setShowModal(false)} />
                 </Col>
             </Row>
+            {
+              props.data.map((el,i)=>
+                <Row style={{marginBottom: "10px"}} key={i}>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.username}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.rank}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "flex-end"}}>
+                      
+                  </Col>
+                </Row>
+              )
+            }
         </TabPanel>
         <TabPanel value={value} index={3}>
-            <Row>
+            <Row style={{marginBottom: "20px"}}>
                 <Col style={{display: "flex", justifyContent: "center"}}>
                     <span style={{fontWeight: "bold", fontSize: "22px"}}>Username</span>
                 </Col>
@@ -113,6 +159,21 @@ export default function BasicTabs(props) {
                     <CloseButton onClick={()=>props.setShowModal(false)} />
                 </Col>
             </Row>
+            {
+              props.data.map((el,i)=>
+                <Row style={{marginBottom: "10px"}} key={i}>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.username}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "center"}}>
+                      <span >{el.elo}</span>
+                  </Col>
+                  <Col style={{display: "flex", justifyContent: "flex-end"}}>
+                      
+                  </Col>
+                </Row>
+              )
+            }
         </TabPanel>
       </div>
   

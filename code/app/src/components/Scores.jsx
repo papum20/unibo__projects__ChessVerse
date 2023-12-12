@@ -1,12 +1,14 @@
 
 import {Modal} from "react-bootstrap";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {Trophy} from "react-bootstrap-icons";
 import { Button} from "@mui/material";
 import BasicTabs from "./BasicTabs.jsx";
 
 
 function Scores (){
+
+
 
    const [showModal, setShowModal] = useState(false);
 
@@ -18,14 +20,33 @@ function Scores (){
     function getCurrentLeaderboard (){
         if(focus==="daily board"){
             //fai la fetch al server e ottieni i dati
-            setData([{username: "pippo", minMoves: 10},])
+            setData([{username: "pippo", minMoves: 10},{username: "pippo", minMoves: 10}])
+        }
+        else if(focus==="weekly challenge"){
+            //fai la fetch al server e ottieni i dati
+            setData([{username: "pluto", minMoves: 10},{username: "pippo", minMoves: 10}])
+        }
+        else if(focus==="ranked"){
+            //fai la fetch al server e ottieni i dati
+            setData([{username: "pippo", rank: 10},{username: "pippo", rank: 10}])
+        }
+        else{
+            //fai la fetch al server e ottieni i dati
+            setData([{username: "pippo", elo: 10},{username: "pippo", elo: 10}])
         }
     }
+
+
+
+ 
+    useEffect(()=>{
+        getCurrentLeaderboard();
+    },[focus])
 
     return (
             <>
                 <Modal show={showModal} fullscreen>  
-                    <BasicTabs setFocus={setFocus} setShowModal={setShowModal}/>
+                    <BasicTabs data={data} setFocus={setFocus} setShowModal={setShowModal}/>
                 </Modal>
 
                 <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>

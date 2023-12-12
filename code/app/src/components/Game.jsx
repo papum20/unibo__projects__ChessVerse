@@ -228,7 +228,7 @@ function Game({
                         <Col>
                             <Row style={{marginBottom: "20px"}}>
                                 <Col >
-                                    <div style={{marginTop: "40px", marginLeft: "70px"}}>
+                                    <div style={{marginTop: "40px", marginLeft: "150px"}}>
                                         <span style={{fontWeight: "bold"}}>{mode=== PVE ? "Stockfish" : "pippo"}</span>
                                         {mode === PVP &&
                                             <>
@@ -258,7 +258,7 @@ function Game({
                 </div>
                 <Row>
                     <Col>
-                        <div style={{display: "flex", justifyContent: "center"}}>
+                        <div style={{display: "flex", justifyContent: "flex-start", marginLeft: "150px"}}>
                             <div>
                                 <Board
                                   navigator={navigator}
@@ -287,10 +287,10 @@ function Game({
                             </div>
                         </div>
                     </Col>
-                    <Col style={{maxWidth:"50vw"}}>
+                    <Col style={{maxWidth:"30vw"}}>
                     <Row>
                     <Col>
-                    <Card style={{marginLeft: "30px", backgroundColor: "#b6884e", marginTop: "120px", marginRight: "10px"}}> 
+                    <Card style={{ backgroundColor: "#b6884e", marginTop: "120px", marginRight: "80px", marginLeft: "-50px"}}> 
                             <Card.Title style={{display: 'flex', justifyContent: "center"}}>
                                 <p style={{fontWeight: "bold", fontSize: `${fontSize}`, marginTop: "5px"}}>
                                     Moves History
