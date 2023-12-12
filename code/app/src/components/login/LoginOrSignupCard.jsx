@@ -32,19 +32,22 @@ function LoginOrSignupCard(props) {
 			: parseCredentialsSignup(credentials)
 		);
 		try {
-			await (isLogin
+			const res = await (isLogin
 				? users_api.login(credential_parsed)
 				: users_api.signup(credential_parsed)
 			);
 			if(isLogin){
 				toast.success("Logged in successfully!", {className: "toast-message"});	
-				props.setYouAreLogged(true);			
+				props.setYouAreLogged(true);
+				props.setUser(credentials.username);
+				navigator(`../options`, { relative: "path" });
+				sessionStorage.setItem("session_id", res.session_id);
 			}
 			else{
 				toast.success("Signed up!", {className: "toast-message"});
+				navigator(`./login`, { relative: "path" });
 			}
-			props.setUser(credentials.username);
-			navigator(`../options`, { relative: "path" });
+			
 			
 
 		} catch (error) {

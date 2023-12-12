@@ -51,6 +51,7 @@ function Game({
     const [timerInterval, setTimerInterval] = useState(null);
     const [turn, setTurn] = useState(null);
     const [game, setGame] = useState(null);
+    const [position, setPosition] = useState("");
     const movesRef = useRef(null);
 
     useEffect(() => {
@@ -145,15 +146,17 @@ function Game({
 
                                 <Nav.Link 
                                   as={Link}
-                                  to="/options"
+                                  to={"/options"}
     >
                                     <Button
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
-                                      onClick={() => {socket.emit("resign", {type: mode, id: roomId}); 
-                                                        setSocket(undefined); 
-                                                    }}
+                                      onClick={() => {
+                                            socket.emit("resign", {type: mode, id: roomId}); 
+                                                setSocket(undefined); setGame(null); setIsLoadingGame(true);
+
+                                            }}
                                       variant="contained"
                                     >
                                         Return to menu
@@ -197,14 +200,17 @@ function Game({
 
                             <Nav.Link
                                   as={Link}
-                                  to="/options"
+                                  to="/"
                                   style={{display: "flex", justifyContent: "center"}}
                                 >
                                     <Button
                                       style={{fontSize: "1.2rem"}}
                                       size="large"
                                       color="brown"
-                                      onClick={() => {setSocket(undefined); socket.emit("resign", {type: mode, id: roomId});}}
+                                      onClick={() => {
+                                            setSocket(undefined); socket.emit("resign", {type: mode, id: roomId});
+                                            setPosition("");
+                                        }}
                                       variant="contained"
                                     >
                                         Yes
@@ -275,6 +281,8 @@ function Game({
                                   roomId={roomId}
                                   game={game}
                                   setGame={setGame}
+                                  position={position}
+                                  setPosition={setPosition}
                                 />
                             </div>
                         </div>

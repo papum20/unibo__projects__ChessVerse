@@ -74,7 +74,7 @@ def user_login(request):
             #add the session id to the user
             user.session_id = request.session.session_key
             user.save()
-            return JsonResponse({'message': 'Login successful'})
+            return JsonResponse({'message': 'Login successful', 'elo_really_bad_chess': user.EloReallyBadChess, 'session_id': user.session_id})
     
         else:
             # If authentication fails, return an error response

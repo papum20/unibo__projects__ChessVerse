@@ -11,9 +11,6 @@ from time import perf_counter
 import ssl
 import mysql.connector
 
-active_clients = {}
-
-
 class GameHandler:
     def __init__(self):
         pass
@@ -26,18 +23,12 @@ class GameHandler:
                 return None
         return None
 
-    async def on_connect(self, sid, environ, auth):
-        # cookie_header = environ.get('HTTP_COOKIE', '')
-        # session_id = None
-        #
-        # for cookie in cookie_header.split(';'):
-        #     key, value = map(str.strip, cookie.split('=', 1))
-        #     if key == 'sessionId':
-        #         session_id = value
-        await Game.login(sid)
+    async def on_connect(self, sid, environ):
+        print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
+        print("disconnect", sid)
         if sid in Game.sid_to_id:
             game_id = Game.sid_to_id[sid]
             if isinstance(game_id, dict):
@@ -48,7 +39,10 @@ class GameHandler:
                     await Game.games[game_id].disconnect(sid)
 
     async def on_start(self, sid, data):
-        if("type" not in data.keys()):
+        print("start", sid)
+        if "session_id" in data.keys():
+            await Game.login(data["session_id"], sid)
+        if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
@@ -58,6 +52,7 @@ class GameHandler:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
+        print("move", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
@@ -67,13 +62,10 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
-        game = GameHandler.sid2game(sid)
-        if game is None:
-            await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-            return
-        await game.disconnect(sid)
+        await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
+        print("pop", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)

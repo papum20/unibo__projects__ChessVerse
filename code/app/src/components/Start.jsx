@@ -12,6 +12,10 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import {MAX_BOT_DIFF, MAX_GAME_IMB, MAX_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB, MIN_GAME_TIME, PVP, PVE, TIME_OPTIONS} from "../const/const.js";
 import { io } from "socket.io-client";
 import * as users_api from "../network/users_api";
+import { CalendarEvent, CalendarWeek} from "react-bootstrap-icons";
+import { FaCrown } from 'react-icons/fa';
+import Scores from "./Scores.jsx";
+
 
 function Start({
                    mode, setMode,
@@ -76,8 +80,10 @@ function Start({
                         setIsLoadingGame(false);
                     }
                   })
-
-                socket.emit('start', data);
+                  const tmpData = data;
+                  tmpData.session_id = sessionStorage.getItem("session_id");
+                  
+                socket.emit('start', tmpData);
                 
             });
             navigator('../game', { relative: "path" });
@@ -210,7 +216,7 @@ function Start({
             }}>
                 <ThemeProvider theme={theme}>
                 <span style={{display: "flex", justifyContent: "flex-end", fontWeight: "bold", marginRight: "20px", fontSize: "25px"}}>{user}</span>
-                <div style={{ paddingTop: "18vh"}}>
+                <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : "2vh"}` }}>
                     {!getShowOptions() ?
                     <>
                         <div style={{display: "flex", justifyContent: "center"}}>
@@ -263,6 +269,62 @@ function Start({
                         <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
                             <Button
                               color="brown"
+                              disabled
+                              style={{fontSize: "1.5rem", borderRadius: "20px"}}
+                              variant="contained"
+                            >
+                                <div style={{
+                                    marginTop: "5px",
+                                    marginBottom: "5px",
+                                    marginRight: "50px",
+                                    marginLeft: "50px",
+                                }}>
+                                    
+
+                                    <CalendarEvent size="30" style={{marginTop: "-5px"}} />
+                                    <span style={{marginLeft: "10px"}}>Daily Board</span>
+                                </div>
+                            </Button>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <Button
+                              color="brown"
+                              disabled
+                              style={{fontSize: "1.5rem", borderRadius: "20px"}}
+                              variant="contained"
+                            >
+                                <div style={{
+                                    marginTop: "5px",
+                                    marginBottom: "5px",
+                                }}>
+                                    
+
+                                    <CalendarWeek size="30" style={{marginTop: "-5px"}} />
+                                    <span style={{marginLeft: "10px"}}>weekly challenge</span>
+                                </div>
+                            </Button>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <Button
+                              color="brown"
+                              disabled
+                              style={{fontSize: "1.5rem", borderRadius: "20px"}}
+                              variant="contained"
+                            >
+                                <div style={{
+                                    marginTop: "5px",
+                                    marginBottom: "5px",
+                                    marginRight: "50px",
+                                    marginLeft: "50px"
+                                }}>
+                                    <FaCrown style={{marginTop: "-8px"}} size="35"/>
+                                    <span style={{marginLeft: "10px"}}>ranked</span>
+                                </div>
+                            </Button>
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
+                            <Button
+                              color="brown"
                               onClick={() => {
                                   setMode(PVE);
                                   setShowModal(true);
@@ -290,6 +352,7 @@ function Start({
                                 </div>
                             </Button>
                         </div>
+                        
                         <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
                             <Button
                               
@@ -316,6 +379,9 @@ function Start({
                                 </div>
                             </Button>
                         </div>
+        
+                        <Scores />
+        
                         <div style={{display: "flex", justifyContent: "center", marginTop: "30px"}}>
                             <Button
                               color="brown"

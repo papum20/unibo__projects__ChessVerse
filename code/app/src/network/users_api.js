@@ -40,9 +40,8 @@ export async function login(credentials) {
                 method: API.login.method,
                 body: parsed
         }, API.login);
-
-        return response.json();
-
+        const json = response.json();
+        return json;
 }
 
 

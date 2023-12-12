@@ -39,3 +39,5 @@ MAX_TIME = 3000
 
 # pvpGame constants
 TIME_OPTIONS = [300, 600, 900]
+
+DEFAULT_ELO = 1000

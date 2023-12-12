@@ -16,7 +16,6 @@ function Board(props) {
   const [optionSquares, setOptionSquares] = useState({});
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
-  const [position, setPosition] = useState("");
 
   
   function safeGameMutate(modify) {
@@ -237,7 +236,7 @@ function Board(props) {
         props.navigator(`../`, { relative: "path" });
       }
     })
-  },[]);
+  }, []);
 
   useEffect(()=>{
       if(!!props.game){
@@ -249,7 +248,7 @@ function Board(props) {
 
         props.game.undo();
         props.game.undo();
-        setPosition(props.game.fen());
+        props.setPosition(props.game.fen());
         setMoveSan(null);
         setOppMoveSan(null);
       }
@@ -260,7 +259,7 @@ function Board(props) {
 
   useEffect(()=>{
     if (props.game){
-      setPosition(props.game.fen());
+      props.setPosition(props.game.fen());
       props.setTurn(0);
     }
   },[props.game]);
@@ -306,7 +305,7 @@ function Board(props) {
         id="ClickToMove"
         animationDuration={300}
         arePiecesDraggable={false}
-        position={position}
+        position={props.position}
         onSquareClick={async (square)=>await onSquareClick(square)}
         onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
         customBoardStyle={{
