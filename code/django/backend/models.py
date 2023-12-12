@@ -25,9 +25,6 @@ class CustomUserManager(BaseUserManager):
 
 
 class RegisteredUsers(AbstractUser):
-    GamesWon = models.IntegerField(default=0)
-    GameDraw = models.IntegerField(default=0)
-    GamesLost = models.IntegerField(default=0)
     EloReallyBadChess = models.IntegerField(default=1000)
     session_id = models.CharField(max_length=255, default='')
 
@@ -54,8 +51,8 @@ class DailyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
     challenge_date = models.DateField()
-    result = models.CharField(max_length=10)  # Vittoria, sconfitta, pareggio, ecc.
-    attempts = models.PositiveIntegerField()  # Numero di tentativi
+    result = models.CharField(max_length=10)  
+    attempts = models.PositiveIntegerField()  
 
     class Meta:
         ordering = ['-moves_count']
@@ -64,7 +61,7 @@ class WeeklyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
     challenge_date = models.DateField()
-    result = models.CharField(max_length=10)  # Vittoria, sconfitta, pareggio, ecc.
+    result = models.CharField(max_length=10)  
 
     class Meta:
         ordering = ['-moves_count']

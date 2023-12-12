@@ -1,4 +1,4 @@
-Struttura del Database Django
+Struttura del Database 
 
 1. Modello: Guest
     Campi: 
@@ -32,6 +32,6 @@ Struttura del Database Django
     moves_count: Campo intero positivo.
     challenge_date: Campo data.
     result: Campo stringa con una lunghezza massima di 10 caratteri.
-    
+
     Meta:
     ordering: Lista dei campi utilizzati per l'ordinamento (['-moves_count'] per ordine decrescente).

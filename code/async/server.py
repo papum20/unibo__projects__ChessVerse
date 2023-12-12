@@ -10,6 +10,8 @@ from const import GameType
 from time import perf_counter
 import ssl
 import mysql.connector
+import schedule
+import time
 
 class GameHandler:
     def __init__(self):
@@ -86,6 +88,18 @@ class GameHandler:
                         await Game.sio.emit("timeout", {}, room=player.sid)
                         await self.on_disconnect(player.sid)
 
+    def scheduleDaily(self):
+        schedule.every().day.at("00:00").do(self.updateDailyChallenge)
+
+    def scheduleWeekly(self):
+        schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
+
+    def updateDailyChallenge(self):
+        
+        print("Funzione giornaliera pianificata eseguita!")
+
+    def updateWeeklyChallenge(self):
+        print("Funzione settimanale pianificata eseguita!")
 
 
 async def main():
@@ -122,6 +136,9 @@ async def main():
     sio.on('resign', handler.on_resign)
     sio.on('pop', handler.on_pop)
 
+    handler.scheduleDaily()
+    handler.scheduleWeekly()
+    
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
@@ -131,13 +148,14 @@ async def main():
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate.crt", keyfile="/run/secrets/ssl_priv_key.key")
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
-
+    
+    
     await site.start()
     print(f"Listening on 0.0.0.0:{port}")
-
     cleaner_task = asyncio.create_task(handler.cleaner())
 
     while True:
+        schedule.run_pending()
         await asyncio.sleep(1)
 
 if __name__ == "__main__":
