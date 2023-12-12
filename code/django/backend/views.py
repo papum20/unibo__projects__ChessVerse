@@ -1,13 +1,14 @@
+from datetime import date, timedelta
+import json
 import random
+
 from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-import json
-from .models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
-import os
-from datetime import date, timedelta
+
+from .models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard
+
 
 
 def is_nickname_in_database(nickname):
@@ -104,7 +105,8 @@ def user_signup(request):
 			User.objects.create_user(
 				username=username,
 				password=password,
-				EloReallyBadChess=elo_really_bad_chess,
+				EloReallyBadChess=elo_really_bad_chess
+				# ranked assigned 0 by dflt
 			)
 
 			# Return a success response if the signup is successful
