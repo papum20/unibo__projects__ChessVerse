@@ -8,10 +8,11 @@ from ranks import dailyRank, weeklyRank
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
 
-    def __init__(self, player: str, rank: int, depth: int, time: int) -> None:
-        super().__init__([player], rank, time)
+    def __init__(self, player: str, rank: int, depth: int, time: int, seed: int|None = None, type: int|None = None) -> None:
+        super().__init__([player], rank, time, seed)
         self.bot = None
         self.depth = depth
+        self.type = type
 
     @classmethod
     async def start(cls, sid: str, data: dict[str, str], seed = None, type = None) -> None:
@@ -37,9 +38,9 @@ class PVEGame(Game):
             Game.sid_to_id[sid] = sid # solo in PVE;
             if seed is not None:
                 if type == 2:
-                    Game.games[sid] = PVEGame(sid, dailyRank, 1, -1, seed)
+                    Game.games[sid] = PVEGame(sid, dailyRank, 1, -1, seed, type)
                 else:
-                    Game.games[sid] = PVEGame(sid, weeklyRank, 1, -1, seed)
+                    Game.games[sid] = PVEGame(sid, weeklyRank, 1, -1, seed, type)
             else:
                 Game.games[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed)
             await Game.games[sid].instantiate_bot()
@@ -71,6 +72,7 @@ class PVEGame(Game):
         except (chess.InvalidMoveError, chess.IllegalMoveError):
             await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
             return
+        self.current.move_count += 1
         self.board.push_uci(uci_move)
         outcome = self.board.outcome()
         if outcome is not None:
