@@ -33,7 +33,7 @@ class Game(ABC):
     __slots__ = ["fen", "board", "players", "turn", "popped"]
 
     def __init__(self, sids: [], rank: int, time: int) -> None:
-        self.fen = confighandler.gen_start_fen(rank)
+        self.fen = confighandler.gen_start_fen(rank, seed)
         self.board = chess.Board(self.fen)
         self.players = []
         for i, sid in enumerate(sids):

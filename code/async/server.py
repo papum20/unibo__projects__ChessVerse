@@ -12,6 +12,8 @@ import ssl
 import mysql.connector
 import schedule
 import time
+import datetime
+from ranks import dailyRank, weeklyRank
 
 class GameHandler:
     def __init__(self):
@@ -39,8 +41,31 @@ class GameHandler:
             else:
                 if game_id in Game.games:
                     await Game.games[game_id].disconnect(sid)
+    
+    def daily_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Estraiamo anno, mese e giorno
+        year = today.year
+        month = today.month
+        day = today.day
+        # Combiniamo anno, mese e giorno per creare il seed
+        seed = year * 10000 + month * 100 + day
+        return seed
+    
+    def weekly_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Otteniamo il numero della settimana e l'anno
+        week_number = today.isocalendar()[1]
+        year = today.year
+        # Combiniamo anno e numero della settimana per creare il seed
+        seed = year * 100 + week_number
+        return seed
 
-    async def on_start(self, sid, data):
+    async def on_start(self, sid, data): 
+        daily_seed = GameHandler.daily_seed()
+        weekly_seed = GameHandler.weekly_seed()
         print("start", sid)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
@@ -50,6 +75,11 @@ class GameHandler:
             await PVEGame.start(sid, data)
         elif data["type"] == GameType.PVP:
             await PVPGame.start(sid, data)
+        #add new GameTypes Daily and Wekkly challenges
+        elif data["type"] == GameType.DAILY:
+            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
+        elif data["type"] == GameType.WEEKLY:
+            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
         else:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
@@ -95,10 +125,11 @@ class GameHandler:
         schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
 
     def updateDailyChallenge(self):
-        
+        dailyRank = random.randint(0, 100)
         print("Funzione giornaliera pianificata eseguita!")
 
     def updateWeeklyChallenge(self):
+        weeklyRank = random.randint(0, 100)
         print("Funzione settimanale pianificata eseguita!")
 
 

@@ -3,7 +3,7 @@ from chess.engine import Limit, popen_uci
 from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from time import perf_counter
-
+from ranks import dailyRank, weeklyRank
 
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
@@ -14,7 +14,7 @@ class PVEGame(Game):
         self.depth = depth
 
     @classmethod
-    async def start(cls, sid: str, data: dict[str, str]) -> None:
+    async def start(cls, sid: str, data: dict[str, str], seed = None, type = None) -> None:
         def check_int(key, inf, sup):
             try:
                 v = int(data[key])
@@ -35,7 +35,13 @@ class PVEGame(Game):
             return
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid # solo in PVE;
-            Game.games[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]))
+            if seed is not None:
+                if type == 2:
+                    Game.games[sid] = PVEGame(sid, dailyRank, 1, -1, seed)
+                else:
+                    Game.games[sid] = PVEGame(sid, weeklyRank, 1, -1, seed)
+            else:
+                Game.games[sid] = PVEGame(sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed)
             await Game.games[sid].instantiate_bot()
             await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
         else:
