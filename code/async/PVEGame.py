@@ -104,3 +104,6 @@ class PVEGame(Game):
             self.board.pop()
             self.popped = True
             await Game.sio.emit("pop", {"time": self.get_times()}, room=sid)
+
+
+#if self.type = 2:
