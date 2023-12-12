@@ -1,6 +1,5 @@
 from Game import Game
 from time import perf_counter
-import json
 import random
 from const import TIME_OPTIONS, MIN_RANK, MAX_RANK
 import chess
@@ -67,18 +66,22 @@ class PVPGame(Game):
 			return
 		if not self.current.has_time():
 			return
+		
 		try:
 			uci_move = self.board.parse_san(data["san"]).uci()
 		except (chess.InvalidMoveError, chess.IllegalMoveError):
 			await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
 			return
+
 		if chess.Move.from_uci(uci_move) not in self.board.legal_moves:
 			await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
 			return
+
 		uci_move = self.board.parse_uci(self.board.parse_san(data["san"]).uci())
 		san_move = self.board.san(uci_move)
 		self.board.push_uci(uci_move.uci())
 		outcome = self.board.outcome()
+
 		if outcome is not None:
 			await Game.sio.emit("move", {"san": san_move, "time": self.get_times()}, room=self.current.sid)
 			await self.update_win_database(sid)
@@ -86,6 +89,7 @@ class PVPGame(Game):
 			await Game.sio.emit("end", {"winner": False if outcome.winner is not None else outcome.winner}, room=self.next.sid)
 			await self.disconnect(self.next.sid)
 			return
+			
 		self.popped = False
 		await Game.sio.emit("ack", {"time": self.get_times()}, room=self.current.sid)
 		self.swap()

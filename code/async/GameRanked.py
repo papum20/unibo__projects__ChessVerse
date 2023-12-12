@@ -1,3 +1,7 @@
+import chess
+from chess.engine import Limit
+from time import perf_counter
+
 from const import MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 
 from Game import Game
@@ -40,8 +44,64 @@ class GameRanked(PVEGame):
 			
 			await Game.games[sid].instantiate_bot()
 			await Game.sio.emit("config",
-					   {
-						   "fen": Game.games[sid].fen,
-						   "rank": rank,
-						},
-					   room=sid)
+				{
+					"fen": Game.games[sid].fen,
+					"rank": rank,
+				},
+				room=sid
+			)
+
+	async def move_bot(self, sid: str) -> str:
+		"""
+		performs a move for the bot.
+		:return: the move in SAN format
+		"""
+
+		bot_move = (await self.bot.play(self.board, Limit(depth=self.depth))).move
+		bot_move_san = self.board.san(bot_move)
+		self.board.push_uci(bot_move.uci())
+
+		self.popped = False
+
+		return bot_move_san
+
+
+	async def move(self, sid: str, data: dict[str, str]) -> None:
+		
+		# input checks
+		if "san" not in data:
+			await Game.sio.emit("error", {"cause": "Missing fields"}, room=sid)
+			return
+		if data["san"] is None:
+			await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
+			return
+		if not self.current.has_time(True):
+			return
+
+		try:
+			move_uci = self.board.parse_san(data["san"]).uci()
+		except (chess.InvalidMoveError, chess.IllegalMoveError):
+			await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
+			return
+			
+		# add (push) move to board
+		self.board.push_uci(move_uci)
+		if self.handle_win(sid):
+			return
+		
+		# bot move
+		bot_time_start = perf_counter()	# count time, to reassign it later
+		
+		bot_move_san = await self.move_bot(sid)
+		await Game.sio.emit("move", {
+				"san": bot_move_san, "time": self.get_times()
+			}, room=sid)
+
+		if self.handle_win(sid):
+			return
+		
+		self.current.add_time( int(perf_counter() - bot_time_start) )	# add time back
+		
+		
+		
+

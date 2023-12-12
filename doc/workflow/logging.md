@@ -28,4 +28,4 @@ Daniele: 54h
 Daniele: 19h
 
 ### sprint 4
-Daniele: 5h30  
+Daniele: 7h  

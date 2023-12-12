@@ -1,13 +1,17 @@
-from typing import List
+from typing import List, Optional
+
 import chess
-import Player
+from chess import Outcome
+from socketio import AsyncServer
+
+from Player import Player
 import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS
 
 
 class Game(ABC):
-	sio = None
+	sio: Optional[AsyncServer] = None
 	games = {}
 	sid_to_id: dict[str, str] = {}
 	waiting_list: dict[str, list[list[str]]] = {key: [[] for _ in range(6)] for key in TIME_OPTIONS}
@@ -86,6 +90,7 @@ class Game(ABC):
 				"UPDATE backend_registeredusers SET EloReallyBadChess = EloReallyBadChess  + 30 WHERE session_id = %s",
 				(session["session_id"],))
 		session = await Game.sio.get_session(self.opponent(sid).sid)
+		
 		if session["session_id"] is not None:
 			Game.cursor.execute("UPDATE backend_registeredusers SET GamesLost = GamesLost + 1 WHERE session_id = %s",
 								(session["session_id"],))
@@ -102,3 +107,30 @@ class Game(ABC):
 
 	def get_times(self):
 		return [player.remaining_time for player in self.players]
+
+
+
+	# standard responses
+	
+	@staticmethod
+	async def emit_win(sid:str, outcome:Outcome) -> None:
+		if outcome is not None:
+			await Game.sio.emit("end", {
+					"winner": outcome.winner
+				}, room=sid)
+	
+	
+	
+	# standard handlers for events
+
+	async def handle_win(self, sid:str) -> bool:
+		"""
+		Checks if the game has ended and if so emits the win event.
+		:return: True if the game has ended, False otherwise
+		"""
+		outcome = self.board.outcome()
+		if outcome is not None:
+			await Game.emit_win(sid, outcome)
+			await self.disconnect(sid)
+			return True
+		return False
