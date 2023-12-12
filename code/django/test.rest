@@ -11,12 +11,12 @@ Content-Type: application/json
 
 ###
 
-POST https://chessverse.cloud:8000/backend/signup/
+POST http://localhost:8000/backend/signup/
 Content-Type: application/json
 
 {
     
-    "username": "adminerdffdrd",
+    "username": "adminerdf",
     "password": "admin",
     "eloReallyBadChess": 2932
 }

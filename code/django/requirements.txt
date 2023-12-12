@@ -8,7 +8,7 @@ django-extensions==3.2.3
 django-sslserver-v2==1.0
 djangorestframework==3.14.0
 MarkupSafe==2.1.3
-mysqlclient==2.2.0
+mysqlclient
 pycparser==2.21
 pyOpenSSL==23.3.0
 python-dotenv==1.0.0

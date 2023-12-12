@@ -73,7 +73,7 @@ export async function signout() {
 }
 
 export async function addGuest() {
-        const response = await fetch(joinPaths(SERVER_ADDR, API.addGuest.endpoint), {method: API.addGuest.method, headers: { "Content-Type": "application/json" }, body: {}});
+        const response = await fetch(/*joinPaths(SERVER_ADDR, API.addGuest.endpoint)*/"http://localhost:8000/backend/add_guest/", {method: API.addGuest.method, headers: { "Content-Type": "application/json" }, body: {}});
         if(response.ok) {
                 const json = await response.json();
                 return json.guest_nickname;
