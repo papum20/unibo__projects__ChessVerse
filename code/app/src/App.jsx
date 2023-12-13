@@ -1,10 +1,10 @@
 import loadable from '@loadable/component';
 import Alert from "./components/Alert.jsx";
-import {Routes, Route, useLocation} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
-import {useEffect, useState} from 'react';
-import {DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB} from "./const/const.js";
+import { useEffect, useState } from 'react';
+import { DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB } from "./const/const.js";
 import LoginOrSignupPage from './components/login/LoginOrSignupPage.jsx';
 
 
@@ -24,7 +24,9 @@ function App() {
   const [startFen, setStartFen] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [color, setColor] = useState("white");
-  const [user,setUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [enemyUsername, setEnemyUsername] = useState("");
+  const [elo, setElo] = useState([0, 0]);
 
   const [youAreLogged, setYouAreLogged] = useState(false);
 
@@ -44,11 +46,11 @@ function App() {
 
   return (
     <div data-testid="appPage">
-      <Alert data-testid="alertDiv"/>
+      <Alert data-testid="alertDiv" />
 
-		
+
       <Routes location={location} key={location.pathname} data-testid="toGame">
-		
+
         <Route path={`/`} element={
           <Start
             mode={mode}
@@ -70,8 +72,10 @@ function App() {
             user={user}
             setYouAreLogged={setYouAreLogged}
             youAreLogged={youAreLogged}
+            setEnemyUsername={setEnemyUsername}
+            setElo={setElo}
           />
-        }/>
+        } />
 
         <Route path={`/options`} element={
           <Start
@@ -94,10 +98,12 @@ function App() {
             user={user}
             setYouAreLogged={setYouAreLogged}
             youAreLogged={youAreLogged}
+            setEnemyUsername={setEnemyUsername}
+            setElo={setElo}
           />
-        }/>
+        } />
 
-       
+
         <Route
           path={`/game`}
           element={
@@ -113,30 +119,32 @@ function App() {
               color={color}
               roomId={roomId}
               user={user}
-           
+              elo={elo}
+              enemyUsername={enemyUsername}
+
             />
           }
           data-testid="game"
         />
-		<Route
-			path={`/login`}
-			element={
-				<LoginOrSignupPage
-          isLogin={true} setUser={setUser} setYouAreLogged={setYouAreLogged}
-				/>
-			}
-		/>
+        <Route
+          path={`/login`}
+          element={
+            <LoginOrSignupPage
+              isLogin={true} setUser={setUser} setYouAreLogged={setYouAreLogged}
+            />
+          }
+        />
 
-    <Route
-			path={`/signup`}
-			element={
-				<LoginOrSignupPage
-            isLogin={false} setUser={setUser}
-				/>
-			}
-		/>
+        <Route
+          path={`/signup`}
+          element={
+            <LoginOrSignupPage
+              isLogin={false} setUser={setUser}
+            />
+          }
+        />
 
-        <Route path="*" element={<NoRoute/>}/>
+        <Route path="*" element={<NoRoute />} />
       </Routes>
 
     </div>

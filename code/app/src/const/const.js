@@ -10,7 +10,10 @@ export const MIN_GAME_TIME = 1;
 export const MAX_GAME_TIME = 3000;
 
 export const PVP = 0;
-export const PVE = 2;
+export const PVE = 1;
+export const DAILY = 2;
+export const WEEKLY = 3;
+export const RANKED = 4;
 export const TIME_OPTIONS = [300, 600, 900]
 
 /*

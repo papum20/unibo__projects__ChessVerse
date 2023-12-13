@@ -32,7 +32,7 @@ class Game(ABC):
     conn = None
     __slots__ = ["fen", "board", "players", "turn", "popped"]
 
-    def __init__(self, sids: [], rank: int, time: int, seed: int|None) -> None:
+    def __init__(self, sids: [], rank: int, time: int, seed: int|None = None) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
         self.board = chess.Board(self.fen)
         self.players = []
@@ -74,6 +74,7 @@ class Game(ABC):
         Game.cursor.execute("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s", (session_id,))
         user_info = Game.cursor.fetchone()
         if user_info is not None:
+            print(user_info)
             await Game.sio.save_session(sid, {'elo': user_info[0], 'session_id': session_id, 'username': user_info[1]})
         else:
             await Game.sio.save_session(sid, {'elo': DEFAULT_ELO, 'session_id': None, 'username': 'Guest'})

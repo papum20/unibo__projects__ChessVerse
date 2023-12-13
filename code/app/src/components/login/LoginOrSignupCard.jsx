@@ -45,7 +45,7 @@ function LoginOrSignupCard(props) {
 			}
 			else{
 				toast.success("Signed up!", {className: "toast-message"});
-				navigator(`./login`, { relative: "path" });
+				navigator(`../login`, { relative: "path" });
 			}
 			
 			

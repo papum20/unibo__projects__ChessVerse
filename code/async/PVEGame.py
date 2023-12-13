@@ -6,7 +6,7 @@ from time import perf_counter
 from ranks import dailyRank, weeklyRank
 
 class PVEGame(Game):
-    __slots__ = ["bot", "depth"]
+    __slots__ = ["bot", "depth", "type"]
 
     def __init__(self, player: str, rank: int, depth: int, time: int, seed: int|None = None, type: int|None = None) -> None:
         super().__init__([player], rank, time, seed)
