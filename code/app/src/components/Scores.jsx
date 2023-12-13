@@ -14,23 +14,29 @@ function Scores (){
     // Array di oggetti che tiene traccia di username e dato elo o altre cose in base in che sezione sei
     const [data, setData] = useState([]);
 
-    async function fetchLeaderboard(API){
+    async function fetchLeaderboard(API, tag){
         const response = await fetch(API);
         const leaderboards = await response.json();
-        return leaderboards['daily_leaderboard'][-1];
+        return leaderboards[tag][-1];
     }
 
     async function getCurrentLeaderboard (){
         if (focus === "daily board") {
-            const currentLeaderboard = await fetchLeaderboard(API.dailyLeaderboard.endpoint);
+            const currentLeaderboard = await fetchLeaderboard(
+              API.dailyLeaderboard.endpoint, 'daily_leaderboard'
+            );
             setData(currentLeaderboard);
         }
         else if (focus === "weekly challenge") {
-            const currentLeaderboard = await fetchLeaderboard(API.weeklyLeaderboard.endpoint);
+            const currentLeaderboard = await fetchLeaderboard(
+              API.weeklyLeaderboard.endpoint, 'weekly_leaderboard'
+            );
             setData(currentLeaderboard);
         }
         else if (focus === "ranked") {
-            const currentLeaderboard = await fetchLeaderboard(API.rankedLeaderboard.endpoint);
+            const currentLeaderboard = await fetchLeaderboard(
+              API.rankedLeaderboard.endpoint, ''
+            );
             setData(currentLeaderboard);
         }
         else {
