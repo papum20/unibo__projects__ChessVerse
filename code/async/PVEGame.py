@@ -7,7 +7,9 @@ from ranks import dailyRank, weeklyRank
 
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
-
+    cursor = None
+    conn = None
+    
     def __init__(self, player: str, rank: int, depth: int, time: int, seed: int|None = None, type: int|None = None) -> None:
         super().__init__([player], rank, time, seed)
         self.bot = None
@@ -77,6 +79,13 @@ class PVEGame(Game):
         outcome = self.board.outcome()
         if outcome is not None:
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
+            #Player wins
+            #if self.type == 2:
+                #Insert into daily leaderboard
+                #PVEGame.cursor.execute("INSERT INTO daily (user, time) VALUES (%s, %s)", (self.current.sid, self.current.time))
+            #else if self.type == 3:
+                #Insert into weekly leaderboard
+                
             await self.disconnect(sid)
             return
         start = perf_counter()
@@ -87,6 +96,8 @@ class PVEGame(Game):
         if outcome is not None:
             await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
+            #Bot wins
+            
             await self.disconnect(sid)
             return
         self.popped = False

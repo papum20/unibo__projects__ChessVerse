@@ -79,6 +79,50 @@ This API provides basic user authentication functionalities, including user logi
 - The `@login_required` decorator is used for the `user_signout` view to ensure that only authenticated users can log out.
 - Passwords are hashed using Django's `make_password` function before being stored in the database, enhancing security.
 
+### 4. `get_daily_leaderboard(request)`
+
+#### Endpoint
+- `/backend/get_daily_leaderboard/`
+
+### Method 
+- `GET`
+
+### Response
+- Success (Status Code: 200): Returns a JSON response containing the daily leaderboard data.
+-  Error (Status Code: 500): Returns an error response with details if an exception occurs during the retrieval process.
+- Invalid Request Method (Status Code: 405): Returns an error response if the HTTP method is not GET.
+
+
+## 5. `get_weekly_leaderboard(request)`
+
+**Description:**
+This method retrieves the weekly leaderboard for games played from the beginning of the week (Monday) to the current day (Sunday). It specifically includes games with a 'win' result and returns the leaderboard data as a JSON response.
+
+**HTTP Method:** GET
+
+**Response:**
+- Success (Status Code: 200): Returns a JSON response containing the weekly leaderboard data.
+- Error (Status Code: 500): Returns an error response with details if an exception occurs during the retrieval process.
+- Invalid Request Method (Status Code: 405): Returns an error response if the HTTP method is not GET.
+
+
+## 3. `check_start_daily(request)`
+
+**Description:**
+This method checks if a user has already played the maximum number of games (defined by `MAX_DAILY_GAMES`) today. It takes the user's username from the request body, queries the database, and returns the status as a JSON response.
+
+**HTTP Method:** GET
+
+**Parameters:**
+- Username (sent in the request body as JSON data)
+
+**Response:**
+- Success (Status Code: 200): Returns a JSON response containing the daily leaderboard data if the user has not reached the maximum number of games.
+- Error (Status Code: 400): Returns an error response if the user has already played the maximum number of games today.
+- Error (Status Code: 500): Returns an error response with details if an exception occurs during the process.
+- Invalid Request Method (Status Code: 405): Returns an error response if the HTTP method is not GET.
+
+
 
 Ho anche messo un file 'test.rest' da cui si possono simulare delle richieste al backend, si può usare come spunto per vedere il tipo di richieste da fare
 Per eseguire le richieste assicurarsi di avere l'estensione 'REST Client' di VSCODE
