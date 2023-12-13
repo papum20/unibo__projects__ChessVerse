@@ -15,6 +15,9 @@ export const DAILY = 2;
 export const WEEKLY = 3;
 export const RANKED = 4;
 export const TIME_OPTIONS = [300, 600, 900]
+export const RANKED_SCORE_WIN = 8;
+export const RANKED_SCORE_LOSS = 2;
+export const RANKED_SCORE_TIE = 0
 
 /*
  * global vars (e.g. taken from env)

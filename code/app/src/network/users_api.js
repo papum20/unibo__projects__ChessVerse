@@ -3,6 +3,7 @@ import { parseCredentialsLogin, parseCredentialsSignup } from "../models/credent
 import { SERVER_ADDR } from '../const/const';
 import { joinPaths } from "../utils/path";
 import { toast } from "react-toastify";
+
 /**
  * Generical function for fetches.
  * Useful for defining only once generical errors and other handling stuff.
@@ -11,7 +12,6 @@ import { toast } from "react-toastify";
  * @param {obj} api_obj reference to object of API constant object
  * @returns 
  */
-
 async function fetchData(input, init, api_obj) {
         // grant it's an array
         const codes = (api_obj && typeof(api_obj.codes) === "object")

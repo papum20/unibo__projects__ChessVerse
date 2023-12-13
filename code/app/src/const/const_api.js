@@ -46,6 +46,5 @@ export const API = {
 	addGuest : {
 		endpoint: "backend/add_guest/",
 		method: "POST",
-		
 	},
 };

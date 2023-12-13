@@ -7,12 +7,13 @@ import { Gear, ExclamationDiamond } from 'react-bootstrap-icons';
 import { Button } from "@mui/material";
 import "../styles/Game.css";
 import useWindowDimensions from "./useWindowDimensions.jsx";
-import { PVP, PVE, DAILY, WEEKLY, RANKED } from "../const/const.js";
+import { PVP, PVE, DAILY, WEEKLY, RANKED, RANKED_SCORE_LOSS, RANKED_SCORE_WIN, RANKED_SCORE_TIE } from "../const/const.js";
 import ImageBlackTime from "../assets/blackTime.png";
 import ImageWhiteTime from "../assets/whiteTime.png";
 import Board from "./Board.jsx";
 import PropTypes from "prop-types";
 import Social from "./Social.jsx";
+import { FaCrown } from "react-icons/fa";
 
 
 function Game({
@@ -141,10 +142,28 @@ function Game({
                         <div style={{ display: "flex", justifyContent: "center", fontSize: `${fontSize}` }}>
                             <span style={{ fontWeight: "bold", marginRight: "10px" }}>{`${modalType === "gameover" ? "Game Over" : modalType === "won" ? "You won!" : "It's a tie!"}`}</span>
                             <ExclamationDiamond size={40} color={`${modalType === "gameover" ? "red" : modalType === "won" ? "green" : "gray"}`} />
+                            {mode === RANKED &&
+                              <>
+                                  <span>
+                                      {modalType === 'gameover'
+                                        ? -RANKED_SCORE_LOSS
+                                        : (modalType === 'won'
+                                            ? +RANKED_SCORE_WIN
+                                            : RANKED_SCORE_TIE
+                                        )
+                                      }
+                                  </span>
+                                  <FaCrown style={{marginTop: "-8px", color: "yellow"}} size="25"/>
+                              </>
+                            }
                         </div>
-                        <div style={{ display: "flex", justifyContent: "space-around", marginTop: "40px", marginBottom: "15px" }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-around",
+                            marginTop: "40px",
+                            marginBottom: "15px"
+                        }}>
                             <ThemeProvider theme={theme}>
-
                                 <Nav.Link
                                     as={Link}
                                     to={"/options"}
@@ -163,10 +182,27 @@ function Game({
                                         Return to menu
                                     </Button>
                                 </Nav.Link>
-                                {mode === PVP || mode === PVE &&  //da rivedere per le altre modalita
-                                    <div style={{ marginTop: "10px" }}>
-                                        <Social url={import.meta.env.VITE_SITO + location.pathname} modalType={modalType} enemyUser={enemyUsername} diff={`${mode === PVE ? data.depth : `${color === "white" ? elo[0] : elo[1]}`}`} mode={mode} />
-                                    </div>
+                                {mode === PVP || mode === PVE &&
+                                  <div style={{marginTop: "10px"}}>
+                                      <Social
+                                        url={import.meta.env.VITE_SITO + location.pathname}
+                                        modalType={modalType}
+                                        enemyUser={enemyUsername}
+                                        diff={`${mode === PVE ? data.depth : `${color === "white" ? elo[0] : elo[1]}`}`}
+                                        mode={mode}
+                                      />
+                                  </div>
+                                }
+                                {mode === RANKED &&
+                                  <div style={{marginTop: "10px"}}>
+                                      <Social
+                                        url={import.meta.env.VITE_SITO + location.pathname}
+                                        modalType={modalType}
+                                        enemyUser={enemyUsername}
+                                        diff={0} /*fetch ranked points*/
+                                        mode={mode}
+                                      />
+                                  </div>
                                 }
                             </ThemeProvider>
                         </div>
@@ -175,18 +211,16 @@ function Game({
             </Modal>
 
 
-
-
             <Modal
-                show={showModalMenu}
-                centered
-                dialogClassName="my-modal"
+              show={showModalMenu}
+              centered
+              dialogClassName="my-modal"
             >
-                <Modal.Body style={{ backgroundColor: "#b6884e", fontSize: `${fontSize}` }}>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
+                <Modal.Body style={{backgroundColor: "#b6884e", fontSize: `${fontSize}`}}>
+                    <div style={{display: "flex", justifyContent: "center"}}>
                         <p>Are you sure you want to go back</p>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
+                    <div style={{display: "flex", justifyContent: "center" }}>
                         <p>to the main menu?</p>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-around", marginTop: "20px", marginBottom: "15px" }}>
@@ -359,20 +393,36 @@ function Game({
                             </Row>
                         </Col>
                     </Row>
-                    <Row  >
+                    <Row>
                         <Col style={{ display: "flex", justifyContent: "center", marginTop: "20px", marginLeft: "-140px" }}>
 
                             <span style={{ marginRight: "15px", fontWeight: "bold" }}>{user}</span>
-                            {mode === PVP && <span style={{ fontWeight: "bold", marginLeft: "3px", marginRight: "3px" }}>{`(${color === "white" ? elo[1] : color === "black" ? elo[0] : ""})`}</span>}
+                            {mode === PVP &&
+                              <span style={{ fontWeight: "bold", marginLeft: "3px", marginRight: "3px" }}>
+                                  {`(${color === "white" ? elo[1] : color === "black" ? elo[0] : ""})`}
+                              </span>
+                            }
                             {(mode === PVE || mode === PVP) &&
                                 <>
-                                    <img src={`${color === "white" || color === undefined ? ImageWhiteTime : ImageBlackTime}`} alt={`${color === "white" || color === undefined ? "clock white" : "clock black"}`} style={{ maxWidth: "30px", maxHeight: "30px", marginTop: "-6px" }} />
-                                    <span>{`${String(Math.floor(timers[0] / 60)).padStart(2, '0')}:${String(Math.floor(timers[Number(color === "black")] % 60)).padStart(2, '0')}`}</span>
+                                    <img
+                                      src={`${color === "white" || color === undefined ? ImageWhiteTime : ImageBlackTime}`}
+                                      alt={`${color === "white" || color === undefined ? "clock white" : "clock black"}`}
+                                      style={{ maxWidth: "30px", maxHeight: "30px", marginTop: "-6px" }}
+                                    />
+                                    <span>
+                                        {`${String(Math.floor(timers[0] / 60)).padStart(2, '0')}:${String(Math.floor(timers[Number(color === "black")] % 60)).padStart(2, '0')}`}
+                                    </span>
                                 </>
                             }
-
+                            {mode === RANKED &&
+                              <>
+                                  <FaCrown style={{marginTop: "-8px", color: "yellow"}} size="25" />
+                                  <span>
+                                      {/* Ranked score */}
+                                  </span>
+                              </>
+                            }
                         </Col>
-
                     </Row>
                 </ThemeProvider>
             </div>

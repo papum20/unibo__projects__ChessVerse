@@ -1,23 +1,37 @@
-import {ShareFill} from "react-bootstrap-icons"
-import { PVP, PVE } from "../const/const.js";
+import { ShareFill } from "react-bootstrap-icons"
+import { PVP, PVE, RANKED } from "../const/const.js";
 
 function Social(props){
 
+    const end_string = props.modalType === 'gameover'
+      ? " e ho perso 😢"
+      : props.modalType === 'victory'
+        ? " e ho vinto! 🎉"
+        : " ed è finita in patta 🤝";
+
+    const pve_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
+          livello di profondità ${props.diff} ${end_string}`;
+
+    const pvp_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
+          elo ${props.diff} ${end_string}`;
+
+    const ranked_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
+          ranking ${props.diff} ${end_string}`;
+
+    function getText() {
+        switch (props.mode) {
+            case PVP: return pvp_msg;
+            case PVE: return pve_msg;
+            case RANKED: return ranked_msg;
+        }
+    }
+
+    const destinationURL = encodeURIComponent(props.url);
+
+    const text = encodeURIComponent(getText());
 
     function Share(){
-
-
-
-        const msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ` + `${props.enemyUser}` + `${props.mode === PVE ? " con livello di profondità " : " con elo "}` + `${props.diff}`  
-          + `${props.modalType === "gameover" ? " e ho perso 😢" : props.modalType === "victory" ? " e ho vinto! 🎉" : " ed è finita in patta 🤝"}`
-
-
-        const destinationURL = encodeURIComponent(props.url);
-
-        const text = encodeURIComponent(msg);
-
         const telegramShareURL = `https://t.me/share/url?url=${destinationURL}&text=${text}`;
-
         window.open(telegramShareURL, '_blank');
     }
 
@@ -25,4 +39,5 @@ function Social(props){
         <ShareFill onClick={()=>Share()} style={{cursor: "pointer"}} role="button" size="30" />
     )
 }
+
 export default Social;           
