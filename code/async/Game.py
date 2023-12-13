@@ -1,13 +1,16 @@
-from typing import List, Optional
+from abc import ABC, abstractmethod
+from typing import List, Optional, Tuple
 
 import chess
 from chess import Outcome
+from mysql.connector import MySQLConnection
 from socketio import AsyncServer
 
-from Player import Player
-import confighandler
-from abc import ABC, abstractmethod
 from const import TIME_OPTIONS
+
+import confighandler
+from database.users import set_user_rank
+from Player import Player
 
 
 class Game(ABC):
@@ -16,7 +19,7 @@ class Game(ABC):
 	sid_to_id: dict[str, str] = {}
 	waiting_list: dict[str, list[list[str]]] = {key: [[] for _ in range(6)] for key in TIME_OPTIONS}
 	cursor = None
-	conn = None
+	conn: Optional[MySQLConnection] = None
 	__slots__ = ["fen", "board", "players", "turn", "popped"]
 
 	def __init__(self, sids:List, rank: int, time: int, fen:str|None=None) -> None:
@@ -54,6 +57,11 @@ class Game(ABC):
 
 	@abstractmethod
 	async def disconnect(self, sid: str) -> None:
+		"""
+		Tipically called on disconnect;
+		tipically removes some saved data,
+		and updates db.
+		"""
 		pass
 
 	@classmethod
@@ -81,22 +89,22 @@ class Game(ABC):
 		else:
 			await Game.sio.save_session(sid, {'elo': 1000, 'session_id': None})
 
-	async def update_win_database(self, sid: str) -> None:
+	async def database_update_win(self, sid: str, rank:str="EloReallyBadChess", diffs:Tuple[int,int]=(30,-30)) -> None:
+		
+		# update current player
 		session = await Game.sio.get_session(sid)
 		if session["session_id"] is not None:
 			Game.cursor.execute("UPDATE backend_registeredusers SET GamesWon = GamesWon + 1 WHERE session_id = %s",
 								(session["session_id"],))
-			Game.cursor.execute(
-				"UPDATE backend_registeredusers SET EloReallyBadChess = EloReallyBadChess  + 30 WHERE session_id = %s",
-				(session["session_id"],))
+			set_user_rank(session["session_id"], rank, diffs[0])
+
+		# update opponent
 		session = await Game.sio.get_session(self.opponent(sid).sid)
-		
 		if session["session_id"] is not None:
 			Game.cursor.execute("UPDATE backend_registeredusers SET GamesLost = GamesLost + 1 WHERE session_id = %s",
 								(session["session_id"],))
-			Game.cursor.execute(
-				"UPDATE backend_registeredusers SET EloReallyBadChess = EloReallyBadChess  - 30 WHERE session_id = %s",
-				(session["session_id"],))
+			set_user_rank(session["session_id"], rank, diffs[1])
+
 		Game.conn.commit()
 
 	async def game_found(self, sid: str, game_id: str):

@@ -1,0 +1,37 @@
+Struttura del Database 
+
+1. Modello: Guest
+    Campi: 
+    Username: Campo stringa con una lunghezza massima di 255 caratteri, unico per ogni oggetto Guest.
+
+2. Modello: RegisteredUsers (sottoclasse di AbstractUser)
+    Campi:
+    EloReallyBadChess: Campo intero con un valore predefinito di 1000.
+    session_id: Campo stringa con una lunghezza massima di 255 caratteri, valore predefinito vuoto.
+
+4. Modello: Games
+    Campi:
+    username1: Campo stringa con una lunghezza massima di 255 caratteri.
+    username2: Campo stringa con una lunghezza massima di 255 caratteri.
+    png: Campo stringa con una lunghezza massima di 255 caratteri.
+
+5. Modello: DailyLeaderboard
+    Campi:
+
+    username: Campo stringa con una lunghezza massima di 255 caratteri.
+    moves_count: Campo intero positivo.
+    challenge_date: Campo data.
+    result: Campo stringa con una lunghezza massima di 10 caratteri.
+    attempts: Campo intero positivo.
+    Meta:
+    ordering: Lista dei campi utilizzati per l'ordinamento (['-moves_count'] per ordine decrescente).
+
+6. Modello: WeeklyLeaderboard
+    Campi:
+    username: Campo stringa con una lunghezza massima di 255 caratteri.
+    moves_count: Campo intero positivo.
+    challenge_date: Campo data.
+    result: Campo stringa con una lunghezza massima di 10 caratteri.
+
+    Meta:
+    ordering: Lista dei campi utilizzati per l'ordinamento (['-moves_count'] per ordine decrescente).

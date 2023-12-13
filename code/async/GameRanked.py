@@ -2,7 +2,7 @@ import chess
 from chess.engine import Limit
 from time import perf_counter
 
-from const import MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
+from const import MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, MODE_RANKED_K
 
 from Game import Game
 from PVEGame import PVEGame
@@ -14,10 +14,13 @@ from utils.TypeChecker import TypeChecker
 class GameRanked(PVEGame):
 	__slots__ = ["bot", "depth"]
 
+
+
 	def __init__(self, sid: str, rank: int, depth: int, time: int) -> None:
 		super().__init__(sid, rank, depth, time)
 		self.bot = None
 		self.depth = depth
+
 
 	@classmethod
 	async def start(cls, sid: str, data: dict[str, str]) -> None:
@@ -50,6 +53,33 @@ class GameRanked(PVEGame):
 				},
 				room=sid
 			)
+
+
+	async def disconnect(self, sid: str) -> None:
+		
+		# TODO
+		
+		rank_current = get_user_rank(sid, "ranked")
+		
+		await self.database_update_win(sid=self.opponent(sid).sid, rank="ranked", diffs=)
+
+		await Game.sio.emit("end", 
+			{
+				"winner": True
+			}, room=self.opponent(sid).sid)
+		
+		await Game.sio.disconnect(sid=player.sid) for player in self.players
+		
+		if sid not in Game.sid_to_id:
+			return
+		else:
+			for player in self.players:
+				if player.sid in Game.sid_to_id:
+					del Game.sid_to_id[player.sid]
+			del Game.games[Game.sid_to_id[sid]]
+			if self.opponent(sid).sid in Game.sid_to_id:
+				del Game.sid_to_id[self.opponent(sid).sid]
+
 
 	async def move_bot(self, sid: str) -> str:
 		"""
@@ -102,6 +132,16 @@ class GameRanked(PVEGame):
 		
 		self.current.add_time( int(perf_counter() - bot_time_start) )	# add time back
 		
-		
+
+	# const
+
+	@staticmethod
+	def get_botLevel_from_rank(rank:int):
+		"""
+		:param rank: user rank in ranked mode.
+		:return the formula just gives a bot level for each K rank points.
+		"""
+		bot_level = int(rank / MODE_RANKED_K)
+		return bot_level if bot_level <= MAX_RANK else MAX_RANK
 		
 

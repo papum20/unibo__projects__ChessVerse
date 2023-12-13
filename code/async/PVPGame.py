@@ -21,7 +21,7 @@ class PVPGame(Game):
 		return self.current.sid == sid
 
 	async def disconnect(self, sid: str) -> None:
-		await self.update_win_database(sid=self.opponent(sid).sid)
+		await self.database_update_win(sid=self.opponent(sid).sid)
 		await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
 		[await Game.sio.disconnect(sid=player.sid) for player in self.players]
 		if sid not in Game.sid_to_id:
@@ -84,7 +84,7 @@ class PVPGame(Game):
 
 		if outcome is not None:
 			await Game.sio.emit("move", {"san": san_move, "time": self.get_times()}, room=self.current.sid)
-			await self.update_win_database(sid)
+			await self.database_update_win(sid)
 			await Game.sio.emit("end", {"winner": True if outcome.winner is not None else outcome.winner}, room=self.current.sid)
 			await Game.sio.emit("end", {"winner": False if outcome.winner is not None else outcome.winner}, room=self.next.sid)
 			await self.disconnect(self.next.sid)
