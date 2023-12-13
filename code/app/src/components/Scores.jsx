@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Trophy } from "react-bootstrap-icons";
 import { Button } from "@mui/material";
 import BasicTabs from "./BasicTabs.jsx";
+import { API } from "../const/const_api.js"
 
 
 function Scores (){
@@ -13,18 +14,24 @@ function Scores (){
     // Array di oggetti che tiene traccia di username e dato elo o altre cose in base in che sezione sei
     const [data, setData] = useState([]);
 
-    function getCurrentLeaderboard (){
+    async function fetchLeaderboard(API){
+        const response = await fetch(API);
+        const leaderboards = await response.json();
+        return leaderboards['daily_leaderboard'][-1];
+    }
+
+    async function getCurrentLeaderboard (){
         if (focus === "daily board") {
-            //fai la fetch al server e ottieni i dati
-            setData([{username: "pippo", minMoves: 10}, {username: "pippo", minMoves: 10}])
+            const currentLeaderboard = await fetchLeaderboard(API.dailyLeaderboard.endpoint);
+            setData(currentLeaderboard);
         }
         else if (focus === "weekly challenge") {
-            //fai la fetch al server e ottieni i dati
-            setData([{username: "pluto", minMoves: 10}, {username: "pippo", minMoves: 10}])
+            const currentLeaderboard = await fetchLeaderboard(API.weeklyLeaderboard.endpoint);
+            setData(currentLeaderboard);
         }
         else if (focus === "ranked") {
-            //fai la fetch al server e ottieni i dati
-            setData([{username: "pippo", rank: 10}, {username: "pippo", rank: 10}])
+            const currentLeaderboard = await fetchLeaderboard(API.rankedLeaderboard.endpoint);
+            setData(currentLeaderboard);
         }
         else {
             //fai la fetch al server e ottieni i dati

@@ -47,4 +47,27 @@ export const API = {
 		endpoint: "backend/add_guest/",
 		method: "POST",
 	},
+	dailyLeaderboard: {
+		endpoint: "backend/get_daily_leaderboard",
+		method: "GET",
+		codes: {
+			"ok": 200,
+			"internal server error": 500,
+			"invalid request": 405
+		}
+	},
+	weeklyLeaderboard: {
+		endpoint: "backend/get_weekly_leaderboard",
+		method: "GET",
+		codes: {
+			"ok": 200,
+			"internal server error": 500,
+			"invalid request": 405
+		}
+	},
+	rankedLeaderboard: {
+		endpoint: "...",
+		method: "...",
+		codes: "..."
+	}
 };
