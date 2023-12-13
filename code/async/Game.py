@@ -3,7 +3,7 @@ import Player
 import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS, DEFAULT_ELO
-
+from ranks import sessionId
 def expected_score(rating_A, rating_B):
   return 1.0 / (1 + 10 ** ((rating_B - rating_A) / 400))
 
@@ -71,6 +71,7 @@ class Game(ABC):
 
     @classmethod
     async def login(cls, session_id: str, sid: str) -> None:
+        sessionId = session_id
         Game.cursor.execute("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s", (session_id,))
         user_info = Game.cursor.fetchone()
         if user_info is not None:

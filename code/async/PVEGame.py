@@ -3,7 +3,7 @@ from chess.engine import Limit, popen_uci
 from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from time import perf_counter
-from ranks import dailyRank, weeklyRank
+from ranks import dailyRank, weeklyRank, sessionId
 
 class PVEGame(Game):
     __slots__ = ["bot", "depth"]
@@ -59,6 +59,19 @@ class PVEGame(Game):
 
     async def instantiate_bot(self) -> None:
         self.bot = (await popen_uci("./stockfish"))[1]
+    
+    def get_current_user():
+        Game.cursor.execute("SELECT username FROM backend_registeredusers WHERE session_id = %s", (sessionId,))
+        return Game.cursor.fetchone()[0]
+    
+    def get_attempts(username):
+        Game.cursor.execute("SELECT attempts FROM backend_dailyleaderboard WHERE username = %s", (username,))
+        result = Game.cursor.fetchone()
+        if result is None:
+            attempts = 0
+        else:
+            attempts = Game.cursor.fetchone()[0]
+        return attempts
 
     async def move(self, sid: str, data: dict[str, str]) -> None:
         if "san" not in data:
@@ -80,11 +93,15 @@ class PVEGame(Game):
         if outcome is not None:
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
             #Player wins
-            #if self.type == 2:
-                #Insert into daily leaderboard
-                #PVEGame.cursor.execute("INSERT INTO daily (user, time) VALUES (%s, %s)", (self.current.sid, self.current.time))
-            #else if self.type == 3:
+            if self.type == 2:
+                #get user information based on the sessionId
+                current_username = get_current_user(sessionId)
+                attempts = get_attempts(current_username) + 1
+                Game.cursor.execute("INSERT INTO backend_dailyleaderboard (username,  moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s)", (current_username, self.current.move_count, date.today(), 'win', attempts))
+            elif self.type == 3:
                 #Insert into weekly leaderboard
+                current_username = get_current_user(sessionId)
+                Game.cursor.execute("INSERT INTO backend_weeklyleaderboard (username,  moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)", (current_username, self.current.move_count, date.today(), 'win'))
                 
             await self.disconnect(sid)
             return
@@ -97,7 +114,16 @@ class PVEGame(Game):
             await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
             #Bot wins
-            
+            if self.type == 2:
+                #get user information based on the sessionId
+                current_username = get_current_user(sessionId)
+                attempts = get_attempts(current_username) + 1
+                Game.cursor.execute("INSERT INTO backend_dailyleaderboard (username,  moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s)", (current_username, self.current.move_count, date.today(), 'loss', attempts))
+            elif self.type == 3:
+                #Insert into weekly leaderboard
+                current_username = get_current_user(sessionId)
+                Game.cursor.execute("INSERT INTO backend_weeklyleaderboard (username,  moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)", (current_username, self.current.move_count, date.today(), 'loss'))
+                
             await self.disconnect(sid)
             return
         self.popped = False
@@ -117,4 +143,4 @@ class PVEGame(Game):
             await Game.sio.emit("pop", {"time": self.get_times()}, room=sid)
 
 
-#if self.type = 2:
+
