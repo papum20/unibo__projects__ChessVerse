@@ -343,7 +343,16 @@ function Start({
                                 <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
                                     <Button
                                         color="brown"
-                                        disabled
+                                        disabled={sessionStorage.getItem("session_id") === "undefined"}
+                                        onClick={() => {
+                                            setMode(RANKED);
+                                            setBotDiff(MIN_BOT_DIFF);
+                                            setIsLoadingGame(true);
+                                            const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
+                                            const secure = import.meta.env.VITE_NODE_ENV == "production";
+                                            const options = { transports: ["websocket"], secure }
+                                            setSocket(io(host, options));
+                                        }}
                                         style={{ fontSize: "1.5rem", borderRadius: "20px" }}
                                         variant="contained"
                                     >
@@ -354,7 +363,7 @@ function Start({
                                             marginLeft: "50px"
                                         }}>
                                             <FaCrown style={{ marginTop: "-8px" }} size="35" />
-                                            <span style={{ marginLeft: "10px" }}>ranked</span>
+                                            <span style={{ marginLeft: "10px" }}>Ranked</span>
                                         </div>
                                     </Button>
                                 </div>
