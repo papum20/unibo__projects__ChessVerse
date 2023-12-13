@@ -70,17 +70,21 @@ function Start({
         if (socket) {
             socket.connect();
             socket.on('connect', () => {
-                socket.on("config", (data) => {
-                    setElo(data?.elo);
-                    setEnemyUsername(data?.username || "Stockfish");
-                    setStartFen(data.fen);
-                    setColor(data.color);
-                    setRoomId(data.id);
+                socket.on("config", (config) => {
+                    setElo(config?.elo);
+                    setEnemyUsername(config?.username || "Stockfish");
+                    setStartFen(config.fen);
+                    setColor(config.color);
+                    setRoomId(config.id);
                     setIsLoadingGame(false);
 
                 })
-                const tmpData = data;
+
+                const tmpData = {
+                    ...data
+                };
                 tmpData.session_id = sessionStorage.getItem("session_id");
+                tmpData.type = mode; //ho messo sta riga perche' mi dava dei bug
 
                 socket.emit('start', tmpData);
 
