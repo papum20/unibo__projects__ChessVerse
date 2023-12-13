@@ -65,7 +65,7 @@ class PVEGame(Game):
         return Game.cursor.fetchone()[0]
     
     def get_attempts(username):
-        Game.cursor.execute("SELECT attempts FROM backend_dailyleaderboard WHERE username = %s", (username,))
+        Game.cursor.execute("SELECT attempts FROM backend_dailyleaderboard WHERE username = %s AND challenge_date = %s", (username, date.today()))
         result = Game.cursor.fetchone()
         if result is None:
             attempts = 0
