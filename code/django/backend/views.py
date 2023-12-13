@@ -150,3 +150,24 @@ def get_weekly_leaderboard(request):
     else:
         # Return an error response for invalid request methods
         return JsonResponse({'message': 'Invalid request method'}, status=405)
+    
+
+MAX_DAILY_GAMES = 2
+
+#check if the user has already played the maximum number of games today
+def check_start_daily(request):
+    if request.method == 'GET':
+        data = json.loads(request.body)
+        username = data.get('username')
+        try:
+            daily_leaderboard = DailyLeaderboard.objects.filter(challenge_date=date.today(), username=username).values('username', 'attempts')
+            if daily_leaderboard and daily_leaderboard[0]['attempts'] == MAX_DAILY_GAMES:
+                return JsonResponse({'message': 'You have already played the maximum number of games today'}, status=400)
+            else:
+                return JsonResponse({'daily_leaderboard': list(daily_leaderboard)}, status=200)
+        except Exception as e:
+            # Log the exception for debugging
+            print(f"Error in check_start_daily: {str(e)}")
+            return JsonResponse({'message': 'An error occurred while processing your request'}, status=500)
+    else:
+        return JsonResponse({'message': 'Invalid request method'}, status=405)

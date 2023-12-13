@@ -57,3 +57,11 @@ Content-Type: application/json
 {
 
 }
+
+###
+GET http://127.0.0.1:8000/backend/check_start_daily/
+Content-Type: application/json
+
+{
+    "username": "ccirone"
+}
