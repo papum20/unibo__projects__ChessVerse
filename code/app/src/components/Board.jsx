@@ -185,6 +185,13 @@ function Board(props) {
     if(!!props.game) wait(); 
   },[props.game]);
 
+  useEffect(() => {
+	  function resetBoard(){
+		props.setGame(null);
+	  }
+	  resetBoard();
+  }, [props.socket?.sid]);
+
   useEffect(()=>{
     if (!moveSan) return;
     props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});       
