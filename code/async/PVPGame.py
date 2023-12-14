@@ -27,12 +27,7 @@ class PVPGame(Game):
 		if sid not in Game.sid_to_id:
 			return
 		else:
-			for player in self.players:
-				if player.sid in Game.sid_to_id:
-					del Game.sid_to_id[player.sid]
-			del Game.games[Game.sid_to_id[sid]]
-			if self.opponent(sid).sid in Game.sid_to_id:
-				del Game.sid_to_id[self.opponent(sid).sid]
+			self._deletePlayers(sid)
 
 	async def pop(self, sid: str) -> None:
 		if sid not in Game.sid_to_id:

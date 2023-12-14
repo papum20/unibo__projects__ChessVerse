@@ -112,41 +112,93 @@ If there's an error (e.g., missing fields, invalid values, the SID is already in
   "winner": true
 }
 ```
-## Disconnect request (frontend event: disconnect)
+
+## Disconnect Request (frontend event: disconnect)
+
+This event is triggered when a player wants to disconnect from the game.
+
+### Request Payload
+
+#### For PvP Games
+
+If another player has sent the request at the same time and rank, the payload should include the `id` of the game session.
+
 ```json
-// risposta (se un altro giocatore ha mandato la richiesta con lo stesso tempo e rank complementario)
-//pvp no outcome 'disconnecte'
 {
-  "id": "aaaaaaaaaaaaaaaa"
-}
-//pve 
-{
+  "id": "game_session_id"
 }
 ```
-## Disconnect response (frontend event: disconnected)
+
+#### For PvE Games
+
+For PvE games, no additional data is required in the payload.
+
 ```json
-{
-}
+{}
 ```
-## Pop request (frontend event: disconnected)
+
+### Response Payload (frontend event: end)
+
+#### For PvP Games
+
+The server acknowledges the disconnect request and emits an `end` event with the winner information.
+
+\```json
+{
+  "winner": true
+}
+\```
+
+#### For PvE Games
+
+The server acknowledges the disconnect request with an empty payload.
+
+\```json
+{}
+\```
+
+#### For Ranked Games
+
+The server acknowledges the disconnect request and emits an `end` event with the winner information and the new rank.
+
+\```json
+{
+  "winner": true,
+  "new_rank": "rank_current"
+}
+\```
+
+## Pop Request (frontend event: disconnected)
+
+This event is triggered when a player wants to leave the game queue.
+
+### Request Payload
+
+#### For PvP Games
+
+The payload should include the `type` of the game (0 for PvP) and the `id` of the game session.
+
 ```json
-//pvp
 {
   "type": 0,
-  "id": "aaaaaaaaaaa"
-}
-//pve
-{
-  "type":1
+  "id": "game_session_id"
 }
 ```
-## Pop response (frontend event: move)
-```json
-//pvp
-{
-}
 
-//pve
+#### For PvE Games
+
+The payload should include the `type` of the game (1 for PvE).
+
+```json
 {
+  "type": 1
 }
+```
+
+### Response Payload (frontend event: move)
+
+The server acknowledges the pop request with an empty payload.
+
+```json
+{}
 ```

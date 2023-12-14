@@ -55,6 +55,19 @@ class Game(ABC):
 	def opponent(self, sid: str) -> Player:
 		return self.players[1 - self.players.index(sid)]
 
+	def _deletePlayers(self, sid):
+		"""
+		delete players (on disconnect).
+		"""
+		
+		for player in self.players:
+			if player.sid in Game.sid_to_id:
+				del Game.sid_to_id[player.sid]
+
+		del Game.games[Game.sid_to_id[sid]]
+		if len(self.players) > 1 and self.opponent(sid).sid in Game.sid_to_id:
+			del Game.sid_to_id[self.opponent(sid).sid]
+
 	@abstractmethod
 	async def disconnect(self, sid: str) -> None:
 		"""

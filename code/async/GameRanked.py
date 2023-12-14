@@ -46,7 +46,7 @@ class GameRanked(PVEGame):
 
 			Game.sid_to_id[sid] = sid # solo in PVE; ?
 			Game.games[sid] = GameRanked(sid, rank, int(data["depth"]), int(data["time"]))
-			
+		
 			await Game.games[sid].instantiate_bot()
 			await Game.sio.emit("config",
 				{
@@ -59,28 +59,25 @@ class GameRanked(PVEGame):
 
 	async def disconnect(self, sid: str) -> None:
 		
-		# TODO
-		
-		rank_current = get_user_rank(sid, "ranked")
-		
 		await self.database_update_win(sid=self.opponent(sid).sid, rank="ranked", diffs=MODE_RANKED_PT_DIFF)
+		rank_current = await get_user_rank(sid, "ranked")
 
 		await Game.sio.emit("end", 
 			{
-				"winner": True
+				"winner": True,
+				"new_rank": rank_current,
+				
 			}, room=self.opponent(sid).sid)
+
+		await self.bot.quit()
 		
 		[await Game.sio.disconnect(sid=player.sid) for player in self.players]
 		
+		# check what ?
 		if sid not in Game.sid_to_id:
 			return
-		else:
-			for player in self.players:
-				if player.sid in Game.sid_to_id:
-					del Game.sid_to_id[player.sid]
-			del Game.games[Game.sid_to_id[sid]]
-			if self.opponent(sid).sid in Game.sid_to_id:
-				del Game.sid_to_id[self.opponent(sid).sid]
+		
+		self._deletePlayers(sid)
 
 
 	async def move_bot(self, sid: str) -> str:
