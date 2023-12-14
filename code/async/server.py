@@ -11,7 +11,7 @@ from PVPGame import PVPGame
 from GameRanked import GameRanked
 from Game import Game
 
-from const import GameType
+from const.const import GameType
 from time import perf_counter
 
 

@@ -2,7 +2,8 @@ import chess
 from chess.engine import Limit
 from time import perf_counter
 
-from const import MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, MODE_RANKED_K
+from const.const import MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
+from const.game_options import MODE_RANKED_K, MODE_RANKED_PT_DIFF
 
 from Game import Game
 from PVEGame import PVEGame
@@ -40,7 +41,8 @@ class GameRanked(PVEGame):
 
 		# finally create game
 		else:
-			rank = get_user_rank(sid, "ranked")
+			session = await Game.sio.get_session(sid)
+			rank = get_user_rank(session["session_id"], "ranked")
 
 			Game.sid_to_id[sid] = sid # solo in PVE; ?
 			Game.games[sid] = GameRanked(sid, rank, int(data["depth"]), int(data["time"]))
@@ -61,14 +63,14 @@ class GameRanked(PVEGame):
 		
 		rank_current = get_user_rank(sid, "ranked")
 		
-		await self.database_update_win(sid=self.opponent(sid).sid, rank="ranked", diffs=)
+		await self.database_update_win(sid=self.opponent(sid).sid, rank="ranked", diffs=MODE_RANKED_PT_DIFF)
 
 		await Game.sio.emit("end", 
 			{
 				"winner": True
 			}, room=self.opponent(sid).sid)
 		
-		await Game.sio.disconnect(sid=player.sid) for player in self.players
+		[await Game.sio.disconnect(sid=player.sid) for player in self.players]
 		
 		if sid not in Game.sid_to_id:
 			return

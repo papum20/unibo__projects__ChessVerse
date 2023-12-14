@@ -6,7 +6,7 @@ from chess import Outcome
 from mysql.connector import MySQLConnection
 from socketio import AsyncServer
 
-from const import TIME_OPTIONS
+from const.const import TIME_OPTIONS
 
 import confighandler
 from database.users import set_user_rank
@@ -89,7 +89,15 @@ class Game(ABC):
 		else:
 			await Game.sio.save_session(sid, {'elo': 1000, 'session_id': None})
 
-	async def database_update_win(self, sid: str, rank:str="EloReallyBadChess", diffs:Tuple[int,int]=(30,-30)) -> None:
+	async def database_update_win(self, sid: str, rank:str="EloReallyBadChess", diffs:Tuple[int,int,int]=(30,0,-30)) -> None:
+		"""
+		Updates the database with the result of the game.
+		:param sid: the session id of the player
+		:param rank: the name of the rank field in the given mode
+		:param diffs: a tuple containing, in order, for the current player, the points to sum in case of win, draw and loss
+		:return: None
+		note: default values is provided for compatibility with previous version
+		"""
 		
 		# update current player
 		session = await Game.sio.get_session(sid)
@@ -104,6 +112,8 @@ class Game(ABC):
 			Game.cursor.execute("UPDATE backend_registeredusers SET GamesLost = GamesLost + 1 WHERE session_id = %s",
 								(session["session_id"],))
 			set_user_rank(session["session_id"], rank, diffs[1])
+
+		# TODO: should save draw?
 
 		Game.conn.commit()
 

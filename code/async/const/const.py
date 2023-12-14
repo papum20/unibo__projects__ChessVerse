@@ -1,4 +1,6 @@
-from enum import IntEnum, StrEnum
+# old const
+
+from enum import IntEnum
 
 
 # Enums
@@ -27,13 +29,6 @@ class AckType(IntEnum):
 	GAME_NOT_FOUND = 5
 	WRONG_TURN = 6
 
-# fields	
-## users
-RANKS = (
-	"EloReallyBadChess",
-	"ranked"	
-)
-
 # pveGame constants
 MIN_RANK = 0
 MAX_RANK = 100
@@ -46,7 +41,3 @@ MAX_TIME = 3000
 
 # pvpGame constants
 TIME_OPTIONS = [300, 600, 900]
-
-# game mdoes
-## ranked
-MODE_RANKED_K = 1	# see GameRanked formula

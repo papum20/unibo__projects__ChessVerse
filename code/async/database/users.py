@@ -1,6 +1,6 @@
 from Game import Game
 
-from const import RANKS
+from const.users import RANKS
 
 
 
@@ -12,14 +12,19 @@ _DATABASES = {
 
 # get functions
 
-def get_user_rank(sid:str, rank_type:str) -> int:
+def get_user_rank(session_id:str, rank_type:str) -> int:
 	"""
-	:param sid: session id
+	:param session_id: session id field
 	:param rank_type: game type, form const.RANKS
 	"""
 
 	if rank_type not in RANKS:
-		raise ValueError("Invalid rank type")
+		print("Invalid rank type")
+		return 0
+
+	if session_id is None:
+		print("Invalid session id")
+		return 0
 	
 	Game.cursor.execute(
 		f"""
@@ -27,7 +32,7 @@ def get_user_rank(sid:str, rank_type:str) -> int:
 		FROM {_DATABASES['registered_users']} 
 		WHERE session_id = %s
 		""",
-		(sid,)
+		(session_id,)
 	)
 	rank = Game.cursor.fetchone()
 
@@ -37,9 +42,9 @@ def get_user_rank(sid:str, rank_type:str) -> int:
 
 # update functions
 
-def set_user_rank(sid:str, rank_type:str, diff:int) -> bool:
+def set_user_rank(session_id:str, rank_type:str, diff:int) -> bool:
 	"""
-	:param sid: session id
+	:param session_id: session id field
 	:param rank_type: game type, form const.RANKS
 	:param diff: `new_rank-old_rank`
 	
@@ -47,9 +52,14 @@ def set_user_rank(sid:str, rank_type:str, diff:int) -> bool:
 	"""
 
 	if rank_type not in RANKS:
-		raise ValueError("Invalid rank type")
+		print("Invalid rank type")
+		return 0
+	
+	if session_id is None:
+		print("Invalid session id")
+		return 0
 
-	old_rank = get_user_rank(sid, rank_type)
+	old_rank = get_user_rank(session_id, rank_type)
 
 	Game.cursor.execute(
 		f"""
@@ -59,7 +69,7 @@ def set_user_rank(sid:str, rank_type:str, diff:int) -> bool:
 		""",
 		{
 			'new_rank': old_rank + diff,
-   			'sid': sid
+   			'sid': session_id
 		}
 	)
 	Game.conn.commit()
