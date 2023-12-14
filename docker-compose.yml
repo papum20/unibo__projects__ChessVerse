@@ -73,13 +73,13 @@ services:
 
 secrets:
   game_cert:
-    file: /etc/ssl/game/certificate.crt
+    file: /etc/ssl/www/certificate.crt
   game_priv:
-    file: /etc/ssl/game/private.key
+    file: /etc/ssl/www/private.key
   api_cert:
-    file: /etc/ssl/api/certificate.crt
+    file: /etc/ssl/www/certificate.crt
   api_priv:
-    file: /etc/ssl/api/private.key
+    file: /etc/ssl/www/private.key
 
 networks:
   default:
