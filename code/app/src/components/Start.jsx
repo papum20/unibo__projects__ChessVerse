@@ -221,8 +221,7 @@ function Start({
                 height: "100vh"
             }}>
                 <ThemeProvider theme={theme}>
-                    <span style={{ display: "flex", justifyContent: "flex-end", fontWeight: "bold", marginRight: "20px", fontSize: "25px" }}>{user}</span>
-                    <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : "2vh"}` }}>
+                    <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : ""}` }}>
                         {!getShowOptions() ?
                             <>
                                 <div style={{ display: "flex", justifyContent: "center" }}>
@@ -269,12 +268,14 @@ function Start({
                             </>
                             :
                             <>
-                                <div style={{ display: "flex", justifyContent: "center" }}>
-                                    <p style={{ color: "white", fontSize: "5rem" }}>
+                                <span style={{ display: "flex", justifyContent: "flex-end", fontWeight: "bold", marginRight: "20px", fontSize: "25px" }}>{user}</span>
+
+                                <div style={{ display: "flex", justifyContent: "center", marginTop: "-20px" }}>
+                                    <p style={{ color: "white", fontSize: "4rem" }}>
                                         Choose an option:
                                     </p>
                                 </div>
-                                <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
+                                <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
                                     <Button
                                         color="brown"
                                         disabled={sessionStorage.getItem("session_id") === "undefined"}
