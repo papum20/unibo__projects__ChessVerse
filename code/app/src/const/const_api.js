@@ -79,5 +79,14 @@ export const API = {
 			"internal server error": 500,
 			"invalid request": 405
 		}
+	},
+	multiplayerLeaderboard: {
+		endpoint: "backend/get_multiplayer_leaderboard",
+		method: "GET",
+		codes: {
+			"ok": 200,
+			"internal server error": 500,
+			"invalid request": 405
+		}
 	}
 };

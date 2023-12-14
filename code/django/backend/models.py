@@ -55,7 +55,8 @@ class DailyLeaderboard(models.Model):
 
     class Meta:
         ordering = ['moves_count']
-        
+
+
 class WeeklyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
@@ -64,7 +65,8 @@ class WeeklyLeaderboard(models.Model):
 
     class Meta:
         ordering = ['moves_count']
-        
+
+
 class MultiplayerLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     elo = models.PositiveIntegerField()

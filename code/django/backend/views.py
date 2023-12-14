@@ -162,7 +162,7 @@ def check_start_daily(request):
         try:
             daily_leaderboard = DailyLeaderboard.objects.filter(challenge_date=date.today(), username=username).values('username', 'attempts')
             if daily_leaderboard and daily_leaderboard[0]['attempts'] == MAX_DAILY_GAMES:
-                return JsonResponse({'message': 'You have already played the maximum number of games today'}, status=400)
+                return JsonResponse({'message': ' '}, status=400)
             else:
                 return JsonResponse({'daily_leaderboard': list(daily_leaderboard)}, status=200)
         except Exception as e:
