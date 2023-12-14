@@ -16,6 +16,7 @@ import { CalendarEvent, CalendarWeek } from "react-bootstrap-icons";
 import { FaCrown } from 'react-icons/fa';
 import Scores from "./Scores.jsx";
 import { toast } from "react-toastify";
+import { API } from "../const/const_api.js";
 
 function Start({
     mode, setMode,
@@ -279,18 +280,25 @@ function Start({
                                     <Button
                                         color="brown"
                                         disabled={sessionStorage.getItem("session_id") === "undefined"}
-                                        onClick={() => {
-                                            if (false) {//la condizione e' se hai finito le tue try giornaliere
-                                                toast.info("wait tomorrow to play", { className: "toast-message" });
-                                            }
-                                            else {
+                                        onClick={async () => {
+                                            const response = await fetch(API.checkStartDaily.endpoint, {
+                                                body: JSON.stringify({
+                                                    username: user
+                                                })
+                                            });
+                                            if (response.status === API.checkStartDaily.codes["maximum reached"]) {
+                                                toast.info("wait tomorrow to play", {className: "toast-message"});
+                                            } else if (response.status === API.checkStartDaily.codes["ok"]) {
                                                 setMode(DAILY);
                                                 setBotDiff(MIN_BOT_DIFF);
                                                 setIsLoadingGame(true);
                                                 const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
                                                 const secure = import.meta.env.VITE_NODE_ENV == "production";
-                                                const options = { transports: ["websocket"], secure }
+                                                const options = {transports: ["websocket"], secure}
                                                 setSocket(io(host, options));
+                                            } else {
+                                                toast.error("unexpected error on server communication",
+                                                  {className: "toast-message"});
                                             }
                                         }}
                                         style={{ fontSize: "1.5rem", borderRadius: "20px" }}
