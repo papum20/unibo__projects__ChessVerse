@@ -36,8 +36,8 @@ services:
     ports:
       - "8080:8080"
     secrets:
-      - ssl_certificate.crt
-      - ssl_priv_key.key
+      - game_cert 
+      - game_priv
         
   django:
     depends_on:
@@ -58,8 +58,8 @@ services:
     ports:
       - "8000:8000"
     secrets:
-      - ssl_certificate.crt
-      - ssl_priv_key.key
+      - api_cert
+      - api_priv
 
   app:
     container_name: app
@@ -72,10 +72,14 @@ services:
       - "3000:3000"
 
 secrets:
-  ssl_certificate.crt:
-    file: /etc/ssl/certificate.crt
-  ssl_priv_key.key:
-    file: /etc/ssl/private/private.key
+  game_cert:
+    file: /etc/ssl/www/certificate.crt
+  game_priv:
+    file: /etc/ssl/www/private.key
+  api_cert:
+    file: /etc/ssl/www/certificate.crt
+  api_priv:
+    file: /etc/ssl/www/private.key
 
 networks:
   default:
