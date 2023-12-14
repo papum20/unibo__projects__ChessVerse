@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from ...views import is_nickname_in_database, generate_random_nickname
-from ...models import RegisteredUsers, Guest
+from ...models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard
 import json
 
 
@@ -236,3 +236,42 @@ class UserSignoutViewTest(TestCase):
         response = self.client.post(reverse('user_signout'))
         self.assertJSONEqual(response.content, {'message': 'Logout successful'})
     '''
+
+
+class GetDailyLeaderboardTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        DailyLeaderboard.objects.create(username='test')
+
+    def test_view_exists_at_desired_location(self):
+        response = self.client.get('/backend/get_daily_leaderboard/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        response = self.client.get(reverse('get_daily_leaderboard'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_response_405_on_post_request(self):
+        response = self.client.post(reverse('get_daily_leaderboard'))
+        self.assertEqual(response.status_code, 405)
+        self.assertJSONEqual(response.content, {'message': 'Invalid request method'})
+
+
+class GetWeeklyLeaderboardTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        WeeklyLeaderboard.objects.create(username='test')
+
+    def test_view_exists_at_desired_location(self):
+        response = self.client.get('/backend/get_weekly_leaderboard/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        response = self.client.get(reverse('get_weekly_leaderboard'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_response_405_on_post_request(self):
+        response = self.client.post(reverse('get_weekly_leaderboard'))
+        self.assertEqual(response.status_code, 405)
+        self.assertJSONEqual(response.content, {'message': 'Invalid request method'})
+

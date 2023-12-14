@@ -44,7 +44,6 @@ class Games(models.Model):
     class Meta:
         app_label = 'backend'
         db_table = 'Games'
-        
 
 
 class DailyLeaderboard(models.Model):
@@ -56,7 +55,8 @@ class DailyLeaderboard(models.Model):
 
     class Meta:
         ordering = ['-moves_count']
-        
+
+
 class WeeklyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()

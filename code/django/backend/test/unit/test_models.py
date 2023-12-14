@@ -1,5 +1,5 @@
 from django.test import TestCase
-from ...models import Guest, RegisteredUsers, Games
+from ...models import Guest, RegisteredUsers, Games, DailyLeaderboard, WeeklyLeaderboard
 
 
 class GuestModelTest(TestCase):
@@ -139,3 +139,80 @@ class GamesModelTest(TestCase):
         game = Games.objects.get(id=1)
         max_length = game._meta.get_field('png').max_length
         self.assertEqual(max_length, 255)
+
+
+class DailyLeaderboardTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        DailyLeaderboard.objects.create(username='test')
+
+    def test_username_label(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('username').verbose_name
+        self.assertEqual(field_label, 'username')
+
+    def test_username_max_length(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        max_length = lb._meta.get_field('username').max_length
+        self.assertEqual(max_length, 255)
+
+    def test_moves_count_label(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('moves_count').verbose_name
+        self.assertEqual(field_label, 'moves_count')
+
+    def test_challenge_date_label(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('challenge_date').verbose_name
+        self.assertEqual(field_label, 'challenge_date')
+
+    def test_result_label(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('result').verbose_name
+        self.assertEqual(field_label, 'result')
+
+    def test_result_max_length(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        max_length = lb._meta.get_field('result').max_length
+        self.assertEqual(max_length, 10)
+
+    def test_attemps_label(self):
+        lb = DailyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('attempts').verbose_name
+        self.assertEqual(field_label, 'attempts')
+
+
+class WeeklyLeaderboardTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        WeeklyLeaderboard.objects.create(username='test')
+
+    def test_username_label(self):
+        lb = WeeklyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('username').verbose_name
+        self.assertEqual(field_label, 'username')
+
+    def test_username_max_length(self):
+        lb = WeeklyLeaderboard.objects.get(username='test')
+        max_length = lb._meta.get_field('username').max_length
+        self.assertEqual(max_length, 255)
+
+    def test_moves_count_label(self):
+        lb = WeeklyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('moves_count').verbose_name
+        self.assertEqual(field_label, 'moves_count')
+
+    def test_challenge_date_label(self):
+        lb = WeeklyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('challenge_date').verbose_name
+        self.assertEqual(field_label, 'challenge_date')
+
+    def test_result_label(self):
+        lb = WeeklyLeaderboard.objects.get(username='test')
+        field_label = lb._meta.get_field('result').verbose_name
+        self.assertEqual(field_label, 'result')
+
+    def test_result_max_length(self):
+        lb = WeeklyLeaderboard.objects.get(username='test')
+        max_length = lb._meta.get_field('result').max_length
+        self.assertEqual(max_length, 10)
