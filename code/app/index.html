@@ -7,31 +7,6 @@
     <title>Chessverse</title>
   </head>
   <body>
-
-	<!-- fb jdk -->
-	<script>
-		window.fbAsyncInit = function() {
-		  FB.init({
-			appId      : '655569260099474',
-			// enable in order to automatically check if the current browser is connected and logged to a facebook account
-			// autoLogAppEvents : true,
-			cookie     : true,
-			xfbml      : true,
-			version    : 'v18.0'
-		  });
-		  FB.AppEvents.logPageView();
-		};
-	  
-		(
-			function(d, s, id){
-				var js, fjs = d.getElementsByTagName(s)[0];
-				if (d.getElementById(id)) {return;}
-				js = d.createElement(s); js.id = id;
-				js.src = "../../../public/facebook-sdk.js";
-				fjs.parentNode.insertBefore(js, fjs);
-			} (document, 'script', 'facebook-jssdk')
-		);
-	</script>
 	
     <div id="root"></div>
     <script type="module" src="src/main.jsx"></script>

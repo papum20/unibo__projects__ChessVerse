@@ -1,6 +1,5 @@
 /*
 	a simple page that contains the login or signup card.
-	for now, it doesnt consider facebook login.
 */
 
 
