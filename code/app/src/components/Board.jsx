@@ -17,6 +17,16 @@ function Board(props) {
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
 
+
+  function getUndoMoves(moves){
+    var counter = 0;
+    moves.forEach((el)=>{
+      if(el.isUndo)
+        counter++;
+    })
+    return counter;
+  }
+
   
   function safeGameMutate(modify) {
     props.setGame((g) => {
@@ -194,8 +204,9 @@ function Board(props) {
 
   useEffect(()=>{
     if (!moveSan) return;
-    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});       
-    props.setMoves(prevValue => [...prevValue, {index: prevValue.length, move: moveSan, isUndo: false}]);
+    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});   
+    props.setNumMoves(prevValue => prevValue + 1);    
+    props.setMoves(prevValue => [...prevValue, {index: prevValue.length - getUndoMoves(prevValue), move: moveSan, isUndo: false}]);
     props.setTurn(prevValue => {return 1-prevValue;});
     setMoveSan(null);
     setAwaitingOppMove(true);
@@ -208,7 +219,8 @@ function Board(props) {
       props.updateTimers(res.time);
     });
     props.socket?.on("move", (res) =>{
-      props.setMoves(prevValue => [...prevValue, {index: prevValue.length, move: res.san, isUndo: false}]);
+      props.setMoves(prevValue => [...prevValue, {index: prevValue.length - getUndoMoves(prevValue), move: res.san, isUndo: false}]);
+      props.setNumMoves(prevValue => prevValue + 1);
       setOppMoveSan(res.san);
       setAwaitingOppMove(false);
       props.setTurn(prevValue => { return 1-prevValue;});

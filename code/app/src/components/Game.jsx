@@ -128,6 +128,7 @@ function Game({
 
 
     const [modalType, setModalType] = useState(null);
+    const [numMoves, setNumMoves] = useState(0);
 
 
     return (
@@ -188,7 +189,7 @@ function Game({
                                         url={import.meta.env.VITE_SITO + location.pathname}
                                         modalType={modalType}
                                         enemyUser={enemyUsername}
-                                        diff={`${mode === PVE ? data.depth : `${color === "white" ? elo[0] : elo[1]}`}`}
+                                        diff={`${mode === PVE ? data.depth : (mode=== DAILY || mode === WEEKLY) ? `${Math.floor(numMoves/2) + 1}` : `${color === "white" ? elo[0] : elo[1]}`}`}
                                         mode={mode}
                                       />
                                   </div>
@@ -321,6 +322,7 @@ function Game({
                                         setGame={setGame}
                                         position={position}
                                         setPosition={setPosition}
+                                        setNumMoves={setNumMoves}
                                     />
                                 </div>
                             </div>

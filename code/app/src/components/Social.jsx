@@ -1,5 +1,5 @@
 import { ShareFill } from "react-bootstrap-icons"
-import { PVP, PVE, RANKED } from "../const/const.js";
+import { PVP, PVE, RANKED, DAILY, WEEKLY } from "../const/const.js";
 
 function Social(props){
 
@@ -15,6 +15,8 @@ function Social(props){
     const pvp_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
           elo ${props.diff} ${end_string}`;
 
+    const dw_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser}, ho fatto ${props.diff} mosse ${end_string}`;
+
     const ranked_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
           ranking ${props.diff} ${end_string}`;
 
@@ -22,6 +24,7 @@ function Social(props){
         switch (props.mode) {
             case PVP: return pvp_msg;
             case PVE: return pve_msg;
+            case DAILY || WEEKLY: return dw_msg;
             case RANKED: return ranked_msg;
         }
     }

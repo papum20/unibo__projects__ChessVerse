@@ -315,10 +315,6 @@ function Start({
                                         style={{ fontSize: "1.5rem", borderRadius: "20px" }}
                                         variant="contained"
                                         onClick={() => {
-                                            if (false) {//la condizione e' se hai finito le tue try giornaliere
-                                                toast.info("wait tomorrow to play", { className: "toast-message" });
-                                            }
-                                            else {
                                                 setMode(WEEKLY);
                                                 setBotDiff(MIN_BOT_DIFF);
                                                 setIsLoadingGame(true);
@@ -326,7 +322,6 @@ function Start({
                                                 const secure = import.meta.env.VITE_NODE_ENV == "production";
                                                 const options = { transports: ["websocket"], secure }
                                                 setSocket(io(host, options));
-                                            }
                                         }}
                                     >
                                         <div style={{
