@@ -65,3 +65,11 @@ Content-Type: application/json
 {
     "username": "ccirone"
 }
+
+###
+GET http://127.0.0.1:8000/backend/get_multiplayer_leaderboard/
+Content-Type: application/json
+
+{
+
+}

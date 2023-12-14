@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
-from .models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard
+from .models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard, MultiplayerLeaderboard
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 import os
@@ -170,4 +170,18 @@ def check_start_daily(request):
             print(f"Error in check_start_daily: {str(e)}")
             return JsonResponse({'message': 'An error occurred while processing your request'}, status=500)
     else:
+        return JsonResponse({'message': 'Invalid request method'}, status=405)
+    
+
+#get the Multiplayer leaderboard  
+def get_multiplayer_leaderboard(request):
+    if request.method == 'GET':
+        try:
+            multiplayer_leaderboard = MultiplayerLeaderboard.objects.all().values('username', 'elo')
+            return JsonResponse({'multiplayer_leaderboard': list(multiplayer_leaderboard)}, status=200)
+        except Exception as e:
+            # Return an error response for any exception
+            return JsonResponse({'message': str(e)}, status=500)
+    else:
+        # Return an error response for invalid request methods
         return JsonResponse({'message': 'Invalid request method'}, status=405)
