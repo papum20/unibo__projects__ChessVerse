@@ -11,24 +11,13 @@ from const.users import RANKS
 
 class DatabaseHandlerUsers:
 
-<<<<<<< HEAD
-	cursor:Optional[MySQLCursor]	= None
-=======
 	cursor:Optional[MySQLCursor] = None
->>>>>>> merge-ranked
 	connector:Optional[MySQLConnection]	= None
 
 
 	def __init__(self):
 		pass
 
-<<<<<<< HEAD
-	def __init__(self, cursor:MySQLCursor, connector:MySQLConnection):
-		self.cursor = cursor
-		self.connector = connector
-
-=======
->>>>>>> merge-ranked
 
 	# get functions
 

@@ -65,7 +65,7 @@ class Game(ABC):
 		self.board = chess.Board(self.fen)
 		self.players = []
 		for i, sid in enumerate(sids):
-			self.players.append(Player.Player(sid, not bool(i), time))
+			self.players.append(Player(sid, not bool(i), time))
 		self.turn = 0
 		self.popped = False
 
@@ -95,45 +95,6 @@ class Game(ABC):
 
 		del Game.games[Game.sid_to_id[sid]]
 		del Game.sid_to_id[sid]
-		if len(self.players) > 1 and self.opponent(sid).sid in Game.sid_to_id:
-			del Game.sid_to_id[self.opponent(sid).sid]
-
-
-	async def update_win_database(self, sid: str, outcome: bool|None) -> None:
-		current = await Game.sio.get_session(sid)
-		opponent = await Game.sio.get_session(self.opponent(sid).sid)
-		if current["session_id"] is not None:
-			field = "GamesWon" if outcome is not None else "GamesDrawn"
-			Game.cursor.execute(f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-									(current["session_id"],))
-		if opponent["session_id"] is not None:
-			field = "GamesLost" if outcome is not None else "GamesLost"
-			Game.cursor.execute(f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-								(opponent["session_id"],))
-		new_elos = [None, None]
-		if current["session_id"] is not None and opponent["session_id"] is not None:
-			result = 1 if outcome is True else 0.5 if outcome is None else 0
-			new_elos = update_rating(current["elo"], opponent["elo"], result)
-			Game.cursor.execute(
-				f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[0]} WHERE session_id = %s",
-				(current["session_id"],))
-			Game.cursor.execute(
-				f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[1]} WHERE session_id = %s",
-				(opponent["session_id"],))
-		Game.conn.commit()
-		return new_elos
-
-
-	def _deletePlayers(self, sid):
-		"""
-		delete players (on disconnect).
-		"""
-
-		for player in self.players:
-			if player.sid in Game.sid_to_id:
-				del Game.sid_to_id[player.sid]
-
-		del Game.games[Game.sid_to_id[sid]]
 		if len(self.players) > 1 and self.opponent(sid).sid in Game.sid_to_id:
 			del Game.sid_to_id[self.opponent(sid).sid]
 
@@ -257,10 +218,12 @@ class Game(ABC):
 
 	# setters
 
-	def set_cursor(self, cursor):
+	@classmethod
+	def set_cursor(cls, cursor):
 		Game.cursor = cursor
-		self.databaseHandler_users.cursor = cursor
+		Game.databaseHandler_users.cursor = cursor
 
-	def set_connector(self, connector):
+	@classmethod
+	def set_connector(cls, connector):
 		Game.conn = connector
-		self.databaseHandler_users.connector = connector
+		Game.databaseHandler_users.connector = connector
