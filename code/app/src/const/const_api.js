@@ -48,7 +48,7 @@ export const API = {
 		method: "POST",
 	},
 	dailyLeaderboard: {
-		endpoint: "backend/get_daily_leaderboard",
+		endpoint: "backend/get_leaderboard/daily",
 		method: "GET",
 		codes: {
 			"ok": 200,
@@ -57,7 +57,7 @@ export const API = {
 		}
 	},
 	weeklyLeaderboard: {
-		endpoint: "backend/get_weekly_leaderboard",
+		endpoint: "backend/get_leaderboard/weekly",
 		method: "GET",
 		codes: {
 			"ok": 200,
@@ -66,9 +66,11 @@ export const API = {
 		}
 	},
 	rankedLeaderboard: {
-		endpoint: "...",
-		method: "...",
-		codes: "..."
+		endpoint: "backend/get_leaderboard/ranked",
+		method: "GET",
+		codes: {
+			
+		}
 	},
 	checkStartDaily: {
 		endpoint: "backend/check_start_daily",
@@ -81,7 +83,7 @@ export const API = {
 		}
 	},
 	multiplayerLeaderboard: {
-		endpoint: "backend/get_multiplayer_leaderboard",
+		endpoint: "backend/get_leaderboard/multiplayer",
 		method: "GET",
 		codes: {
 			"ok": 200,

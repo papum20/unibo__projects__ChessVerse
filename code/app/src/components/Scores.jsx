@@ -16,7 +16,10 @@ function Scores (){
 
     async function fetchLeaderboard(API){
         const response = await fetch(API);
-        return await response.json();
+        console.log(API, response)
+        const data = await response.json();
+        console.log(data);
+        return data;
     }
 
     async function getCurrentLeaderboard (){
