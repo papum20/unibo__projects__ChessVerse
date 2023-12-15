@@ -86,6 +86,7 @@ class PVEGame(Game):
             await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
             return
         self.current.move_count += 1
+			
         self.board.push_uci(uci_move)
         outcome = self.board.outcome()
         if outcome is not None:
@@ -129,6 +130,7 @@ class PVEGame(Game):
         san_bot_move = self.board.san(bot_move)
         self.board.push_uci(bot_move.uci())
         outcome = self.board.outcome()
+        
         if outcome is not None:
             await Game.sio.emit("move", {"san": san_bot_move}, room=sid)
             await Game.sio.emit("end", {"winner": outcome.winner}, room=sid)
@@ -166,6 +168,7 @@ class PVEGame(Game):
                 
             await self.disconnect(sid)
             return
+        
         self.popped = False
         end = perf_counter()
         self.current.add_time(end - start)

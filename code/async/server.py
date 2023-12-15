@@ -1,11 +1,20 @@
 #!/usr/bin/env python
-import asyncio
 import os
-import socketio
+import random
+from time import perf_counter
+
 import aiohttp
+import asyncio
+import mysql.connector
+import socketio
+import schedule
+import ssl
+
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
+from GameRanked import GameRanked
+
 from const import GameType
 from time import perf_counter
 import ssl
@@ -29,9 +38,12 @@ class GameHandler:
 
     async def on_connect(self, sid, environ):
         print("connect", sid)
+    async def on_connect(self, sid, environ):
+        print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
+        print("disconnect", sid)
         print("disconnect", sid)
         if sid in Game.sid_to_id:
             game_id = Game.sid_to_id[sid]
@@ -62,7 +74,35 @@ class GameHandler:
         # Combiniamo anno e numero della settimana per creare il seed
         seed = year * 100 + week_number
         return seed
+    
+    def daily_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Estraiamo anno, mese e giorno
+        year = today.year
+        month = today.month
+        day = today.day
+        # Combiniamo anno, mese e giorno per creare il seed
+        seed = year * 10000 + month * 100 + day
+        return seed
+    
+    def weekly_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Otteniamo il numero della settimana e l'anno
+        week_number = today.isocalendar()[1]
+        year = today.year
+        # Combiniamo anno e numero della settimana per creare il seed
+        seed = year * 100 + week_number
+        return seed
 
+    async def on_start(self, sid, data): 
+        daily_seed = GameHandler.daily_seed()
+        weekly_seed = GameHandler.weekly_seed()
+        print("start", sid)
+        if "session_id" in data.keys():
+            await Game.login(data["session_id"], sid)
+        if "type" not in data.keys():
     async def on_start(self, sid, data): 
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
@@ -80,10 +120,18 @@ class GameHandler:
             await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
         elif data["type"] == GameType.WEEKLY:
             await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
+        elif data["type"] == GameType.RANKED:
+            await GameRanked.start(sid, data)
+        #add new GameTypes Daily and Wekkly challenges
+        elif data["type"] == GameType.DAILY:
+            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
+        elif data["type"] == GameType.WEEKLY:
+            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
         else:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
+        print("move", sid)
         print("move", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
@@ -95,8 +143,10 @@ class GameHandler:
 
     async def on_resign(self, sid, data):
         await self.on_disconnect(sid)
+        await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
+        print("pop", sid)
         print("pop", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
@@ -117,6 +167,20 @@ class GameHandler:
                     if player.is_timed and player_time <= 0:
                         await Game.sio.emit("timeout", {}, room=player.sid)
                         await self.on_disconnect(player.sid)
+
+    def scheduleDaily(self):
+        schedule.every().day.at("00:00").do(self.updateDailyChallenge)
+
+    def scheduleWeekly(self):
+        schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
+
+    def updateDailyChallenge(self):
+        dailyRank = random.randint(0, 100)
+        print("Funzione giornaliera pianificata eseguita!")
+
+    def updateWeeklyChallenge(self):
+        weeklyRank = random.randint(0, 100)
+        print("Funzione settimanale pianificata eseguita!")
 
     def scheduleDaily(self):
         schedule.every().day.at("00:00").do(self.updateDailyChallenge)
@@ -156,8 +220,8 @@ async def main():
 
     handler = GameHandler()
     Game.sio = sio
-    Game.cursor = cursor
-    Game.conn = conn
+    Game.set_cursor(cursor)
+    Game.set_connector(conn)
     
     # Aggiorna le chiamate a handler
     sio.on('connect', handler.on_connect)
@@ -166,6 +230,10 @@ async def main():
     sio.on('move', handler.on_move)
     sio.on('resign', handler.on_resign)
     sio.on('pop', handler.on_pop)
+
+    handler.scheduleDaily()
+    handler.scheduleWeekly()
+    
 
     handler.scheduleDaily()
     handler.scheduleWeekly()
@@ -181,11 +249,14 @@ async def main():
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
     
     
+    
+    
     await site.start()
     print(f"Listening on 0.0.0.0:{port}")
     cleaner_task = asyncio.create_task(handler.cleaner())
 
     while True:
+        schedule.run_pending()
         schedule.run_pending()
         await asyncio.sleep(1)
 

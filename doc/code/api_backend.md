@@ -6,6 +6,42 @@ Method: get_guest_name
     Endpoint: /get_guest_name/
     GET: get the name of the last added guest user
 
+# Leaderboards
+
+- Endpoint: `/get_leaderboard/<leaderboard_type>/`
+- Method: `GET`
+- Parameters: `leaderboard_type` can be `ranked`, `daily`, or `weekly`.
+- Response: `200 OK` with a JSON object containing the requested leaderboard. The JSON object will have a key named after the `<mode>_leaderboard` parameter and its value will be an array of objects, each containing the specified fields. Here `<mode>` can be one of `"ranked","daily","weekly"`.  
+
+## responses
+
+```json
+{
+  <mode>_leaderboard: [
+    {
+      // object fields...
+    },
+    // more users...
+  ]
+}
+```
+
+Ranked mode object:  
+```json
+{
+    "user": <string>,
+    "score_ranked": <int>,
+}
+```
+
+Periodic challenges object:
+```json
+{
+  "user": <string>,
+  "moves_count": <int>,
+}
+```
+
 # User Authentication
 
 This API provides basic user authentication functionalities, including user login, signup, and logout.

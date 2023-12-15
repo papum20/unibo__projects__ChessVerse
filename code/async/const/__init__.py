@@ -1,15 +1,16 @@
 from enum import IntEnum
 
+
 # Enums
 class EventType(IntEnum):
-    ERROR = -1
-    RESIGN = 0
-    MOVE = 1
-    POP = 2
-    ACK = 3
-    CONFIG = 4
-    END = 5
-    START = 999
+	ERROR = -1
+	RESIGN = 0
+	MOVE = 1
+	POP = 2
+	ACK = 3
+	CONFIG = 4
+	END = 5
+	START = 999
 
 
 class GameType(IntEnum):
@@ -17,18 +18,16 @@ class GameType(IntEnum):
     PVE = 1
     DAILY = 2
     WEEKLY = 3
-    
-
+	RANKED = 4
 
 class AckType(IntEnum):
-    OK = 0
-    NOK = 1
-    UNKNOWN_ACTION = 2
-    WRONG_CONFIG = 3
-    NOT_IMPLEMENTED = 4
-    GAME_NOT_FOUND = 5
-    WRONG_TURN = 6
-
+	OK = 0
+	NOK = 1
+	UNKNOWN_ACTION = 2
+	WRONG_CONFIG = 3
+	NOT_IMPLEMENTED = 4
+	GAME_NOT_FOUND = 5
+	WRONG_TURN = 6
 
 # pveGame constants
 MIN_RANK = 0
