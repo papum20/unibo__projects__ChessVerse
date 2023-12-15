@@ -14,10 +14,10 @@ class EventType(IntEnum):
 
 
 class GameType(IntEnum):
-    PVP = 0
-    PVE = 1
-    DAILY = 2
-    WEEKLY = 3
+	PVP = 0
+	PVE = 1
+	DAILY = 2
+	WEEKLY = 3
 	RANKED = 4
 
 class AckType(IntEnum):

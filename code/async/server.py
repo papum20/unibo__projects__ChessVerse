@@ -103,13 +103,6 @@ class GameHandler:
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
-    async def on_start(self, sid, data): 
-        daily_seed = GameHandler.daily_seed()
-        weekly_seed = GameHandler.weekly_seed()
-        print("start", sid)
-        if "session_id" in data.keys():
-            await Game.login(data["session_id"], sid)
-        if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
@@ -123,15 +116,10 @@ class GameHandler:
         elif data["type"] == GameType.RANKED:
             await GameRanked.start(sid, data)
         #add new GameTypes Daily and Wekkly challenges
-        elif data["type"] == GameType.DAILY:
-            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
-        elif data["type"] == GameType.WEEKLY:
-            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
         else:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
-        print("move", sid)
         print("move", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
@@ -142,7 +130,6 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
-        await self.on_disconnect(sid)
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
@@ -234,10 +221,6 @@ async def main():
     handler.scheduleDaily()
     handler.scheduleWeekly()
     
-
-    handler.scheduleDaily()
-    handler.scheduleWeekly()
-    
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
@@ -256,7 +239,6 @@ async def main():
     cleaner_task = asyncio.create_task(handler.cleaner())
 
     while True:
-        schedule.run_pending()
         schedule.run_pending()
         await asyncio.sleep(1)
 

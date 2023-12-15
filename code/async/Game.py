@@ -23,7 +23,7 @@ def update_rating(rating_A, rating_B, risultato):
   K = calc_K(rating_A, rating_B)
   new_rating_a = rating_A + K * (risultato - expected_a)
   new_rating_b = rating_B + K * (1 - risultato - expected_b)
-  return new_rating_a, new_rating_b 
+  return new_rating_a, new_rating_b
 
 def calc_K(rating_A, rating_B):
   # Assumo che il rating Elo sia compreso tra 0 e 3000
@@ -56,7 +56,7 @@ class Game(ABC):
 			sids (list): A list of session IDs for the players.
 			rank (int): The rank of the game.
 			time (int): The time limit for the game.
-			fen (str, optional): The initial board setup in Forsyth-Edwards Notation. 
+			fen (str, optional): The initial board setup in Forsyth-Edwards Notation.
 								 If not provided, a starting position will be generated based on the rank.
 
 		Returns:
@@ -123,7 +123,7 @@ class Game(ABC):
 		"""
 		delete players (on disconnect).
 		"""
-		
+
 		for player in self.players:
 			if player.sid in Game.sid_to_id:
 				del Game.sid_to_id[player.sid]
@@ -179,7 +179,7 @@ class Game(ABC):
 		:return: None
 		note: default values is provided for compatibility with previous version
 		"""
-		
+
 		# update current player
 		session = await Game.sio.get_session(sid)
 		if session["session_id"] is not None:
@@ -210,16 +210,16 @@ class Game(ABC):
 
 
 	# standard responses
-	
+
 	@staticmethod
 	async def emit_win(sid:str, outcome:Outcome) -> None:
 		if outcome is not None:
 			await Game.sio.emit("end", {
 					"winner": outcome.winner
 				}, room=sid)
-	
-	
-	
+
+
+
 	# standard handlers for events
 
 	async def handle_win(self, sid:str) -> bool:
@@ -233,7 +233,7 @@ class Game(ABC):
 			await self.disconnect(sid)
 			return True
 		return False
-	
+
 
 	# setters
 
