@@ -1,5 +1,6 @@
 
 from datetime import date, timedelta
+import json
 
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -33,32 +34,52 @@ def get_leaderboard_ranked(request):
 # periodic challenges
 
 def get_leaderboard_daily(request):
-	if request.method == 'GET':
-		try:
-			# Retrieve only the games played today from the database 
-			daily_leaderboard = DailyLeaderboard.objects.filter(challenge_date=date.today(), result='win').values('username', 'moves_count')
-			# Return the daily leaderboard as a JSON response
-			return JsonResponse({'daily_leaderboard': list(daily_leaderboard)}, status=200)
-		except Exception as e:
-			# Return an error response for any exception
-			return JsonResponse({'message': str(e)}, status=500)
-	else:
-		# Return an error response for invalid request methods
-		return JsonResponse({'message': 'Invalid request method'}, status=405)
-
+    if request.method == 'GET':
+        try:
+            # Retrieve only the games played today from the database 
+            daily_leaderboard = DailyLeaderboard.objects.filter(challenge_date=date.today(), result='win').values('username', 'moves_count')
+            # Return the daily leaderboard as a JSON response
+            return JsonResponse({'daily_leaderboard': list(daily_leaderboard)}, status=200)
+        except Exception as e:
+            # Return an error response for any exception
+            return JsonResponse({'message': str(e)}, status=500)
+    else:
+        # Return an error response for invalid request methods
+        return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 def get_leaderboard_weekly(request):
-	if request.method == 'GET':
-		try:
-			# Retrieve only the games played from this Monday to this Sunday from the database
-			start_of_week = date.today() - timedelta(days=date.today().weekday())
-			end_of_week = start_of_week + timedelta(days=6)
-			weekly_leaderboard = WeeklyLeaderboard.objects.filter(challenge_date__range=[start_of_week, end_of_week], result='win').values('username', 'moves_count')
-			# Return the weekly leaderboard as a JSON response
-			return JsonResponse({'weekly_leaderboard': list(weekly_leaderboard)}, status=200)
-		except Exception as e:
-			# Return an error response for any exception
-			return JsonResponse({'message': str(e)}, status=500)
-	else:
-		# Return an error response for invalid request methods
-		return JsonResponse({'message': 'Invalid request method'}, status=405)
+    if request.method == 'GET':
+        try:
+            # Retrieve only the games played from this Monday to this Sunday from the database
+            start_of_week = date.today() - timedelta(days=date.today().weekday())
+            end_of_week = start_of_week + timedelta(days=6)
+            weekly_leaderboard = WeeklyLeaderboard.objects.filter(challenge_date__range=[start_of_week, end_of_week], result='win').values('username', 'moves_count')
+            # Return the weekly leaderboard as a JSON response
+            return JsonResponse({'weekly_leaderboard': list(weekly_leaderboard)}, status=200)
+        except Exception as e:
+            # Return an error response for any exception
+            return JsonResponse({'message': str(e)}, status=500)
+    else:
+        # Return an error response for invalid request methods
+        return JsonResponse({'message': 'Invalid request method'}, status=405)
+    
+
+MAX_DAILY_GAMES = 2
+
+#check if the user has already played the maximum number of games today
+def check_start_daily(request):
+    if request.method == 'GET':
+        data = json.loads(request.body)
+        username = data.get('username')
+        try:
+            daily_leaderboard = DailyLeaderboard.objects.filter(challenge_date=date.today(), username=username).values('username', 'attempts')
+            if daily_leaderboard and daily_leaderboard[0]['attempts'] == MAX_DAILY_GAMES:
+                return JsonResponse({'message': 'You have already played the maximum number of games today'}, status=400)
+            else:
+                return JsonResponse({'daily_leaderboard': list(daily_leaderboard)}, status=200)
+        except Exception as e:
+            # Log the exception for debugging
+            print(f"Error in check_start_daily: {str(e)}")
+            return JsonResponse({'message': 'An error occurred while processing your request'}, status=500)
+    else:
+        return JsonResponse({'message': 'Invalid request method'}, status=405)

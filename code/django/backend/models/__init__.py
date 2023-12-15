@@ -25,17 +25,14 @@ class CustomUserManager(BaseUserManager):
 
 
 class RegisteredUsers(AbstractUser):
-<<<<<<< HEAD
-    EloReallyBadChess = models.IntegerField(default=1000)
-    session_id = models.CharField(max_length=255, default='')
-=======
 	GamesWon = models.IntegerField(default=0)
 	GameDraw = models.IntegerField(default=0)
 	GamesLost = models.IntegerField(default=0)
+
 	EloReallyBadChess = models.IntegerField(default=1000)
 	score_ranked = models.IntegerField(default=0)
+
 	session_id = models.CharField(max_length=255, default='')
->>>>>>> dev-ranked
 
 	groups = models.ManyToManyField(Group, blank=True, related_name='registered_users')
 	user_permissions = models.ManyToManyField(Permission, blank=True, related_name='registered_users')
@@ -47,33 +44,6 @@ class RegisteredUsers(AbstractUser):
 
 
 class Games(models.Model):
-<<<<<<< HEAD
-    username1 = models.CharField(max_length=255)
-    username2 = models.CharField(max_length=255)
-    png = models.CharField(max_length=255)
-    
-    class Meta:
-        app_label = 'backend'
-        db_table = 'Games'
-
-
-class DailyLeaderboard(models.Model):
-    username = models.CharField(max_length=255)
-    moves_count = models.PositiveIntegerField()
-    challenge_date = models.DateField()
-    result = models.CharField(max_length=10)  
-    attempts = models.PositiveIntegerField()  
-
-    class Meta:
-        ordering = ['-moves_count']
-
-
-class WeeklyLeaderboard(models.Model):
-    username = models.CharField(max_length=255)
-    moves_count = models.PositiveIntegerField()
-    challenge_date = models.DateField()
-    result = models.CharField(max_length=10)  
-=======
 	username1 = models.CharField(max_length=255)
 	username2 = models.CharField(max_length=255)
 	png = models.CharField(max_length=255)
@@ -81,28 +51,26 @@ class WeeklyLeaderboard(models.Model):
 	class Meta:
 		app_label = 'backend'
 		db_table = 'Games'
-		
 
 
 class DailyLeaderboard(models.Model):
 	username = models.CharField(max_length=255)
 	moves_count = models.PositiveIntegerField()
 	challenge_date = models.DateField()
-	result = models.CharField(max_length=10)  # Vittoria, sconfitta, pareggio, ecc.
-	attempts = models.PositiveIntegerField()  # Numero di tentativi
+	result = models.CharField(max_length=10)  
+	attempts = models.PositiveIntegerField()  
 
 	objects = CustomUserManager()
 
 	class Meta:
 		ordering = ['-moves_count']
-	
-		
+
+
 class WeeklyLeaderboard(models.Model):
 	username = models.CharField(max_length=255)
 	moves_count = models.PositiveIntegerField()
 	challenge_date = models.DateField()
-	result = models.CharField(max_length=10)  # Vittoria, sconfitta, pareggio, ecc.
->>>>>>> dev-ranked
+	result = models.CharField(max_length=10)  
 
 	objects = CustomUserManager()
 

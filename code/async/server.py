@@ -25,138 +25,121 @@ active_clients = {}
 
 
 class GameHandler:
-	def __init__(self):
-		pass
-	@classmethod
-	def sid2game(cls, sid):
-		if isinstance(Game.sid_to_id[sid], str):
-			try:
-				return Game.games[Game.sid_to_id[sid]]
-			except KeyError:
-				return None
-		return None
+    def __init__(self):
+        pass
+    @classmethod
+    def sid2game(cls, sid):
+        if isinstance(Game.sid_to_id[sid], str):
+            try:
+                return Game.games[Game.sid_to_id[sid]]
+            except KeyError:
+                return None
+        return None
 
-	async def on_connect(self, sid, environ):
-		print("connect", sid)
-		await Game.sio.emit("connected", room=sid)
+    async def on_connect(self, sid, environ):
+        print("connect", sid)
+        await Game.sio.emit("connected", room=sid)
 
-	async def on_disconnect(self, sid):
-		print("disconnect", sid)
-		if sid in Game.sid_to_id:
-			game_id = Game.sid_to_id[sid]
-			if isinstance(game_id, dict):
-				Game.waiting_list[game_id["time"]][game_id["index"]] = [waiting for waiting in Game.waiting_list[game_id["time"]][game_id["index"]] if waiting["sid"] != sid]
-				del Game.sid_to_id[sid]
-			else:
-				if game_id in Game.games:
-					await Game.games[game_id].disconnect(sid)
-	
-	def daily_seed():
-		# Otteniamo la data corrente
-		today = datetime.date.today()
-		# Estraiamo anno, mese e giorno
-		year = today.year
-		month = today.month
-		day = today.day
-		# Combiniamo anno, mese e giorno per creare il seed
-		seed = year * 10000 + month * 100 + day
-		return seed
-	
-	def weekly_seed():
-		# Otteniamo la data corrente
-		today = datetime.date.today()
-		# Otteniamo il numero della settimana e l'anno
-		week_number = today.isocalendar()[1]
-		year = today.year
-		# Combiniamo anno e numero della settimana per creare il seed
-		seed = year * 100 + week_number
-		return seed
+    async def on_disconnect(self, sid):
+        print("disconnect", sid)
+        if sid in Game.sid_to_id:
+            game_id = Game.sid_to_id[sid]
+            if isinstance(game_id, dict):
+                Game.waiting_list[game_id["time"]][game_id["index"]] = [waiting for waiting in Game.waiting_list[game_id["time"]][game_id["index"]] if waiting["sid"] != sid]
+                del Game.sid_to_id[sid]
+            else:
+                if game_id in Game.games:
+                    await Game.games[game_id].disconnect(sid)
+    
+    def daily_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Estraiamo anno, mese e giorno
+        year = today.year
+        month = today.month
+        day = today.day
+        # Combiniamo anno, mese e giorno per creare il seed
+        seed = year * 10000 + month * 100 + day
+        return seed
+    
+    def weekly_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Otteniamo il numero della settimana e l'anno
+        week_number = today.isocalendar()[1]
+        year = today.year
+        # Combiniamo anno e numero della settimana per creare il seed
+        seed = year * 100 + week_number
+        return seed
 
-	async def on_start(self, sid, data): 
-		daily_seed = GameHandler.daily_seed()
-		weekly_seed = GameHandler.weekly_seed()
-		print("start", sid)
-		if "session_id" in data.keys():
-			await Game.login(data["session_id"], sid)
-		if "type" not in data.keys():
-			await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-		elif data["type"] == GameType.PVE:
-			await PVEGame.start(sid, data)
-		elif data["type"] == GameType.PVP:
-			await PVPGame.start(sid, data)
-		#add new GameTypes Daily and Wekkly challenges
-		elif data["type"] == GameType.DAILY:
-			await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
-		elif data["type"] == GameType.WEEKLY:
-			await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
-		else:
-			await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+    async def on_start(self, sid, data): 
+        daily_seed = GameHandler.daily_seed()
+        weekly_seed = GameHandler.weekly_seed()
+        print("start", sid)
+        if "session_id" in data.keys():
+            await Game.login(data["session_id"], sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        elif data["type"] == GameType.PVE:
+            await PVEGame.start(sid, data)
+        elif data["type"] == GameType.PVP:
+            await PVPGame.start(sid, data)
+        #add new GameTypes Daily and Wekkly challenges
+        elif data["type"] == GameType.DAILY:
+            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
+        elif data["type"] == GameType.WEEKLY:
+            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
+        else:
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
-	async def on_move(self, sid, data):
-		print("move", sid)
-		if "type" not in data.keys():
-			await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-		game = GameHandler.sid2game(sid)
-		if game is None:
-			await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-			return
-		await game.move(sid, data)
+    async def on_move(self, sid, data):
+        print("move", sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        game = GameHandler.sid2game(sid)
+        if game is None:
+            await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            return
+        await game.move(sid, data)
 
-	async def on_resign(self, sid, data):
-		await self.on_disconnect(sid)
+    async def on_resign(self, sid, data):
+        await self.on_disconnect(sid)
 
-	async def on_pop(self, sid, data):
-		print("pop", sid)
-		if "type" not in data.keys():
-			await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-		game = GameHandler.sid2game(sid)
-		if game is None:
-			await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-			return
-		await game.pop(sid)
+    async def on_pop(self, sid, data):
+        print("pop", sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        game = GameHandler.sid2game(sid)
+        if game is None:
+            await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            return
+        await game.pop(sid)
 
+    async def cleaner(self):
+        while True:
+            await asyncio.sleep(1)
+            for id in list(Game.games.keys()):
+                if id not in Game.games:
+                    continue
+                for player in Game.games[id].players:
+                    player_time = player.remaining_time - (perf_counter() - player.latest_timestamp)
+                    if player.is_timed and player_time <= 0:
+                        await Game.sio.emit("timeout", {}, room=player.sid)
+                        await self.on_disconnect(player.sid)
 
-	async def on_resign(self, sid, data):
-		game = GameHandler.sid2game(sid)
-		if game is None:
-			await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-			return
-		await game.disconnect(sid)
+    def scheduleDaily(self):
+        schedule.every().day.at("00:00").do(self.updateDailyChallenge)
 
-	async def on_pop(self, sid, data):
-		if "type" not in data.keys():
-			await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
-		game = GameHandler.sid2game(sid)
-		if game is None:
-			await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-			return
-		await game.pop(sid)
+    def scheduleWeekly(self):
+        schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
 
-	async def cleaner(self):
-		while True:
-			await asyncio.sleep(1)
-			for id in list(Game.games.keys()):
-				if id not in Game.games:
-					continue
-				for player in Game.games[id].players:
-					player_time = player.remaining_time - (perf_counter() - player.latest_timestamp)
-					if player.is_timed and player_time <= 0:
-						await Game.sio.emit("timeout", {}, room=player.sid)
-						await self.on_disconnect(player.sid)
+    def updateDailyChallenge(self):
+        dailyRank = random.randint(0, 100)
+        print("Funzione giornaliera pianificata eseguita!")
 
-	def scheduleDaily(self):
-		schedule.every().day.at("00:00").do(self.updateDailyChallenge)
-
-	def scheduleWeekly(self):
-		schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
-
-	def updateDailyChallenge(self):
-		dailyRank = random.randint(0, 100)
-		print("Funzione giornaliera pianificata eseguita!")
-
-	def updateWeeklyChallenge(self):
-		weeklyRank = random.randint(0, 100)
-		print("Funzione settimanale pianificata eseguita!")
+    def updateWeeklyChallenge(self):
+        weeklyRank = random.randint(0, 100)
+        print("Funzione settimanale pianificata eseguita!")
 
 
 async def main():
