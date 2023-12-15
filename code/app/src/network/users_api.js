@@ -12,7 +12,8 @@ import { toast } from "react-toastify";
  * @param {obj} api_obj reference to object of API constant object
  * @returns 
  */
-async function fetchData(input, init, api_obj) {
+export async function fetchData(input, init, api_obj) {
+        
         // grant it's an array
         const codes = (api_obj && typeof(api_obj.codes) === "object")
                 ? Object.values(api_obj.codes)
@@ -77,6 +78,7 @@ export async function addGuest() {
         const response = await fetch(joinPaths(SERVER_ADDR, API.addGuest.endpoint), {method: API.addGuest.method, headers: { "Content-Type": "application/json" }, body: {}});
         if(response.ok) {
                 const json = await response.json();
+                console.log(json);
                 return json.guest_nickname;
         } 
         else

@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
 
 class RegisteredUsers(AbstractUser):
 	GamesWon = models.IntegerField(default=0)
-	GameDraw = models.IntegerField(default=0)
+	GamesDrawn = models.IntegerField(default=0)
 	GamesLost = models.IntegerField(default=0)
 	EloReallyBadChess = models.IntegerField(default=1000)
 	score_ranked = models.IntegerField(default=0)
@@ -76,3 +76,10 @@ class WeeklyLeaderboard(models.Model):
 	class Meta:
 		ordering = ['-moves_count']
 
+class MultiplayerLeaderboard(models.Model):
+    username = models.CharField(max_length=255)
+    elo = models.PositiveIntegerField()
+
+    class Meta:
+        #order from highest elo to lowest
+        ordering = ['-elo']

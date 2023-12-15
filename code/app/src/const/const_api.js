@@ -57,7 +57,7 @@ export const API = {
 		}
 	},
 	weeklyLeaderboard: {
-		endpoint: "backend/get_leaderboard/weekly",
+		endpoint: "backend/get_leaderboard/weekly/",
 		method: "GET",
 		codes: {
 			"ok": 200,
@@ -66,7 +66,7 @@ export const API = {
 		}
 	},
 	rankedLeaderboard: {
-		endpoint: "backend/get_leaderboard/ranked",
+		endpoint: "backend/get_leaderboard_ranked/",
 		method: "GET",
 		codes: {
 			

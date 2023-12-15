@@ -1,6 +1,7 @@
 import chess
 from chess.engine import Limit
 from time import perf_counter
+from typing import List, Optional, Tuple
 
 from const import MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from const.game_options import MODE_RANKED_K, MODE_RANKED_PT_DIFF
@@ -40,13 +41,14 @@ class GameRanked(PVEGame):
 
 		# finally create game
 		else:
-			session = await Game.sio.get_session(sid)
-			rank = Game.databaseHandler_users.get_user_rank(session["session_id"], "ranked")
+			session = await Game.get_session_from_sid(sid)
+			rank = Game.databaseHandler_users.get_user_rank(session["session_id"], "score_ranked")
 
 			Game.sid_to_id[sid] = sid # solo in PVE; ?
 			Game.games[sid] = GameRanked(sid, rank, int(data["depth"]), int(data["time"]))
 		
 			await Game.games[sid].instantiate_bot()
+			#print(f"fen e sid: {Game.games[sid].fen}, {sid}")
 			await Game.sio.emit("config",
 				{
 					"fen": Game.games[sid].fen,
@@ -58,15 +60,17 @@ class GameRanked(PVEGame):
 
 	async def disconnect(self, sid: str) -> None:
 		
-		await self.database_update_win(sid=self.opponent(sid).sid, rank="ranked", diffs=MODE_RANKED_PT_DIFF)
-		rank_current = await Game.databaseHandler_users.get_user_rank(sid, "ranked")
+		session = await Game.get_session_from_sid(sid)
+		#print(session)
+		await self.database_update_win(session["session_id"], self.board.outcome(), rank="score_ranked", get_new_elos=GameRanked.get_new_elos)
+		rank_current = Game.databaseHandler_users.get_user_rank(session["session_id"], "score_ranked")
 
 		await Game.sio.emit("end", 
 			{
-				"winner": True,
+				"winner": self.board.outcome().winner if self.board.outcome() is not None else "draw",
 				"new_rank": rank_current,
 				
-			}, room=self.opponent(sid).sid)
+			}, room=sid)
 
 		await self.bot.quit()
 		
@@ -114,7 +118,7 @@ class GameRanked(PVEGame):
 			
 		# add (push) move to board
 		self.board.push_uci(move_uci)
-		if self.handle_win(sid):
+		if await self.handle_win(sid):
 			return
 		
 		# bot move
@@ -125,7 +129,7 @@ class GameRanked(PVEGame):
 				"san": bot_move_san, "time": self.get_times()
 			}, room=sid)
 
-		if self.handle_win(sid):
+		if await self.handle_win(sid):
 			return
 		
 		self.current.add_time( int(perf_counter() - bot_time_start) )	# add time back
@@ -142,4 +146,12 @@ class GameRanked(PVEGame):
 		bot_level = int(rank / MODE_RANKED_K)
 		return bot_level if bot_level <= MAX_RANK else MAX_RANK
 		
+	@staticmethod
+	def get_new_elos(elo1:int, elo2:int, outcome:Optional[bool]) -> Tuple[int,int]:
+		if outcome is None:
+			return elo1 + MODE_RANKED_PT_DIFF[1], elo2 + MODE_RANKED_PT_DIFF[1]
+		elif outcome:
+			return elo1 + MODE_RANKED_PT_DIFF[0], elo2 + MODE_RANKED_PT_DIFF[2]
+		else:
+			return elo1 + MODE_RANKED_PT_DIFF[2], elo2 + MODE_RANKED_PT_DIFF[0]
 

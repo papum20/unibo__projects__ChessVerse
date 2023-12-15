@@ -3,7 +3,12 @@ import { useState, useEffect } from "react";
 import { Trophy } from "react-bootstrap-icons";
 import { Button } from "@mui/material";
 import BasicTabs from "./BasicTabs.jsx";
+
 import { API } from "../const/const_api.js"
+import { SERVER_ADDR } from '../const/const';
+
+import { fetchData } from "../network/users_api.js"
+import { joinPaths } from "../utils/path";
 
 
 function Scores (){
@@ -14,14 +19,29 @@ function Scores (){
     // Array di oggetti che tiene traccia di username e dato elo o altre cose in base in che sezione sei
     const [data, setData] = useState([]);
 
-    async function fetchLeaderboard(API){
-        const response = await fetch(API);
-        console.log(API, response)
-        const data = await response.json();
-        console.log(data);
-        return data;
-    }
+    // async function fetchLeaderboard(API){
+    //     const response = await fetch(API);
+    //     console.log(API, response)
+    //     const data = await response.json();
+    //     console.log(data);
+    //     return data;
+    // }
 
+    async function fetchLeaderboard(API){
+        const response = await fetchData(joinPaths(SERVER_ADDR, API), {
+            method: "GET",
+    }, {
+		endpoint: "backend/get_weekly_leaderboard",
+		method: "GET",
+		codes: {
+			"ok": 200,
+			"internal server error": 500,
+			"invalid request": 405
+		}});
+        const json = response.json();
+        return json;
+    }
+    
     async function getCurrentLeaderboard (){
         let leaderboard;
         if (focus === "daily board") {
@@ -36,6 +56,7 @@ function Scores (){
         else {
             leaderboard = await fetchLeaderboard(API.multiplayerLeaderboard.endpoint);
         }
+        console.log("res",leaderboard)
         setData(leaderboard);
     }
 

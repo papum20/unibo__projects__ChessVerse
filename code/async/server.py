@@ -37,14 +37,15 @@ class GameHandler:
         return None
 
     async def on_connect(self, sid, environ):
-        print("connect", sid)
+        #print("connect", sid)
+        pass
     async def on_connect(self, sid, environ):
-        print("connect", sid)
+        #print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
-        print("disconnect", sid)
-        print("disconnect", sid)
+        #print("disconnect", sid)
+        #print("disconnect", sid)
         if sid in Game.sid_to_id:
             game_id = Game.sid_to_id[sid]
             if isinstance(game_id, dict):
@@ -99,7 +100,7 @@ class GameHandler:
     async def on_start(self, sid, data): 
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
-        print("start", sid)
+        print("start", data["type"])
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
@@ -110,9 +111,9 @@ class GameHandler:
             await PVPGame.start(sid, data)
         #add new GameTypes Daily and Wekkly challenges
         elif data["type"] == GameType.DAILY:
-            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
+            await PVEGame.start(sid, data, seed = daily_seed, type = GameType.DAILY)
         elif data["type"] == GameType.WEEKLY:
-            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
+            await PVEGame.start(sid, data, seed = weekly_seed, type = GameType.WEEKLY)
         elif data["type"] == GameType.RANKED:
             await GameRanked.start(sid, data)
         #add new GameTypes Daily and Wekkly challenges
@@ -120,7 +121,7 @@ class GameHandler:
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
     async def on_move(self, sid, data):
-        print("move", sid)
+        #print("move", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
@@ -133,8 +134,8 @@ class GameHandler:
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
-        print("pop", sid)
-        print("pop", sid)
+        #print("pop", sid)
+        #print("pop", sid)
         if "type" not in data.keys():
             await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
         game = GameHandler.sid2game(sid)
@@ -163,11 +164,11 @@ class GameHandler:
 
     def updateDailyChallenge(self):
         dailyRank = random.randint(0, 100)
-        print("Funzione giornaliera pianificata eseguita!")
+        #print("Funzione giornaliera pianificata eseguita!")
 
     def updateWeeklyChallenge(self):
         weeklyRank = random.randint(0, 100)
-        print("Funzione settimanale pianificata eseguita!")
+        #print("Funzione settimanale pianificata eseguita!")
 
     def scheduleDaily(self):
         schedule.every().day.at("00:00").do(self.updateDailyChallenge)
@@ -177,11 +178,11 @@ class GameHandler:
 
     def updateDailyChallenge(self):
         dailyRank = random.randint(0, 100)
-        print("Funzione giornaliera pianificata eseguita!")
+        #print("Funzione giornaliera pianificata eseguita!")
 
     def updateWeeklyChallenge(self):
         weeklyRank = random.randint(0, 100)
-        print("Funzione settimanale pianificata eseguita!")
+        #print("Funzione settimanale pianificata eseguita!")
 
 
 async def main():
@@ -235,7 +236,7 @@ async def main():
     
     
     await site.start()
-    print(f"Listening on 0.0.0.0:{port}")
+    #print(f"Listening on 0.0.0.0:{port}")
     cleaner_task = asyncio.create_task(handler.cleaner())
 
     while True:

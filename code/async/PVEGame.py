@@ -1,5 +1,8 @@
+from datetime import date, timedelta
+
 import chess
 from chess.engine import Limit, popen_uci
+
 from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from time import perf_counter
@@ -9,7 +12,8 @@ class PVEGame(Game):
     __slots__ = ["bot", "depth", "type"]
 
     def __init__(self, player: str, rank: int, depth: int, time: int, seed: int|None = None, type: int|None = None) -> None:
-        super().__init__([player], rank, time, seed)
+        #print(player, rank, depth, time, seed, type)
+        super().__init__([player], rank, time, seed=seed)
         self.bot = None
         self.depth = depth
         self.type = type
@@ -58,10 +62,12 @@ class PVEGame(Game):
     async def instantiate_bot(self) -> None:
         self.bot = (await popen_uci("./stockfish"))[1]
     
+    @staticmethod
     def get_current_user():
         Game.cursor.execute("SELECT username FROM backend_registeredusers WHERE session_id = %s", (sessionId,))
         return Game.cursor.fetchone()[0]
-    
+
+    @staticmethod
     def get_attempts(username):
         Game.cursor.execute("SELECT attempts FROM backend_dailyleaderboard WHERE username = %s AND challenge_date = %s", (username, date.today()))
         result = Game.cursor.fetchone()
@@ -94,8 +100,8 @@ class PVEGame(Game):
             #Player wins
             if self.type == 2:
                 #get user information based on the sessionId
-                current_username = get_current_user(sessionId)
-                attempts = get_attempts(current_username) 
+                current_username = PVEGame.get_current_user(sessionId)
+                attempts = PVEGame.get_attempts(current_username) 
                 if attempts == 0:
                     Game.cursor.execute("INSERT INTO backend_dailyleaderboard (username,  moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s)", (current_username, self.current.move_count, date.today(), 'win', attempts+1))
                 else:
@@ -106,7 +112,7 @@ class PVEGame(Game):
                     """, (self.current.move_count, current_username, date.today()))
             elif self.type == 3:
                 #Insert into weekly leaderboard
-                current_username = get_current_user(sessionId)
+                current_username = PVEGame.get_current_user(sessionId)
                 start_of_week = date.today() - timedelta(days=date.today().weekday())
                 end_of_week = start_of_week + timedelta(days=6)
                 #check if the current user has already played the weekly challenge
@@ -137,8 +143,8 @@ class PVEGame(Game):
             #Bot wins
             if self.type == 2:
                 #get user information based on the sessionId
-                current_username = get_current_user(sessionId)
-                attempts = get_attempts(current_username) 
+                current_username = PVEGame.get_current_user(sessionId)
+                attempts = PVEGame.get_attempts(current_username) 
                 if attempts == 0:
                     Game.cursor.execute("INSERT INTO backend_dailyleaderboard (username,  moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s)", (current_username, self.current.move_count, date.today(), 'loss', attempts+1))
                 else:
@@ -149,7 +155,7 @@ class PVEGame(Game):
                     """, (self.current.move_count, current_username, date.today()))
             elif self.type == 3:
                 #Insert into weekly leaderboard
-                current_username = get_current_user(sessionId)
+                current_username = PVEGame.get_current_user(sessionId)
                 start_of_week = date.today() - timedelta(days=date.today().weekday())
                 end_of_week = start_of_week + timedelta(days=6)
                 #check if the current user has already played the weekly challenge
