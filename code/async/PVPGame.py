@@ -1,13 +1,14 @@
 from Game import Game
 from time import perf_counter
-import json
 import random
 from const import TIME_OPTIONS, MIN_RANK, MAX_RANK
 import chess
 
 
 class PVPGame(Game):
+	
 	waiting_list: dict[str, list[list[str]]] = {key: [[] for _ in range(6)] for key in TIME_OPTIONS}
+
 
 	@classmethod
 	async def start(cls, sid: str, data: dict[str, str]) -> None:
@@ -93,20 +94,17 @@ class PVPGame(Game):
 	def is_player_turn(self, sid):
 		return self.current.sid == sid
 
+
 	async def disconnect(self, sid: str) -> None:
-		await self.update_win_database(self.opponent(sid).sid, False)
-		# await self.update_win_database(self.opponent(sid).sid,)
+		await self.database_update_win(self.opponent(sid).sid, False)
 		await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
-		await Game.sio.disconnect(sid=self.opponent(sid).sid)
+		[await Game.sio.disconnect(player.sid) for player in self.players]
 		if sid not in Game.sid_to_id:
 			return
 		elif Game.sid_to_id[sid] in Game.games:
-			if self.opponent(sid).sid in Game.sid_to_id:
-				del Game.sid_to_id[self.opponent(sid).sid]
-			del Game.games[Game.sid_to_id[sid]]
-			del Game.sid_to_id[sid]
+			self._deletePlayers(sid)
 		print(f"1 sid_to_id={Game.sid_to_id}, waiting_list={Game.waiting_list}, games={Game.games}")
-				
+
 
 	async def pop(self, sid: str) -> None:
 		if sid not in Game.sid_to_id:
@@ -126,6 +124,8 @@ class PVPGame(Game):
 			await Game.sio.emit("pop", {"time": self.get_times()}, room=[player.sid for player in self.players])
 			self.popped = True
 
+
+
 	async def move(self, sid: str, data: dict[str, str]) -> None:
 		if sid not in Game.sid_to_id:
 			await Game.sio.emit("error", {"cause": "No games found"}, room=sid)
@@ -135,31 +135,35 @@ class PVPGame(Game):
 		if data["san"] is None:
 			await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
 			return
-		print(sid, self.current.sid, self.next.sid)
 		if not self.is_player_turn(sid):
 			await Game.sio.emit("error", {"cause": "It's not your turn"}, room=sid)
 			return
 		if not self.current.has_time():
 			return
+		
 		try:
 			uci_move = self.board.parse_san(data["san"]).uci()
 		except (chess.InvalidMoveError, chess.IllegalMoveError):
 			await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
 			return
+
 		if chess.Move.from_uci(uci_move) not in self.board.legal_moves:
 			await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
 			return
+
 		uci_move = self.board.parse_uci(self.board.parse_san(data["san"]).uci())
 		san_move = self.board.san(uci_move)
 		self.board.push_uci(uci_move.uci())
 		outcome = self.board.outcome()
+
 		if outcome is not None:
 			await Game.sio.emit("move", {"san": san_move, "time": self.get_times()}, room=self.current.sid)
-			elos = await self.update_win_database(sid, outcome.winner)
+			await self.database_update_win(sid, outcome.winner)
 			await Game.sio.emit("end", {"winner": True if outcome.winner is not None else outcome.winner, "elo": elos[self.turn]}, room=self.current.sid)
 			await Game.sio.emit("end", {"winner": False if outcome.winner is not None else outcome.winner, "elo": elos[1-self.turn]}, room=self.next.sid)
 			await self.disconnect(self.next.sid)
 			return
+			
 		self.popped = False
 		await Game.sio.emit("ack", {"time": self.get_times()}, room=self.current.sid)
 		self.swap()
