@@ -2,13 +2,12 @@ import chess
 from chess.engine import Limit
 from time import perf_counter
 
-from const.const import MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
+from const import MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
 from const.game_options import MODE_RANKED_K, MODE_RANKED_PT_DIFF
 
 from Game import Game
 from PVEGame import PVEGame
 
-from database.users import get_user_rank
 from utils.TypeChecker import TypeChecker
 
 

@@ -6,7 +6,7 @@ from chess import Outcome
 from mysql.connector import MySQLConnection
 from socketio import AsyncServer
 
-from const.const import TIME_OPTIONS
+from const import TIME_OPTIONS
 
 import confighandler
 from database.users import DatabaseHandlerUsers
