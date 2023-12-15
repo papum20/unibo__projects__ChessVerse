@@ -16,6 +16,7 @@ import { CalendarEvent, CalendarWeek } from "react-bootstrap-icons";
 import { FaCrown } from 'react-icons/fa';
 import Scores from "./Scores.jsx";
 import { toast } from "react-toastify";
+import { API } from "../const/const_api.js";
 
 function Start({
     mode, setMode,
@@ -221,8 +222,7 @@ function Start({
                 height: "100vh"
             }}>
                 <ThemeProvider theme={theme}>
-                    <span style={{ display: "flex", justifyContent: "flex-end", fontWeight: "bold", marginRight: "20px", fontSize: "25px" }}>{user}</span>
-                    <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : "2vh"}` }}>
+                    <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : ""}` }}>
                         {!getShowOptions() ?
                             <>
                                 <div style={{ display: "flex", justifyContent: "center" }}>
@@ -269,27 +269,36 @@ function Start({
                             </>
                             :
                             <>
-                                <div style={{ display: "flex", justifyContent: "center" }}>
-                                    <p style={{ color: "white", fontSize: "5rem" }}>
+                                <span style={{ display: "flex", justifyContent: "flex-end", fontWeight: "bold", marginRight: "20px", fontSize: "25px" }}>{user}</span>
+
+                                <div style={{ display: "flex", justifyContent: "center", marginTop: "-20px" }}>
+                                    <p style={{ color: "white", fontSize: "4rem" }}>
                                         Choose an option:
                                     </p>
                                 </div>
-                                <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
+                                <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
                                     <Button
                                         color="brown"
                                         disabled={sessionStorage.getItem("session_id") === "undefined"}
-                                        onClick={() => {
-                                            if (false) {//la condizione e' se hai finito le tue try giornaliere
-                                                toast.info("wait tomorrow to play", { className: "toast-message" });
-                                            }
-                                            else {
+                                        onClick={async () => {
+                                            const response = await fetch(API.checkStartDaily.endpoint, {
+                                                body: JSON.stringify({
+                                                    username: user
+                                                })
+                                            });
+                                            if (response.status === API.checkStartDaily.codes["maximum reached"]) {
+                                                toast.info("wait tomorrow to play", {className: "toast-message"});
+                                            } else if (response.status === API.checkStartDaily.codes["ok"]) {
                                                 setMode(DAILY);
                                                 setBotDiff(MIN_BOT_DIFF);
                                                 setIsLoadingGame(true);
                                                 const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
                                                 const secure = import.meta.env.VITE_NODE_ENV == "production";
-                                                const options = { transports: ["websocket"], secure }
+                                                const options = {transports: ["websocket"], secure}
                                                 setSocket(io(host, options));
+                                            } else {
+                                                toast.error("unexpected error on server communication",
+                                                  {className: "toast-message"});
                                             }
                                         }}
                                         style={{ fontSize: "1.5rem", borderRadius: "20px" }}
@@ -315,10 +324,6 @@ function Start({
                                         style={{ fontSize: "1.5rem", borderRadius: "20px" }}
                                         variant="contained"
                                         onClick={() => {
-                                            if (false) {//la condizione e' se hai finito le tue try giornaliere
-                                                toast.info("wait tomorrow to play", { className: "toast-message" });
-                                            }
-                                            else {
                                                 setMode(WEEKLY);
                                                 setBotDiff(MIN_BOT_DIFF);
                                                 setIsLoadingGame(true);
@@ -326,7 +331,6 @@ function Start({
                                                 const secure = import.meta.env.VITE_NODE_ENV == "production";
                                                 const options = { transports: ["websocket"], secure }
                                                 setSocket(io(host, options));
-                                            }
                                         }}
                                     >
                                         <div style={{

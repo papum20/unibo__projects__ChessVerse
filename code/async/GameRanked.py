@@ -41,7 +41,11 @@ class GameRanked(PVEGame):
 		# finally create game
 		else:
 			session = await Game.sio.get_session(sid)
+<<<<<<< HEAD
 			rank = get_user_rank(session["session_id"], "ranked")
+=======
+			rank = Game.databaseHandler_users.get_user_rank(session["session_id"], "ranked")
+>>>>>>> merge-ranked
 
 			Game.sid_to_id[sid] = sid # solo in PVE; ?
 			Game.games[sid] = GameRanked(sid, rank, int(data["depth"]), int(data["time"]))
@@ -59,7 +63,11 @@ class GameRanked(PVEGame):
 	async def disconnect(self, sid: str) -> None:
 		
 		await self.database_update_win(sid=self.opponent(sid).sid, rank="ranked", diffs=MODE_RANKED_PT_DIFF)
+<<<<<<< HEAD
 		rank_current = await get_user_rank(sid, "ranked")
+=======
+		rank_current = await Game.databaseHandler_users.get_user_rank(sid, "ranked")
+>>>>>>> merge-ranked
 
 		await Game.sio.emit("end", 
 			{

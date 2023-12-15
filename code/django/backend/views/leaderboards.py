@@ -6,8 +6,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
-from ..models import RegisteredUsers, DailyLeaderboard, WeeklyLeaderboard
-
+from backend.models import RegisteredUsers, DailyLeaderboard, WeeklyLeaderboard
 
 
 # ranked
@@ -82,4 +81,18 @@ def check_start_daily(request):
             print(f"Error in check_start_daily: {str(e)}")
             return JsonResponse({'message': 'An error occurred while processing your request'}, status=500)
     else:
+        return JsonResponse({'message': 'Invalid request method'}, status=405)
+    
+
+#get the Multiplayer leaderboard  
+def get_leaderboard_multiplayer(request):
+    if request.method == 'GET':
+        try:
+            multiplayer_leaderboard = MultiplayerLeaderboard.objects.all().values('username', 'elo')
+            return JsonResponse({'multiplayer_leaderboard': list(multiplayer_leaderboard)}, status=200)
+        except Exception as e:
+            # Return an error response for any exception
+            return JsonResponse({'message': str(e)}, status=500)
+    else:
+        # Return an error response for invalid request methods
         return JsonResponse({'message': 'Invalid request method'}, status=405)

@@ -142,7 +142,7 @@ This method retrieves the weekly leaderboard for games played from the beginning
 - Invalid Request Method (Status Code: 405): Returns an error response if the HTTP method is not GET.
 
 
-## 3. `check_start_daily(request)`
+## 6. `check_start_daily(request)`
 
 **Description:**
 This method checks if a user has already played the maximum number of games (defined by `MAX_DAILY_GAMES`) today. It takes the user's username from the request body, queries the database, and returns the status as a JSON response.
@@ -159,6 +159,32 @@ This method checks if a user has already played the maximum number of games (def
 - Invalid Request Method (Status Code: 405): Returns an error response if the HTTP method is not GET.
 
 
+### 6. Method: get_multiplayer_leaderboard
+
+Purpose: Retrieve Multiplayer Leaderboard.
+HTTP Method: GET
+Endpoint: /get_multiplayer_leaderboard/
+Parameters:
+
+request: HttpRequest object.
+Returns:
+
+JSON response containing Multiplayer Leaderboard data or an error message.
+Usage:
+
+Make a GET request to /get_multiplayer_leaderboard/ to retrieve the Multiplayer Leaderboard.
+Example Response:
+{
+    "multiplayer_leaderboard": [
+        {"username": "player1", "elo": 1500},
+        {"username": "player2", "elo": 1600},
+        ...
+    ]
+}
+Error Response Example:
+{
+    "message": "Internal Server Error"
+}
 
 Ho anche messo un file 'test.rest' da cui si possono simulare delle richieste al backend, si può usare come spunto per vedere il tipo di richieste da fare
 Per eseguire le richieste assicurarsi di avere l'estensione 'REST Client' di VSCODE

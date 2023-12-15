@@ -69,5 +69,24 @@ export const API = {
 		endpoint: "...",
 		method: "...",
 		codes: "..."
+	},
+	checkStartDaily: {
+		endpoint: "backend/check_start_daily",
+		method: "GET",
+		codes: {
+			"ok": 200,
+			"maximum reached": 400,
+			"internal server error": 500,
+			"invalid request": 405
+		}
+	},
+	multiplayerLeaderboard: {
+		endpoint: "backend/get_multiplayer_leaderboard",
+		method: "GET",
+		codes: {
+			"ok": 200,
+			"internal server error": 500,
+			"invalid request": 405
+		}
 	}
 };

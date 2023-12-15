@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 # old const
 
+=======
+>>>>>>> merge-ranked
 from enum import IntEnum
 
 
@@ -16,7 +19,10 @@ class EventType(IntEnum):
 
 
 class GameType(IntEnum):
+<<<<<<< HEAD
 	
+=======
+>>>>>>> merge-ranked
 	PVP = 0
 	PVE = 1
 	DAILY = 2

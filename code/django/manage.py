@@ -3,6 +3,8 @@
 import os
 import sys
 
+sys.path.append('./backend')
+
 
 def main():
     """Run administrative tasks."""

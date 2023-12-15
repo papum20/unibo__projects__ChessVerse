@@ -57,20 +57,20 @@ class DailyLeaderboard(models.Model):
 	username = models.CharField(max_length=255)
 	moves_count = models.PositiveIntegerField()
 	challenge_date = models.DateField()
-	result = models.CharField(max_length=10)  
-	attempts = models.PositiveIntegerField()  
+	result = models.CharField(max_length=10)  # Vittoria, sconfitta, pareggio, ecc.
+	attempts = models.PositiveIntegerField()  # Numero di tentativi
 
 	objects = CustomUserManager()
 
 	class Meta:
 		ordering = ['-moves_count']
-
-
+	
+		
 class WeeklyLeaderboard(models.Model):
 	username = models.CharField(max_length=255)
 	moves_count = models.PositiveIntegerField()
 	challenge_date = models.DateField()
-	result = models.CharField(max_length=10)  
+	result = models.CharField(max_length=10)  # Vittoria, sconfitta, pareggio, ecc.
 
 	objects = CustomUserManager()
 

@@ -23,7 +23,7 @@ def update_rating(rating_A, rating_B, risultato):
   K = calc_K(rating_A, rating_B)
   new_rating_a = rating_A + K * (risultato - expected_a)
   new_rating_b = rating_B + K * (1 - risultato - expected_b)
-  return new_rating_a, new_rating_b 
+  return new_rating_a, new_rating_b
 
 def calc_K(rating_A, rating_B):
   # Assumo che il rating Elo sia compreso tra 0 e 3000
@@ -33,7 +33,6 @@ def calc_K(rating_A, rating_B):
   # Arrotondo il valore di K al numero intero piÃ¹ vicino
   return round(60 - 0.0167 * (rating_A + rating_B) / 2)
 
-  
 
 class Game(ABC):
 
@@ -45,7 +44,7 @@ class Game(ABC):
 	conn: Optional[MySQLConnection] = None
 	__slots__ = ["fen", "board", "players", "turn", "popped"]
 
-	databaseHandler_users: Optional[DatabaseHandlerUsers] = None
+	databaseHandler_users: Optional[DatabaseHandlerUsers] =  DatabaseHandlerUsers()
 
 
 	def __init__(self, sids:List, rank: int, time: int, fen:str|None=None) -> None:
@@ -56,7 +55,7 @@ class Game(ABC):
 			sids (list): A list of session IDs for the players.
 			rank (int): The rank of the game.
 			time (int): The time limit for the game.
-			fen (str, optional): The initial board setup in Forsyth-Edwards Notation. 
+			fen (str, optional): The initial board setup in Forsyth-Edwards Notation.
 								 If not provided, a starting position will be generated based on the rank.
 
 		Returns:
@@ -70,7 +69,6 @@ class Game(ABC):
 		self.turn = 0
 		self.popped = False
 
-		self.databaseHandler_users = DatabaseHandlerUsers(Game.cursor, Game.conn)
 
 	@property
 	def current(self) -> Player:
@@ -97,6 +95,45 @@ class Game(ABC):
 
 		del Game.games[Game.sid_to_id[sid]]
 		del Game.sid_to_id[sid]
+		if len(self.players) > 1 and self.opponent(sid).sid in Game.sid_to_id:
+			del Game.sid_to_id[self.opponent(sid).sid]
+
+
+	async def update_win_database(self, sid: str, outcome: bool|None) -> None:
+		current = await Game.sio.get_session(sid)
+		opponent = await Game.sio.get_session(self.opponent(sid).sid)
+		if current["session_id"] is not None:
+			field = "GamesWon" if outcome is not None else "GamesDrawn"
+			Game.cursor.execute(f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
+									(current["session_id"],))
+		if opponent["session_id"] is not None:
+			field = "GamesLost" if outcome is not None else "GamesLost"
+			Game.cursor.execute(f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
+								(opponent["session_id"],))
+		new_elos = [None, None]
+		if current["session_id"] is not None and opponent["session_id"] is not None:
+			result = 1 if outcome is True else 0.5 if outcome is None else 0
+			new_elos = update_rating(current["elo"], opponent["elo"], result)
+			Game.cursor.execute(
+				f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[0]} WHERE session_id = %s",
+				(current["session_id"],))
+			Game.cursor.execute(
+				f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[1]} WHERE session_id = %s",
+				(opponent["session_id"],))
+		Game.conn.commit()
+		return new_elos
+
+
+	def _deletePlayers(self, sid):
+		"""
+		delete players (on disconnect).
+		"""
+
+		for player in self.players:
+			if player.sid in Game.sid_to_id:
+				del Game.sid_to_id[player.sid]
+
+		del Game.games[Game.sid_to_id[sid]]
 		if len(self.players) > 1 and self.opponent(sid).sid in Game.sid_to_id:
 			del Game.sid_to_id[self.opponent(sid).sid]
 
@@ -137,6 +174,7 @@ class Game(ABC):
 
 
 	async def database_update_win(self, sid: str, outcome: bool|None, rank:str="EloReallyBadChess", diffs:Tuple[int,int,int]=(30,0,-30)):
+
 		"""
 		Updates the database with the result of the game.
 		:param sid: the session id of the player
@@ -155,7 +193,7 @@ class Game(ABC):
 			field = "GamesWon" if outcome is not None else "GamesDrawn"
 			Game.cursor.execute(f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
 								(session["session_id"],))
-			self.databaseHandler_users.set_user_rank(session["session_id"], rank, diffs[0])
+			Game.databaseHandler_users.set_user_rank(session["session_id"], rank, diffs[0])
 
 		# update opponent
 		session = await Game.sio.get_session(self.opponent(sid).sid)
@@ -163,7 +201,7 @@ class Game(ABC):
 			field = "GamesDrawn" if outcome is not None else "GamesLost"
 			Game.cursor.execute(f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
 								(session["session_id"],))
-			self.databaseHandler_users.set_user_rank(session["session_id"], rank, diffs[1])
+			Game.databaseHandler_users.set_user_rank(session["session_id"], rank, diffs[1])
 
 		# ??
 		new_elos = [None, None]
@@ -193,16 +231,15 @@ class Game(ABC):
 
 
 	# standard responses
-	
+
 	@staticmethod
 	async def emit_win(sid:str, outcome:Outcome) -> None:
 		if outcome is not None:
 			await Game.sio.emit("end", {
 					"winner": outcome.winner
 				}, room=sid)
-	
-	
-	
+
+
 	# standard handlers for events
 
 	async def handle_win(self, sid:str) -> bool:

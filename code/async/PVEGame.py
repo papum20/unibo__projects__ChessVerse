@@ -87,7 +87,11 @@ class PVEGame(Game):
             return
 
         self.current.move_count += 1
+<<<<<<< HEAD
 
+=======
+			
+>>>>>>> merge-ranked
         self.board.push_uci(uci_move)
         outcome = self.board.outcome()
         if outcome is not None:
