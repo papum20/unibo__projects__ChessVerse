@@ -127,8 +127,8 @@ async def main():
 	
 	handler = GameHandler()
 	Game.sio = sio
-	Game.cursor = cursor
-	Game.conn = conn
+	Game.set_cursor(cursor)
+	Game.set_connector(conn)
 	
 	# Aggiorna le chiamate a handler
 	sio.on('connect', handler.on_connect)

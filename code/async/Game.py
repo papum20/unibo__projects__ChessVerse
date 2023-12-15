@@ -9,11 +9,12 @@ from socketio import AsyncServer
 from const.const import TIME_OPTIONS
 
 import confighandler
-from database.users import set_user_rank
+from database.users import DatabaseHandlerUsers
 from Player import Player
 
 
 class Game(ABC):
+
 	sio: Optional[AsyncServer] = None
 	games = {}
 	sid_to_id: dict[str, str] = {}
@@ -21,6 +22,8 @@ class Game(ABC):
 	cursor = None
 	conn: Optional[MySQLConnection] = None
 	__slots__ = ["fen", "board", "players", "turn", "popped"]
+
+	databaseHandler_users: Optional[DatabaseHandlerUsers] = None
 
 	def __init__(self, sids:List, rank: int, time: int, fen:str|None=None) -> None:
 		"""
@@ -43,6 +46,8 @@ class Game(ABC):
 			self.players.append(Player.Player(sid, not bool(i), time))
 		self.turn = 0
 		self.popped = False
+
+		self.databaseHandler_users = DatabaseHandlerUsers(Game.cursor, Game.conn)
 
 	@property
 	def current(self) -> Player:
@@ -117,14 +122,14 @@ class Game(ABC):
 		if session["session_id"] is not None:
 			Game.cursor.execute("UPDATE backend_registeredusers SET GamesWon = GamesWon + 1 WHERE session_id = %s",
 								(session["session_id"],))
-			set_user_rank(session["session_id"], rank, diffs[0])
+			self.databaseHandler_users.set_user_rank(session["session_id"], rank, diffs[0])
 
 		# update opponent
 		session = await Game.sio.get_session(self.opponent(sid).sid)
 		if session["session_id"] is not None:
 			Game.cursor.execute("UPDATE backend_registeredusers SET GamesLost = GamesLost + 1 WHERE session_id = %s",
 								(session["session_id"],))
-			set_user_rank(session["session_id"], rank, diffs[1])
+			self.databaseHandler_users.set_user_rank(session["session_id"], rank, diffs[1])
 
 		# TODO: should save draw?
 
@@ -165,3 +170,14 @@ class Game(ABC):
 			await self.disconnect(sid)
 			return True
 		return False
+	
+
+	# setters
+
+	def set_cursor(self, cursor):
+		Game.cursor = cursor
+		self.databaseHandler_users.cursor = cursor
+
+	def set_connector(self, connector):
+		Game.conn = connector
+		self.databaseHandler_users.connector = connector
