@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('GamesWon', models.IntegerField(default=0)),
-                ('GameDraw', models.IntegerField(default=0)),
+                ('GamesDrawn', models.IntegerField(default=0)),
                 ('GamesLost', models.IntegerField(default=0)),
                 ('EloReallyBadChess', models.IntegerField(default=1000)),
                 ('score_ranked', models.IntegerField(default=0)),

@@ -5,5 +5,5 @@
 
 RANKS = (
 	"EloReallyBadChess",
-	"ranked"	
+	"score_ranked"	
 )
