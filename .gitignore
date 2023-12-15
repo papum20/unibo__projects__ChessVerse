@@ -1,8 +1,10 @@
+# app
+## https certs for local testing
+code/app/cert/
+
 # editor
 ##vscode
 .vscode/
-##mac
-.DS_Store
 
 # languages
 ## node/js
@@ -11,19 +13,27 @@ coverage/
 dist/
 node_modules/
 
-## python
-__pycache__/
 
 # env/private
 .env
 
-# misc
-.idea
 
 # logging data
-## grafana
+prometheus/
 prometheus/prometheus.env
 prometheus/prometheus.yaml
 prometheus/wal_data/
 
+# misc
+.idea
+
+# shit
+## mac
+.DS_Store
+## python
+__pycache__/
+
+# ??
 venv/
+
+t4-chessverse/

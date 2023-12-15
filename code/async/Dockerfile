@@ -1,5 +1,7 @@
 FROM python:3.12.0-slim-bullseye
 
+EXPOSE 8080
+
 # Set environment variables
 ## for python to not write pyc files
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -11,7 +13,8 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY requirements.txt .
-RUN apt-get update -y && apt-get install gcc -y
+RUN apt-get update -y && apt-get install gcc -y && apt-get clean
+RUN apt-get install pkg-config python3-dev libmariadb-dev-compat libmariadb-dev build-essential -y && apt-get clean
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 

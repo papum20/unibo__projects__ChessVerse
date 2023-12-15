@@ -12,6 +12,10 @@ export default defineConfig({
     minify: "terser",
   },
   server: {
-    port: process.env.REACT_APP_PORT,
+    //port: process.env.REACT_APP_PORT,
+    https: process.env.IS_LOCAL === 'true' ? {
+      key: './cert/key.pem',
+      cert: './cert/cert.pem',
+    } : false,
   },
 });

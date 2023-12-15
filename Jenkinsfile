@@ -53,10 +53,11 @@ pipeline {
 				}
 			}
             steps {
-                dir('code/async') {
+                dir('code/async/') {
                     // Add your Python testing commands here
-                    sh 'pip install -r requirements.txt'
-                    sh 'python -m unittest discover -s tests -p "*.py"'
+                    sh 'pip install -r ../../requirements.txt'
+                    sh 'cd test/unit'
+                    sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
             }
         }

@@ -1,174 +1,193 @@
 #!/usr/bin/env python
-
 import asyncio
-import threading
 import os
-
 import socketio
 import aiohttp
-from time import perf_counter
-
-import chess
-import chess.engine
-
 from PVEGame import PVEGame
+from PVPGame import PVPGame
+from Game import Game
+from const import GameType
+from time import perf_counter
+import ssl
+import mysql.connector
+import schedule
+import time
+import datetime
+from ranks import dailyRank, weeklyRank
 
-sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', path=f'{os.environ.get("SUBPATH")}')
-app = aiohttp.web.Application()
-sio.attach(app)
+class GameHandler:
+    def __init__(self):
+        pass
+    @classmethod
+    def sid2game(cls, sid):
+        if isinstance(Game.sid_to_id[sid], str):
+            try:
+                return Game.games[Game.sid_to_id[sid]]
+            except KeyError:
+                return None
+        return None
 
-pveGames = {}
+    async def on_connect(self, sid, environ):
+        print("connect", sid)
+        await Game.sio.emit("connected", room=sid)
 
+    async def on_disconnect(self, sid):
+        print("disconnect", sid)
+        if sid in Game.sid_to_id:
+            game_id = Game.sid_to_id[sid]
+            if isinstance(game_id, dict):
+                Game.waiting_list[game_id["time"]][game_id["index"]] = [waiting for waiting in Game.waiting_list[game_id["time"]][game_id["index"]] if waiting["sid"] != sid]
+                del Game.sid_to_id[sid]
+            else:
+                if game_id in Game.games:
+                    await Game.games[game_id].disconnect(sid)
+    
+    def daily_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Estraiamo anno, mese e giorno
+        year = today.year
+        month = today.month
+        day = today.day
+        # Combiniamo anno, mese e giorno per creare il seed
+        seed = year * 10000 + month * 100 + day
+        return seed
+    
+    def weekly_seed():
+        # Otteniamo la data corrente
+        today = datetime.date.today()
+        # Otteniamo il numero della settimana e l'anno
+        week_number = today.isocalendar()[1]
+        year = today.year
+        # Combiniamo anno e numero della settimana per creare il seed
+        seed = year * 100 + week_number
+        return seed
 
-async def handle_connect(sid, _environ):
-    print("connect ", sid)
+    async def on_start(self, sid, data): 
+        daily_seed = GameHandler.daily_seed()
+        weekly_seed = GameHandler.weekly_seed()
+        print("start", sid)
+        if "session_id" in data.keys():
+            await Game.login(data["session_id"], sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        elif data["type"] == GameType.PVE:
+            await PVEGame.start(sid, data)
+        elif data["type"] == GameType.PVP:
+            await PVPGame.start(sid, data)
+        #add new GameTypes Daily and Wekkly challenges
+        elif data["type"] == GameType.DAILY:
+            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
+        elif data["type"] == GameType.WEEKLY:
+            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
+        else:
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
 
+    async def on_move(self, sid, data):
+        print("move", sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        game = GameHandler.sid2game(sid)
+        if game is None:
+            await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            return
+        await game.move(sid, data)
 
-async def handle_disconnect(sid):
-    print("disconnect ", sid)
-    if sid in pveGames.keys():
-        del pveGames[sid]
+    async def on_resign(self, sid, data):
+        await self.on_disconnect(sid)
 
+    async def on_pop(self, sid, data):
+        print("pop", sid)
+        if "type" not in data.keys():
+            await Game.sio.emit("error", {"cause": "Invalid type", "fatal": True}, room=sid)
+        game = GameHandler.sid2game(sid)
+        if game is None:
+            await Game.sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
+            return
+        await game.pop(sid)
 
-async def handle_start(sid, data):
-    def check_int(key, min, max):
-        return key in data and isinstance(data[key], int) and min <= data[key] <= max
-    print("start ", sid, data)
-    if "rank" not in data or "depth" not in data or "time" not in data:
-        await sio.emit("error", {"cause": "Missing fields", "fatal": True}, room=sid)
-        return
-    if not check_int("rank", 0, 100):
-        await sio.emit("error", {"cause": "Invalid rank", "fatal": True}, room=sid)
-        return
-    if not check_int("depth", 1, 20):
-        await sio.emit("error", {"cause": "Invalid bot strength", "fatal": True}, room=sid)
-        return
-    if not check_int("time", 1, 3000):
-        await sio.emit("error", {"cause": "Invalid clocktime", "fatal": True}, room=sid)
-        return
-    pveGames[sid] = PVEGame(sid, data["rank"], data["depth"], data["time"])
-    await pveGames[sid].initialize_bot()
-    await sio.emit("config", {"fen": pveGames[sid].fen}, room=sid)
-
-
-async def handle_move(sid, data):
-    print("move ", sid, data)
-    if sid not in pveGames:
-        await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-        return
-    game = pveGames[sid]
-    if "san" not in data:
-        await sio.emit("error", {"cause": "Missing fields"}, room=sid)
-        return
-    if not game.current.has_time():
-        return
-    try:
-        uci_move = game.board.parse_san(data["san"]).uci()
-    except (chess.InvalidMoveError, chess.IllegalMoveError):
-        await sio.emit("error", {"cause": "Invalid move"}, room=sid)
-        return
-    if chess.Move.from_uci(uci_move) not in game.board.legal_moves:
-        await sio.emit("error", {"cause": "Invalid move"}, room=sid)
-        return
-    game.board.push_uci(uci_move)
-    outcome = game.board.outcome()
-    if outcome is not None:
-        await sio.emit("end", {"winner": outcome.winner}, room=sid)
-        await handle_disconnect(sid)
-        await sio.disconnect(sid)
-        return
-    start = perf_counter()
-    bot_move = (await game.bot.play(game.board, chess.engine.Limit(depth=game.depth))).move
-    game.board.push_uci(bot_move.uci())
-    outcome = game.board.outcome()
-    latest_move = game.board.pop()
-    san_bot_move = game.board.san(bot_move)
-    game.board.push(latest_move)
-    if outcome is not None:
-        print(outcome)
-        await sio.emit("move", {"san": san_bot_move}, room=sid)
-        await sio.emit("end", {"winner": outcome.winner}, room=sid)
-        await handle_disconnect(sid)
-        await sio.disconnect(sid)
-        return
-    game.popped = False
-    end = perf_counter()
-    game.current.add_time(end - start)
-    game.current.first_move = False
-    await sio.emit("move", {"san": san_bot_move}, room=sid)
-
-
-async def handle_resign(sid, _data):
-    print("resign", sid)
-    if sid not in pveGames:
-        await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-        return
-    await handle_disconnect(sid)
-    await sio.disconnect(sid)
-
-
-async def handle_pop(sid, _data):
-    print("pop", sid)
-    if sid not in pveGames:
-        await sio.emit("error", {"cause": "Game not found", "fatal": True}, room=sid)
-        return
-    game = pveGames[sid]
-    if game.popped:
-        await sio.emit("error", {"cause": "You have already popped"}, room=sid)
-    elif game.board.fullmove_number == 1:
-        await sio.emit("error", {"cause": "No moves to undo"}, room=sid)
-    else:
-        game.board.pop()
-        game.board.pop()
-        await sio.emit("pop", {}, room=sid)
-        game.popped = True
-
-
-sio.on("connect", handle_connect)
-sio.on("disconnect", handle_disconnect)
-sio.on("resign", handle_resign)
-sio.on("pop", handle_pop)
-sio.on("move", handle_move)
-sio.on("start", handle_start)
-
-
-def cleaner_thread():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    async def cleaner():
+    async def cleaner(self):
         while True:
             await asyncio.sleep(1)
-
-            for sid in list(pveGames.keys()):
-                if sid not in pveGames:
+            for id in list(Game.games.keys()):
+                if id not in Game.games:
                     continue
+                for player in Game.games[id].players:
+                    player_time = player.remaining_time - (perf_counter() - player.latest_timestamp)
+                    if player.is_timed and player_time <= 0:
+                        await Game.sio.emit("timeout", {}, room=player.sid)
+                        await self.on_disconnect(player.sid)
 
-                for player in pveGames[sid].players:
-                    if not player.has_time():
-                        print("gotcha ", sid)
-                        await sio.emit("timeout", {}, room=sid)
-                        await handle_disconnect(sid)
-                        await sio.disconnect(sid)
+    def scheduleDaily(self):
+        schedule.every().day.at("00:00").do(self.updateDailyChallenge)
 
-    loop.run_until_complete(cleaner())
+    def scheduleWeekly(self):
+        schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
+
+    def updateDailyChallenge(self):
+        dailyRank = random.randint(0, 100)
+        print("Funzione giornaliera pianificata eseguita!")
+
+    def updateWeeklyChallenge(self):
+        weeklyRank = random.randint(0, 100)
+        print("Funzione settimanale pianificata eseguita!")
+
 
 async def main():
+    env = os.environ.get("ENV", "development")
+    if env == "development":
+        from dotenv import load_dotenv
+        env_file = f".env.{env}"
+        load_dotenv(dotenv_path=env_file)
+
+    global sio
+    sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
+    app = aiohttp.web.Application()
+    sio.attach(app)
+
+    conn = mysql.connector.connect(
+        host=os.environ.get("DATABASE_HOST"),
+        user=os.environ.get("DATABASE_USER"),
+        password=os.environ.get("DATABASE_PASSWORD"),
+        database=os.environ.get("DATABASE_NAME"),
+        port=3306
+    )
+    cursor = conn.cursor()
+
+    handler = GameHandler()
+    Game.sio = sio
+    Game.cursor = cursor
+    Game.conn = conn
+    
+    # Aggiorna le chiamate a handler
+    sio.on('connect', handler.on_connect)
+    sio.on('disconnect', handler.on_disconnect)
+    sio.on('start', handler.on_start)
+    sio.on('move', handler.on_move)
+    sio.on('resign', handler.on_resign)
+    sio.on('pop', handler.on_pop)
+
+    handler.scheduleDaily()
+    handler.scheduleWeekly()
+    
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
-    site = aiohttp.web.TCPSite(runner, "0.0.0.0", os.environ.get("PORT"))
-    thread = threading.Thread(target=cleaner_thread)
-    thread.start()
-    await site.start()
-    print(f"listening on {os.environ.get('IP')}:{os.environ.get('PORT')}") 
-    while True:
-        await asyncio.sleep(1)
 
+    port = os.environ.get("PORT", 8080)
+    ssl_context = None
+    if os.environ.get("ENV") == "production":
+        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_context.load_cert_chain(certfile="/run/secrets/ssl_certificate.crt", keyfile="/run/secrets/ssl_priv_key.key")
+    site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
+    
+    
+    await site.start()
+    print(f"Listening on 0.0.0.0:{port}")
+    cleaner_task = asyncio.create_task(handler.cleaner())
+
+    while True:
+        schedule.run_pending()
+        await asyncio.sleep(1)
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-"""
-    per eseguire: 
-        python3.12 server.py
-"""
