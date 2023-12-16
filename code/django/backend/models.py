@@ -6,9 +6,9 @@ class Guest(models.Model):
     Username = models.CharField(max_length=255, unique=True)
 
     class Meta:
-        app_label = 'backend'
-        db_table = 'Guest'
-        
+        app_label = "backend"
+        db_table = "Guest"
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -18,57 +18,62 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
 
         return self.create_user(username, password, **extra_fields)
 
 
 class RegisteredUsers(AbstractUser):
     EloReallyBadChess = models.IntegerField(default=1000)
-    session_id = models.CharField(max_length=255, default='')
+    session_id = models.CharField(max_length=255, default="")
 
-    groups = models.ManyToManyField(Group, blank=True, related_name='registered_users')
-    user_permissions = models.ManyToManyField(Permission, blank=True, related_name='registered_users')
+    groups = models.ManyToManyField(Group, blank=True, related_name="registered_users")
+    user_permissions = models.ManyToManyField(
+        Permission, blank=True, related_name="registered_users"
+    )
 
     objects = CustomUserManager()
 
     def __str__(self):
         return self.username
 
+
 class Games(models.Model):
     username1 = models.CharField(max_length=255)
     username2 = models.CharField(max_length=255)
     png = models.CharField(max_length=255)
-    
+
     class Meta:
-        app_label = 'backend'
-        db_table = 'Games'
+        app_label = "backend"
+        db_table = "Games"
 
 
 class DailyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
     challenge_date = models.DateField()
-    result = models.CharField(max_length=10)  
-    attempts = models.PositiveIntegerField()  
+    result = models.CharField(max_length=10)
+    attempts = models.PositiveIntegerField()
 
     class Meta:
-        ordering = ['moves_count']
-        
+        ordering = ["moves_count"]
+
+
 class WeeklyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
     challenge_date = models.DateField()
-    result = models.CharField(max_length=10)  
+    result = models.CharField(max_length=10)
 
     class Meta:
-        ordering = ['moves_count']
-        
+        ordering = ["moves_count"]
+
+
 class MultiplayerLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     elo = models.PositiveIntegerField()
 
     class Meta:
-        #order from highest elo to lowest
-        ordering = ['-elo']
+        # order from highest elo to lowest
+        ordering = ["-elo"]

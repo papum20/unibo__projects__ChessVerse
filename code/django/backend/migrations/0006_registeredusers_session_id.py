@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0005_alter_registeredusers_options_and_more'),
+        ("backend", "0005_alter_registeredusers_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='registeredusers',
-            name='session_id',
-            field=models.CharField(default='', max_length=255),
+            model_name="registeredusers",
+            name="session_id",
+            field=models.CharField(default="", max_length=255),
         ),
     ]

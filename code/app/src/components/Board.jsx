@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
-import Spinner from 'react-bootstrap/Spinner';
+import Spinner from "react-bootstrap/Spinner";
 import { toast } from "react-toastify";
-import {PVE, PVP} from "../const/const.js";
-
+import { PVE, PVP } from "../const/const.js";
 
 function Board(props) {
- 
   const [moveSan, setMoveSan] = useState(null);
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -17,17 +15,14 @@ function Board(props) {
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
 
-
-  function getUndoMoves(moves){
+  function getUndoMoves(moves) {
     var counter = 0;
-    moves.forEach((el)=>{
-      if(el.isUndo)
-        counter++;
-    })
+    moves.forEach((el) => {
+      if (el.isUndo) counter++;
+    });
     return counter;
   }
 
-  
   function safeGameMutate(modify) {
     props.setGame((g) => {
       const update = { ...g };
@@ -37,7 +32,7 @@ function Board(props) {
   }
 
   function getMoveOptions(square) {
-    const moves = props.game.moves({
+    const moves = props.game?.moves({
       square,
       verbose: true,
     });
@@ -65,7 +60,6 @@ function Board(props) {
     return true;
   }
 
-  
   useEffect(() => {
     const makeOppMove = async () => {
       if (oppMoveSan) {
@@ -75,7 +69,7 @@ function Board(props) {
         const move = updatedGame.move(oppMoveSan);
         if (move) {
           // Ritarda l'esecuzione per un breve periodo per visualizzare l'animazione
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 300));
 
           safeGameMutate((game) => {
             props.game.move(move.san, { sloppy: true });
@@ -106,7 +100,7 @@ function Board(props) {
         verbose: true,
       });
       const foundMove = moves.find(
-        (m) => m.from === moveFrom && m.to === square
+        (m) => m.from === moveFrom && m.to === square,
       );
       // not a valid move
       if (!foundMove) {
@@ -132,7 +126,7 @@ function Board(props) {
         setShowPromotionDialog(true);
         return;
       }
-      
+
       // is normal move
       const gameCopy = { ...props.game };
       // const gameCopy = async;
@@ -179,54 +173,80 @@ function Board(props) {
     setOptionSquares({});
   }
 
-  useEffect(()=>{
-    if(props.startFen){
+  useEffect(() => {
+    if (props.startFen) {
       const newGame = new Chess();
-          newGame.load(props.startFen);
-          props.setGame(newGame);
+      newGame.load(props.startFen);
+      props.setGame(newGame);
     }
-  },[props.startFen])
-
-  useEffect(()=>{
-    async function wait (){
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      props.setIsLoadingGame(false);
-    } 
-    if(!!props.game) wait(); 
-  },[props.game]);
+  }, [props.startFen]);
 
   useEffect(() => {
-	  function resetBoard(){
-		props.setGame(null);
-	  }
-	  resetBoard();
+    async function wait() {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      props.setIsLoadingGame(false);
+    }
+    if (!!props.game) wait();
+  }, [props.game]);
+
+  useEffect(() => {
+    function resetBoard() {
+      props.setGame(null);
+    }
+    resetBoard();
   }, [props.socket?.sid]);
 
-  useEffect(()=>{
+  useEffect(() => {
     if (!moveSan) return;
-    props.socket.emit("move", {san: moveSan, type: props.mode, id: props.roomId});   
-    props.setNumMoves(prevValue => prevValue + 1);    
-    props.setMoves(prevValue => [...prevValue, {index: prevValue.length - getUndoMoves(prevValue), move: moveSan, isUndo: false}]);
-    props.setTurn(prevValue => {return 1-prevValue;});
+    props.socket.emit("move", {
+      san: moveSan,
+      type: props.mode,
+      id: props.roomId,
+    });
+    props.setNumMoves((prevValue) => prevValue + 1);
+    props.setMoves((prevValue) => [
+      ...prevValue,
+      {
+        index: prevValue.length - getUndoMoves(prevValue),
+        move: moveSan,
+        isUndo: false,
+      },
+    ]);
+    props.setTurn((prevValue) => {
+      return 1 - prevValue;
+    });
     setMoveSan(null);
     setAwaitingOppMove(true);
-  },[moveSan]);
+  }, [moveSan]);
 
   const [getPop, setGetPop] = useState(false);
 
-  useEffect(()=>{
-    props.socket?.on("ack", (res) =>{
+  useEffect(() => {
+    props.socket?.on("ack", (res) => {
+      console.log("faccio l'update dei timers");
+      console.log(res.time);
       props.updateTimers(res.time);
     });
-    props.socket?.on("move", (res) =>{
-      props.setMoves(prevValue => [...prevValue, {index: prevValue.length - getUndoMoves(prevValue), move: res.san, isUndo: false}]);
-      props.setNumMoves(prevValue => prevValue + 1);
+    props.socket?.on("move", (res) => {
+      props.setMoves((prevValue) => [
+        ...prevValue,
+        {
+          index: prevValue.length - getUndoMoves(prevValue),
+          move: res.san,
+          isUndo: false,
+        },
+      ]);
+      props.setNumMoves((prevValue) => prevValue + 1);
       setOppMoveSan(res.san);
       setAwaitingOppMove(false);
-      props.setTurn(prevValue => { return 1-prevValue;});
+      props.setTurn((prevValue) => {
+        return 1 - prevValue;
+      });
+      console.log("faccio l'update dei timers");
+      console.log(res.time);
       props.updateTimers(res.time);
     });
-    props.socket?.on("end", (res) =>{
+    props.socket?.on("end", (res) => {
       props.setShowEndGame(true);
       if (res.winner) props.setModalType("won");
       else if (res.winner === false) props.setModalType("gameover");
@@ -234,18 +254,19 @@ function Board(props) {
       props.socket.disconnect();
     });
 
-    props.socket?.on("timeout", (_data) =>{
-        props.setShowEndGame(true);
-        props.setModalType("gameover");
-    });
-    
-    props.socket?.on("pop", () => {
-      setGetPop(prevValue => !prevValue);
+    props.socket?.on("timeout", (_data) => {
+      props.setShowEndGame(true);
+      props.setModalType("gameover");
+      props.setTimerOut(true);
     });
 
-    props.socket?.on("error", (error) =>{
-      toast.error(error.cause, {className: "toast-message"});
-      if(error.fatal){
+    props.socket?.on("pop", () => {
+      setGetPop((prevValue) => !prevValue);
+    });
+
+    props.socket?.on("error", (error) => {
+      toast.error(error.cause, { className: "toast-message" });
+      if (error.fatal) {
         props.setSocket(null);
         props.socket?.off("pop");
         props.socket?.off("timeout");
@@ -254,94 +275,107 @@ function Board(props) {
         props.socket?.off("config");
         props.navigator(`../`, { relative: "path" });
       }
-    })
+    });
   }, []);
 
-  useEffect(()=>{
-      if(!!props.game){
+  useEffect(() => {
+    if (!!props.game) {
+      const currentMoves = [...props.moves];
+      currentMoves[currentMoves.length - 1].isUndo = true;
+      currentMoves[currentMoves.length - 2].isUndo = true;
+      props.setMoves(currentMoves);
 
-        const currentMoves = [...props.moves];
-        currentMoves[currentMoves.length - 1].isUndo = true;
-        currentMoves[currentMoves.length - 2].isUndo = true;
-        props.setMoves(currentMoves);
+      props.game.undo();
+      props.game.undo();
+      props.setPosition(props.game.fen());
+      setMoveSan(null);
+      setOppMoveSan(null);
+    }
+  }, [getPop]);
 
-        props.game.undo();
-        props.game.undo();
-        props.setPosition(props.game.fen());
-        setMoveSan(null);
-        setOppMoveSan(null);
-      }
-  },[getPop]);
-
-
-
-
-  useEffect(()=>{
-    if (props.game){
+  useEffect(() => {
+    if (props.game) {
       props.setPosition(props.game.fen());
       props.setTurn(0);
     }
-  },[props.game]);
-
-  
+  }, [props.game]);
 
   return (
     <>
-    {props.isLoadingGame ? 
-    <>
-      {props.mode===PVP ?
-        <div data-testid="Loading">
+      {props.isLoadingGame ? (
+        <>
+          {props.mode === PVP ? (
+            <div data-testid="Loading">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "10vh",
+                }}
+              >
+                <h1 style={{ fontWeight: "bold", marginBottom: "20px" }}>
+                  waiting for a player
+                </h1>
+              </div>
 
-          <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}} >
-            <h1 style={{fontWeight:"bold", marginBottom: "20px"}}>waiting for a player</h1>
-          </div>
-
-          <div style={{display: "flex", justifyContent: "center", marginTop: "10px"}}>
-            <Spinner  animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </div>
-        
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "10px",
+                }}
+              >
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              </div>
+            </div>
+          ) : (
+            <div data-testid="Loading">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "10vh",
+                }}
+              >
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div data-testid="chessboard">
+          <Chessboard
+            id="ClickToMove"
+            animationDuration={300}
+            arePiecesDraggable={false}
+            position={props.position}
+            onSquareClick={async (square) => await onSquareClick(square)}
+            onPromotionPieceSelect={async (piece) =>
+              await onPromotionPieceSelect(piece)
+            }
+            customBoardStyle={{
+              borderRadius: "4px",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+            }}
+            customSquareStyles={{
+              ...moveSquares,
+              ...optionSquares,
+            }}
+            promotionToSquare={moveTo}
+            showPromotionDialog={showPromotionDialog}
+            boardWidth={`${
+              props.width / 2 > props.height - 180
+                ? props.height - 180
+                : props.width / 2
+            }`}
+            boardOrientation={props.mode === PVE ? "white" : props.color}
+          />
         </div>
-        
-        
-    :
-      <div data-testid="Loading">
-        <div style={{display: "flex", justifyContent: "center", marginTop: "10vh"}} >
-          <Spinner  animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        </div>
-      </div>
-    }
-
-    </>
-    
-    
-  : 
-    <div data-testid="chessboard">
-      <Chessboard 
-        id="ClickToMove"
-        animationDuration={300}
-        arePiecesDraggable={false}
-        position={props.position}
-        onSquareClick={async (square)=>await onSquareClick(square)}
-        onPromotionPieceSelect={async (piece) => await onPromotionPieceSelect(piece)}
-        customBoardStyle={{
-          borderRadius: "4px",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-        }}
-        customSquareStyles={{
-          ...moveSquares,
-          ...optionSquares,
-        }}
-        promotionToSquare={moveTo}
-        showPromotionDialog={showPromotionDialog}
-        boardWidth={`${props.width/2 >(props.height-180) ? (props.height-180) : (props.width/2)}`}
-        boardOrientation={props.mode===PVE ? "white" : props.color}
-      />
-    </div>
-  }
+      )}
     </>
   );
 }

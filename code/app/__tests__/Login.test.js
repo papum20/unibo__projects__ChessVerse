@@ -1,8 +1,8 @@
-import Login from '/code/app/src/components/Login.jsx';
+import Login from "/code/app/src/components/Login.jsx";
 import { test, expect } from "@jest/globals";
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from "@testing-library/react";
 
-test('Login renders successfully', async () => {
+test("Login renders successfully", async () => {
   render(<Login />);
 
   const spanElement = screen.getByTestId("loginSpan");

@@ -48,7 +48,7 @@ from server import PVPGameNamespace  # Replace with your actual namespace
 
 class TestPVPGameNamespace(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.namespace = PVPGameNamespace('/test')  # Replace with your actual namespace
+        self.namespace = PVPGameNamespace("/test")  # Replace with your actual namespace
 
     async def test_on_connect(self):
         # Create an AsyncMock for 'emit'
@@ -75,12 +75,12 @@ class TestPVPGameNamespace(unittest.IsolatedAsyncioTestCase):
         await self.namespace.on_start(player, player_data)
         await self.namespace.on_start(opp, opp_data)
 
-        mock_emit.assert_called_with("config", {"fen": chess.STARTING_FEN, "id"})
+        mock_emit.assert_called_with("config", {"fen": chess.STARTING_FEN})
 
-    async def test_on_disconnect(self):
-    
+    # async def test_on_disconnect(self):
 
     # Add more test methods for other functionalities...
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

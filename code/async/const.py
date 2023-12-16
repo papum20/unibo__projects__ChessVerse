@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 # Enums
 class EventType(IntEnum):
     ERROR = -1
@@ -17,7 +18,6 @@ class GameType(IntEnum):
     PVE = 1
     DAILY = 2
     WEEKLY = 3
-    
 
 
 class AckType(IntEnum):

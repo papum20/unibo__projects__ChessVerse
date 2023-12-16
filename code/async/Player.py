@@ -16,7 +16,7 @@ class Player:
     def __eq__(self, sid: str):
         return self.sid == sid
 
-    def add_time(self, time : int):
+    def add_time(self, time: int):
         if self.is_timed:
             self.remaining_time += time
 

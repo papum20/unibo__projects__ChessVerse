@@ -4,22 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0003_initial'),
+        ("backend", "0003_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RegisteredUsers',
+            name="RegisteredUsers",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('Username', models.CharField(max_length=255, unique=True)),
-                ('Password', models.CharField(max_length=255)),
-                ('GamesWon', models.IntegerField(default=0)),
-                ('GameDraw', models.IntegerField(default=0)),
-                ('GamesLost', models.IntegerField(default=0)),
-                ('EloReallyBadChess', models.IntegerField(default=1000)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("Username", models.CharField(max_length=255, unique=True)),
+                ("Password", models.CharField(max_length=255)),
+                ("GamesWon", models.IntegerField(default=0)),
+                ("GameDraw", models.IntegerField(default=0)),
+                ("GamesLost", models.IntegerField(default=0)),
+                ("EloReallyBadChess", models.IntegerField(default=1000)),
             ],
         ),
     ]

@@ -4,22 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0008_dailyleaderboard_weeklyleaderboard'),
+        ("backend", "0008_dailyleaderboard_weeklyleaderboard"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='registeredusers',
-            name='GameDraw',
+            model_name="registeredusers",
+            name="GameDraw",
         ),
         migrations.RemoveField(
-            model_name='registeredusers',
-            name='GamesLost',
+            model_name="registeredusers",
+            name="GamesLost",
         ),
         migrations.RemoveField(
-            model_name='registeredusers',
-            name='GamesWon',
+            model_name="registeredusers",
+            name="GamesWon",
         ),
     ]

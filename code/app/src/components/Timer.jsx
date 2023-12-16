@@ -1,14 +1,10 @@
-import {useEffect} from 'react';
-
+import { useEffect } from "react";
 
 function MyTimer({ paused, timer, expiryTimestamp }) {
-
-  useEffect(()=>{
-
+  useEffect(() => {
     restart(timer);
     console.log("restart timer", timer);
-
-  },[timer]);
+  }, [timer]);
 
   useEffect(() => {
     if (paused) pause();
@@ -16,8 +12,11 @@ function MyTimer({ paused, timer, expiryTimestamp }) {
   }, [paused]);
 
   return (
-    <div style={{textAlign: 'center'}}>
-      <span style={{marginLeft: "5px"}}>{minutes.toString().padStart(2, '0')}</span>:<span>{seconds.toString().padStart(2, '0')}</span>
+    <div style={{ textAlign: "center" }}>
+      <span style={{ marginLeft: "5px" }}>
+        {minutes.toString().padStart(2, "0")}
+      </span>
+      :<span>{seconds.toString().padStart(2, "0")}</span>
     </div>
   );
 }

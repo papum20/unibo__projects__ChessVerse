@@ -6,85 +6,120 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('backend', '0004_registeredusers'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("backend", "0004_registeredusers"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='registeredusers',
-            options={'verbose_name': 'user', 'verbose_name_plural': 'users'},
+            name="registeredusers",
+            options={"verbose_name": "user", "verbose_name_plural": "users"},
         ),
         migrations.RemoveField(
-            model_name='registeredusers',
-            name='Password',
+            model_name="registeredusers",
+            name="Password",
         ),
         migrations.RemoveField(
-            model_name='registeredusers',
-            name='Username',
+            model_name="registeredusers",
+            name="Username",
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='date_joined',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined'),
+            model_name="registeredusers",
+            name="date_joined",
+            field=models.DateTimeField(
+                default=django.utils.timezone.now, verbose_name="date joined"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='email',
-            field=models.EmailField(blank=True, max_length=254, verbose_name='email address'),
+            model_name="registeredusers",
+            name="email",
+            field=models.EmailField(
+                blank=True, max_length=254, verbose_name="email address"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='first_name',
-            field=models.CharField(blank=True, max_length=150, verbose_name='first name'),
+            model_name="registeredusers",
+            name="first_name",
+            field=models.CharField(
+                blank=True, max_length=150, verbose_name="first name"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='groups',
-            field=models.ManyToManyField(blank=True, related_name='registered_users', to='auth.group'),
+            model_name="registeredusers",
+            name="groups",
+            field=models.ManyToManyField(
+                blank=True, related_name="registered_users", to="auth.group"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='is_active',
-            field=models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active'),
+            model_name="registeredusers",
+            name="is_active",
+            field=models.BooleanField(
+                default=True,
+                help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                verbose_name="active",
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='is_staff',
-            field=models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status'),
+            model_name="registeredusers",
+            name="is_staff",
+            field=models.BooleanField(
+                default=False,
+                help_text="Designates whether the user can log into this admin site.",
+                verbose_name="staff status",
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='is_superuser',
-            field=models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status'),
+            model_name="registeredusers",
+            name="is_superuser",
+            field=models.BooleanField(
+                default=False,
+                help_text="Designates that this user has all permissions without explicitly assigning them.",
+                verbose_name="superuser status",
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='last_login',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='last login'),
+            model_name="registeredusers",
+            name="last_login",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="last login"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='last_name',
-            field=models.CharField(blank=True, max_length=150, verbose_name='last name'),
+            model_name="registeredusers",
+            name="last_name",
+            field=models.CharField(
+                blank=True, max_length=150, verbose_name="last name"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='user_permissions',
-            field=models.ManyToManyField(blank=True, related_name='registered_users', to='auth.permission'),
+            model_name="registeredusers",
+            name="user_permissions",
+            field=models.ManyToManyField(
+                blank=True, related_name="registered_users", to="auth.permission"
+            ),
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='password',
-            field=models.CharField(default='your_default_password', max_length=128, verbose_name='password'),
+            model_name="registeredusers",
+            name="password",
+            field=models.CharField(
+                default="your_default_password", max_length=128, verbose_name="password"
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='registeredusers',
-            name='username',
-            field=models.CharField(default='default', error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username'),
+            model_name="registeredusers",
+            name="username",
+            field=models.CharField(
+                default="default",
+                error_messages={"unique": "A user with that username already exists."},
+                help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                max_length=150,
+                unique=True,
+                validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],
+                verbose_name="username",
+            ),
             preserve_default=False,
         ),
     ]

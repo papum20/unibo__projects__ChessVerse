@@ -1,15 +1,18 @@
-import loadable from '@loadable/component';
+import loadable from "@loadable/component";
 import Alert from "./components/Alert.jsx";
 import { Routes, Route, useLocation } from "react-router-dom";
 import NoRoute from "./NoRoute.jsx";
 import Start from "./components/Start.jsx";
-import { useEffect, useState } from 'react';
-import { DEFAULT_GAME_TIME, MIN_BOT_DIFF, MIN_GAME_IMB } from "./const/const.js";
-import LoginOrSignupPage from './components/login/LoginOrSignupPage.jsx';
-
+import { useEffect, useState } from "react";
+import {
+  DEFAULT_GAME_TIME,
+  MIN_BOT_DIFF,
+  MIN_GAME_IMB,
+} from "./const/const.js";
+import LoginOrSignupPage from "./components/login/LoginOrSignupPage.jsx";
 
 //caricamento Lazy
-const Game = loadable(() => import('./components/Game.jsx'));
+const Game = loadable(() => import("./components/Game.jsx"));
 
 function App() {
   const location = useLocation();
@@ -30,79 +33,77 @@ function App() {
 
   const [youAreLogged, setYouAreLogged] = useState(false);
 
-
-
   useEffect(() => {
     setData({
       type: mode,
       rank: gameImb,
       time: gameTime,
-      depth: botDiff
-    })
-  }, [mode, gameImb, gameTime, botDiff])
-
-
-
+      depth: botDiff,
+    });
+  }, [mode, gameImb, gameTime, botDiff]);
 
   return (
     <div data-testid="appPage">
       <Alert data-testid="alertDiv" />
 
-
       <Routes location={location} key={location.pathname} data-testid="toGame">
+        <Route
+          path={`/`}
+          element={
+            <Start
+              mode={mode}
+              setMode={setMode}
+              gameImb={gameImb}
+              setGameImb={setGameImb}
+              botDiff={botDiff}
+              setBotDiff={setBotDiff}
+              gameTime={gameTime}
+              setGameTime={setGameTime}
+              setSocket={setSocket}
+              socket={socket}
+              setIsLoadingGame={setIsLoadingGame}
+              data={data}
+              setStartFen={setStartFen}
+              setRoomId={setRoomId}
+              setColor={setColor}
+              setUser={setUser}
+              user={user}
+              setYouAreLogged={setYouAreLogged}
+              youAreLogged={youAreLogged}
+              setEnemyUsername={setEnemyUsername}
+              setElo={setElo}
+            />
+          }
+        />
 
-        <Route path={`/`} element={
-          <Start
-            mode={mode}
-            setMode={setMode}
-            gameImb={gameImb}
-            setGameImb={setGameImb}
-            botDiff={botDiff}
-            setBotDiff={setBotDiff}
-            gameTime={gameTime}
-            setGameTime={setGameTime}
-            setSocket={setSocket}
-            socket={socket}
-            setIsLoadingGame={setIsLoadingGame}
-            data={data}
-            setStartFen={setStartFen}
-            setRoomId={setRoomId}
-            setColor={setColor}
-            setUser={setUser}
-            user={user}
-            setYouAreLogged={setYouAreLogged}
-            youAreLogged={youAreLogged}
-            setEnemyUsername={setEnemyUsername}
-            setElo={setElo}
-          />
-        } />
-
-        <Route path={`/options`} element={
-          <Start
-            mode={mode}
-            setMode={setMode}
-            gameImb={gameImb}
-            setGameImb={setGameImb}
-            botDiff={botDiff}
-            setBotDiff={setBotDiff}
-            gameTime={gameTime}
-            setGameTime={setGameTime}
-            setSocket={setSocket}
-            socket={socket}
-            setIsLoadingGame={setIsLoadingGame}
-            data={data}
-            setStartFen={setStartFen}
-            setRoomId={setRoomId}
-            setColor={setColor}
-            setUser={setUser}
-            user={user}
-            setYouAreLogged={setYouAreLogged}
-            youAreLogged={youAreLogged}
-            setEnemyUsername={setEnemyUsername}
-            setElo={setElo}
-          />
-        } />
-
+        <Route
+          path={`/options`}
+          element={
+            <Start
+              mode={mode}
+              setMode={setMode}
+              gameImb={gameImb}
+              setGameImb={setGameImb}
+              botDiff={botDiff}
+              setBotDiff={setBotDiff}
+              gameTime={gameTime}
+              setGameTime={setGameTime}
+              setSocket={setSocket}
+              socket={socket}
+              setIsLoadingGame={setIsLoadingGame}
+              data={data}
+              setStartFen={setStartFen}
+              setRoomId={setRoomId}
+              setColor={setColor}
+              setUser={setUser}
+              user={user}
+              setYouAreLogged={setYouAreLogged}
+              youAreLogged={youAreLogged}
+              setEnemyUsername={setEnemyUsername}
+              setElo={setElo}
+            />
+          }
+        />
 
         <Route
           path={`/game`}
@@ -121,7 +122,6 @@ function App() {
               user={user}
               elo={elo}
               enemyUsername={enemyUsername}
-
             />
           }
           data-testid="game"
@@ -130,25 +130,22 @@ function App() {
           path={`/login`}
           element={
             <LoginOrSignupPage
-              isLogin={true} setUser={setUser} setYouAreLogged={setYouAreLogged}
+              isLogin={true}
+              setUser={setUser}
+              setYouAreLogged={setYouAreLogged}
             />
           }
         />
 
         <Route
           path={`/signup`}
-          element={
-            <LoginOrSignupPage
-              isLogin={false} setUser={setUser}
-            />
-          }
+          element={<LoginOrSignupPage isLogin={false} setUser={setUser} />}
         />
 
         <Route path="*" element={<NoRoute />} />
       </Routes>
-
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
