@@ -8,7 +8,6 @@ from .models import (
     Guest,
     DailyLeaderboard,
     WeeklyLeaderboard,
-    MultiplayerLeaderboard,
 )
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
@@ -103,6 +102,9 @@ def user_signup(request):
             password = data.get("password")
             elo_really_bad_chess = data.get("eloReallyBadChess")
 
+            possible_elos = [400, 800, 1200, 1600, 2000]
+            if(elo_really_bad_chess not in possible_elos):
+                return JsonResponse({'message': 'Invalid elo'}, status=400)
             # Check if all required fields are provided
             if not all([username, password, elo_really_bad_chess]):
                 return JsonResponse({"message": "Missing required fields"}, status=400)
@@ -138,7 +140,7 @@ def get_daily_leaderboard(request):
             # Retrieve only the games played today from the database
             daily_leaderboard = DailyLeaderboard.objects.filter(
                 challenge_date=date.today(), result="win"
-            ).values("username", "moves_count")
+            ).values("username", "moves_count").order_by("moves_count")
             # Return the daily leaderboard as a JSON response
             return JsonResponse(
                 {"daily_leaderboard": list(daily_leaderboard)}, status=200
@@ -151,15 +153,19 @@ def get_daily_leaderboard(request):
         return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
+
 def get_weekly_leaderboard(request):
     if request.method == "GET":
         try:
             # Retrieve only the games played from this Monday to this Sunday from the database
             start_of_week = date.today() - timedelta(days=date.today().weekday())
             end_of_week = start_of_week + timedelta(days=6)
+
             weekly_leaderboard = WeeklyLeaderboard.objects.filter(
-                challenge_date__range=[start_of_week, end_of_week], result="win"
-            ).values("username", "moves_count")
+                result="win",
+                challenge_date__range=[start_of_week, end_of_week],  # Add this filter
+            ).values("username", "moves_count").order_by("moves_count")
+
             # Return the weekly leaderboard as a JSON response
             return JsonResponse(
                 {"weekly_leaderboard": list(weekly_leaderboard)}, status=200
@@ -170,7 +176,6 @@ def get_weekly_leaderboard(request):
     else:
         # Return an error response for invalid request methods
         return JsonResponse({"message": "Invalid request method"}, status=405)
-
 
 MAX_DAILY_GAMES = 2
 
@@ -213,9 +218,9 @@ def check_start_daily(request):
 def get_multiplayer_leaderboard(request):
     if request.method == "GET":
         try:
-            multiplayer_leaderboard = MultiplayerLeaderboard.objects.all().values(
-                "username", "elo"
-            )
+            multiplayer_leaderboard = RegisteredUsers.objects.all().values(
+                "username", "EloReallyBadChess"
+            ).order_by("-EloReallyBadChess")
             return JsonResponse(
                 {"multiplayer_leaderboard": list(multiplayer_leaderboard)}, status=200
             )

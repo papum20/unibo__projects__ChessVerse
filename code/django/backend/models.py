@@ -69,11 +69,3 @@ class WeeklyLeaderboard(models.Model):
     class Meta:
         ordering = ["moves_count"]
 
-
-class MultiplayerLeaderboard(models.Model):
-    username = models.CharField(max_length=255)
-    elo = models.PositiveIntegerField()
-
-    class Meta:
-        # order from highest elo to lowest
-        ordering = ["-elo"]

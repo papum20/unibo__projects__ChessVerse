@@ -16,9 +16,9 @@ Content-Type: application/json
 
 {
     
-    "username": "adminerdf",
+    "username": "adminerff",
     "password": "admin",
-    "eloReallyBadChess": 2932
+    "eloReallyBadChess": 1600
 }
 
 
@@ -67,6 +67,7 @@ Content-Type: application/json
 }
 
 ###
+
 GET http://127.0.0.1:8000/backend/get_multiplayer_leaderboard/
 Content-Type: application/json
 

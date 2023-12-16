@@ -122,6 +122,32 @@ This method checks if a user has already played the maximum number of games (def
 - Error (Status Code: 500): Returns an error response with details if an exception occurs during the process.
 - Invalid Request Method (Status Code: 405): Returns an error response if the HTTP method is not GET.
 
+### 6. Method: get_multiplayer_leaderboard
+
+Purpose: Retrieve Multiplayer Leaderboard.
+HTTP Method: GET
+Endpoint: /get_multiplayer_leaderboard/
+Parameters:
+
+request: HttpRequest object.
+Returns:
+
+JSON response containing Multiplayer Leaderboard data or an error message.
+Usage:
+
+Make a GET request to /get_multiplayer_leaderboard/ to retrieve the Multiplayer Leaderboard.
+Example Response:
+{
+    "multiplayer_leaderboard": [
+        {"username": "player1", "elo": 1500},
+        {"username": "player2", "elo": 1600},
+        ...
+    ]
+}
+Error Response Example:
+{
+    "message": "Internal Server Error"
+}
 
 ### 6. Method: get_multiplayer_leaderboard
 
