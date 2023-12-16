@@ -26,13 +26,6 @@ services:
     build:
       context: ./code/async
       dockerfile: Dockerfile
-    environment:
-      - ENV=production
-      - PORT=8080
-      - DATABASE_NAME=users_db
-      - DATABASE_HOST=mysql
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=root
     ports:
       - "8080:8080"
     secrets:
@@ -48,13 +41,6 @@ services:
     build:
       context: ./code/django
       dockerfile: Dockerfile
-    environment:
-      - ENV=production
-      - PORT=8000
-      - DATABASE_NAME=users_db
-      - DATABASE_HOST=mysql
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=root
     ports:
       - "8000:8000"
     secrets:

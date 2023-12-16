@@ -134,7 +134,6 @@ class PVPGame(Game):
 
     async def disconnect(self, sid: str) -> None:
         await self.update_win_database(self.opponent(sid).sid, False)
-        # await self.update_win_database(self.opponent(sid).sid,)
         await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
         await Game.sio.disconnect(sid=self.opponent(sid).sid)
         if sid not in Game.sid_to_id:

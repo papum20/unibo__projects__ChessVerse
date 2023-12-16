@@ -8,6 +8,14 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ## for logs
 ENV PYTHONUNBUFFERED 1
 
+ENV PORT 8000
+ENV ENV "production"
+ENV DATABASE_HOST "mysql"
+ENV DATABASE_PORT 3306
+ENV DATABASE_USER "root"
+ENV DATABASE_PASSWORD "root"
+ENV DATABASE_NAME "users_db"
+
 # Set work directory in the container
 WORKDIR /usr/src/app
 

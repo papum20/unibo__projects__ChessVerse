@@ -171,7 +171,7 @@ async def main():
         user=os.environ.get("DATABASE_USER"),
         password=os.environ.get("DATABASE_PASSWORD"),
         database=os.environ.get("DATABASE_NAME"),
-        port=3306,
+        port=os.environ.get("DATABASE_PORT"),
     )
     cursor = conn.cursor()
 
