@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
-from ...views import is_nickname_in_database, generate_random_nickname
-from ...models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard
+from ...views import is_nickname_in_database, generate_random_nickname, MAX_DAILY_GAMES
+from ...models import RegisteredUsers, Guest, DailyLeaderboard, WeeklyLeaderboard, MultiplayerLeaderboard
 import json
+from datetime import date
 
 
 class IsNicknameInDatabaseTest(TestCase):
@@ -260,7 +261,12 @@ class UserSignoutViewTest(TestCase):
 class GetDailyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        DailyLeaderboard.objects.create(username="test")
+        DailyLeaderboard.objects.create(username='test_user1',
+                                        challenge_date=date.today(),
+                                        moves_count=10)
+        DailyLeaderboard.objects.create(username='test_user2',
+                                        challenge_date=date.today(),
+                                        moves_count=15)
 
     def test_view_exists_at_desired_location(self):
         response = self.client.get("/backend/get_daily_leaderboard/")
@@ -273,13 +279,32 @@ class GetDailyLeaderboardTests(TestCase):
     def test_response_405_on_post_request(self):
         response = self.client.post(reverse("get_daily_leaderboard"))
         self.assertEqual(response.status_code, 405)
-        self.assertJSONEqual(response.content, {"message": "Invalid request method"})
+        self.assertJSONEqual(response.content, {'message': 'Invalid request method'})
+
+    def test_view_returns_correct_data(self):
+        response = self.client.get(reverse('get_daily_leaderboard'))
+        self.assertEqual(response.content, {'daily_leaderboard': [
+            {'username': 'test_user1', 'moves_count': 10},
+            {'username': 'test_user2', 'moves_count': 15}
+        ]})
+
+    def test_view_returns_correct_data(self):
+        response = self.client.get(reverse('get_daily_leaderboard'))
+        self.assertEqual(response.content, {'daily_leaderboard': [
+            {'username': 'test_user1', 'moves_count': 10},
+            {'username': 'test_user2', 'moves_count': 15}
+        ]})
 
 
 class GetWeeklyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        WeeklyLeaderboard.objects.create(username="test")
+        WeeklyLeaderboard.objects.create(username='test_user1',
+                                         challenge_date=date.today(),
+                                         moves_count=10)
+        WeeklyLeaderboard.objects.create(username='test_user2',
+                                         challenge_date=date.today(),
+                                         moves_count=15)
 
     def test_view_exists_at_desired_location(self):
         response = self.client.get("/backend/get_weekly_leaderboard/")
@@ -292,4 +317,76 @@ class GetWeeklyLeaderboardTests(TestCase):
     def test_response_405_on_post_request(self):
         response = self.client.post(reverse("get_weekly_leaderboard"))
         self.assertEqual(response.status_code, 405)
-        self.assertJSONEqual(response.content, {"message": "Invalid request method"})
+        self.assertJSONEqual(response.content, {'message': 'Invalid request method'})
+
+    def test_view_returns_correct_data(self):
+        response = self.client.get(reverse('get_weekly_leaderboard'))
+        self.assertEqual(response.content, {'weekly_leaderboard': [
+            {'username': 'test_user1', 'moves_count': 10},
+            {'username': 'test_user2', 'moves_count': 15}
+        ]})
+
+
+class CheckStartDailyTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        DailyLeaderboard.objects.create(username='test_user',
+                                        challenge_date=date.today(),
+                                        moves_count=10)
+
+    def test_view_exists_at_desired_location(self):
+        response = self.client.get('/backend/check_start_daily/',
+                                   json.dumps({'username': 'test_user'})
+                                   )
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        response = self.client.get(reverse('check_start_daily'),
+                                   json.dumps({'username': 'test_user'})
+                                   )
+        self.assertEqual(response.status_code, 200)
+
+    def test_response_405_on_post_request(self):
+        response = self.client.post(reverse('check_start_daily'))
+        self.assertEqual(response.status_code, 405)
+        self.assertJSONEqual(response.content, {'message': 'invalid request'})
+
+    '''
+    def test_max_number_of_games_played(self):
+        daily_leaderboard = DailyLeaderboard.objects.filter(username='test_user').values(
+            'username', 'attempts')
+        daily_leaderboard[0]['attempts'] = MAX_DAILY_GAMES
+        response = self.client.get(reverse('check_start_daily'),
+                                   json.dumps({'username': 'test'})
+                                   )
+        self.assertEqual(response.status_code, 500)
+        self.assertJSONEqual(response.content, {'message': 'You have already played the maximum number of games today'})
+    '''
+
+
+class GetMultiplayerLeaderboardTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        MultiplayerLeaderboard.objects.create(username='test_user1',
+                                              elo=10)
+        MultiplayerLeaderboard.objects.create(username='test_user2',
+                                              elo=15)
+
+    def test_view_exists_at_desired_location(self):
+        response = self.client.get('/backend/get_multiplayer_leaderboard/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        response = self.client.get(reverse('get_multiplayer_leaderboard'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_response_405_on_post_request(self):
+        response = self.client.post(reverse('get_multiplayer_leaderboard'))
+        self.assertEqual(response.status_code, 405)
+
+    def test_view_returns_correct_data(self):
+        response = self.client.get(reverse('get_multiplayer_leaderboard'))
+        self.assertEqual(response.content, {'weekly_leaderboard': [
+            {'username': 'test_user1', 'elo': 10},
+            {'username': 'test_user2', 'elo': 15}
+        ]})
