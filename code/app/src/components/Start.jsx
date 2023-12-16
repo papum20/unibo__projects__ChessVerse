@@ -399,9 +399,7 @@ function Start({
                         setMode(DAILY);
                         setBotDiff(MIN_BOT_DIFF);
                         setIsLoadingGame(true);
-                        const host =
-                          import.meta.env.VITE_ASYNC_HOST ??
-                          "http://localhost:8080";
+                        const host = import.meta.env.VITE_ASYNC_HOST;
                         const secure =
                           import.meta.env.VITE_NODE_ENV == "production";
                         const options = { transports: ["websocket"], secure };
@@ -447,9 +445,7 @@ function Start({
                       setMode(WEEKLY);
                       setBotDiff(MIN_BOT_DIFF);
                       setIsLoadingGame(true);
-                      const host =
-                        import.meta.env.VITE_ASYNC_HOST ??
-                        "http://localhost:8080";
+                      const host = import.meta.env.VITE_ASYNC_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
                       const options = { transports: ["websocket"], secure };
@@ -485,9 +481,7 @@ function Start({
                       setMode(RANKED);
                       setBotDiff(MIN_BOT_DIFF);
                       setIsLoadingGame(true);
-                      const host =
-                        import.meta.env.VITE_ASYNC_HOST ??
-                        "http://localhost:8080";
+                      const host = import.meta.env.VITE_ASYNC_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
                       const options = { transports: ["websocket"], secure };
