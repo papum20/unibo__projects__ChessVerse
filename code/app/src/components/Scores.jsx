@@ -13,38 +13,23 @@ function Scores() {
   // Array di oggetti che tiene traccia di username e dato elo o altre cose in base in che sezione sei
   const [data, setData] = useState([]);
 
-  async function fetchLeaderboard(API, tag) {
+  async function fetchLeaderboard(API) {
     const response = await fetch(API);
-    const leaderboards = await response.json();
-    return leaderboards[tag][-1];
+    return await response.json();
   }
 
   async function getCurrentLeaderboard() {
+    let leaderboard;
     if (focus === "daily board") {
-      const currentLeaderboard = await fetchLeaderboard(
-        API.dailyLeaderboard.endpoint,
-        "daily_leaderboard",
-      );
-      setData(currentLeaderboard);
+      leaderboard = await fetchLeaderboard(API.dailyLeaderboard.endpoint);
     } else if (focus === "weekly challenge") {
-      const currentLeaderboard = await fetchLeaderboard(
-        API.weeklyLeaderboard.endpoint,
-        "weekly_leaderboard",
-      );
-      setData(currentLeaderboard);
+      leaderboard = await fetchLeaderboard(API.weeklyLeaderboard.endpoint);
     } else if (focus === "ranked") {
-      const currentLeaderboard = await fetchLeaderboard(
-        API.rankedLeaderboard.endpoint,
-        "",
-      );
-      setData(currentLeaderboard);
+      leaderboard = await fetchLeaderboard(API.rankedLeaderboard.endpoint);
     } else {
-      //fai la fetch al server e ottieni i dati
-      setData([
-        { username: "pippo", elo: 10 },
-        { username: "pippo", elo: 10 },
-      ]);
+      leaderboard = await fetchLeaderboard(API.multiplayerLeaderboard.endpoint);
     }
+    setData(leaderboard);
   }
 
   useEffect(() => {
