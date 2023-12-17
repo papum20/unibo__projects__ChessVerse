@@ -76,7 +76,7 @@ class UserSignupViewTest(TestCase):
                 {
                     "username": "test_user",
                     "password": "secret",
-                    "eloReallyBadChess": "1000",
+                    "eloReallyBadChess": "800",
                 }
             ),
             content_type="application/json",
@@ -95,7 +95,7 @@ class UserSignupViewTest(TestCase):
                 {
                     "username": "test_user",
                     "password": "secret",
-                    "eloReallyBadChess": "1000",
+                    "eloReallyBadChess": "400",
                 }
             ),
             content_type="application/json",
@@ -110,39 +110,28 @@ class UserSignupViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {"message": "Signup successful"})
-    '''
-    def test_signup_with_missing_fields_response(self):
-        response = self.client.post(
-            reverse("user_signup"),
-            json.dumps({"username": "new_user", "password": "secret"}),
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertJSONEqual(response.content, {"message": "Missing required fields"})
+        
+    def test_signup_response_data(self):
+        # Ensure a clean state
+        RegisteredUsers.objects.filter(username="test_user").delete()
 
-    def test_signup_with_invalid_elo_response(self):
-        response = self.client.post(
-            reverse("user_signup"),
-            json.dumps({"username": "new_user", "password": "secret", "eloReallyBadChess": 300}),
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertJSONEqual(response.content, {"message": "Invalid elo"})
-    def test_user_is_in_database(self):
         response = self.client.post(
             reverse("user_signup"),
             json.dumps(
                 {
                     "username": "test_user",
                     "password": "secret",
-                    "eloReallyBadChess": "1000",
+                    "eloReallyBadChess": 800,  # Send as number
                 }
             ),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(RegisteredUsers.objects.filter(username="test_user").exists())
-    '''
+
+        # Check the response data
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data["username"], "test_user")
+        self.assertEqual(response_data["eloReallyBadChess"], 800)
 
 class UserLoginViewTest(TestCase):
     def setUp(self):
@@ -211,29 +200,6 @@ class UserSignoutViewTest(TestCase):
         user = auth.get_user(self.client)
         # Verify the user has been logged out
         self.assertFalse(user.is_authenticated)
-
-    """
-    def test_view_url_exists_at_desired_location(self):
-        # Assert the user is logged in
-        self.assertTrue(self.client.login(username='test_user', password='secret'))
-
-        response = self.client.post('/backend/signout/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_view_url_accessible_by_name(self):
-        # Check that user is logged in
-        self.assertTrue(self.client.login(username='test_user', password='secret'))
-
-        response = self.client.post(reverse('user_signout'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_logout_correct_response(self):
-        # Check that user is logged in
-        self.assertTrue(self.client.login(username='test_user', password='secret'))
-
-        response = self.client.post(reverse('user_signout'))
-        self.assertJSONEqual(response.content, {'message': 'Logout successful'})
-    """
 
 
 class GetDailyLeaderboardTests(TestCase):
@@ -352,18 +318,6 @@ class GetWeeklyLeaderboardTests(TestCase):
             response = self.client.get(self.url, json.dumps({'username': 'test_user'}))
             self.assertEqual(response.status_code, 400)
             self.assertJSONEqual(response.content, {"message": "You have already played the maximum number of games today. Attempts: 2"})
-
-    """
-    def test_max_number_of_games_played(self):
-        daily_leaderboard = DailyLeaderboard.objects.filter(username='test_user').values(
-            'username', 'attempts')
-        daily_leaderboard[0]['attempts'] = MAX_DAILY_GAMES
-        response = self.client.get(reverse('check_start_daily'),
-                                   json.dumps({'username': 'test'})
-                                   )
-        self.assertEqual(response.status_code, 500)
-        self.assertJSONEqual(response.content, {'message': 'You have already played the maximum number of games today'})
-    """
 
 
 class GetMultiplayerLeaderboardViewTest(TestCase):

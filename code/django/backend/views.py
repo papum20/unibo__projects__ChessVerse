@@ -39,16 +39,10 @@ def add_guest(requests):
     if requests.method == "POST":
         global guest_nickname
         guest_nickname = generate_random_nickname()
-        print("Guest name:" + guest_nickname)
         guest = Guest(Username=guest_nickname)
         guest.save()
     else:
         return JsonResponse({"message": "Invalid request method"}, status=405)
-    return JsonResponse({"guest_nickname": guest_nickname})
-
-
-def get_guest_name(requests):
-    print("Guest nickname:" + guest_nickname)
     return JsonResponse({"guest_nickname": guest_nickname})
 
 
