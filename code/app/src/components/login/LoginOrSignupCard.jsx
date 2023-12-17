@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Card, Form, CloseButton } from "react-bootstrap";
+import { Button, Card, Form, CloseButton, FloatingLabel } from "react-bootstrap";
 import { EyeFill, EyeSlashFill } from "react-bootstrap-icons";
 import { useForm } from "react-hook-form";
 import {
@@ -10,7 +10,7 @@ import * as users_api from "../../network/users_api";
 import "../../styles/LoginOrSignupPage.css";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
+import {ELO_LEVEL} from "../../const/const.js";
 /**
  *
  * A card component for login or signup.
@@ -34,6 +34,7 @@ function LoginOrSignupCard(props) {
     const credential_parsed = isLogin
       ? parseCredentialsLogin(credentials)
       : parseCredentialsSignup(credentials);
+
     try {
       const res = await (isLogin
         ? users_api.login(credential_parsed)
@@ -116,22 +117,19 @@ function LoginOrSignupCard(props) {
 
           {!isLogin && (
             <>
-              <Form.Group controlId="formEloRBC" style={{ marginTop: "10px" }}>
-                <Form.Label>Player Experience Level</Form.Label>
-                <Form.Control
-                  as="select"
-                  name="eloReallyBadChess"
-                  defaultValue={800}
-                  {...register("eloReallyBadChess", { required: true })}
-                >
-                  <option value="400">New Player - 400 elo</option>
-                  <option value="800">Beginner - 800 elo</option>
-                  <option value="1200">Intermediate - 1200 elo</option>
-                  <option value="1600">Advanced - 1600 elo</option>
-                  <option value="2000">Expert - 2000 elo</option>
-                </Form.Control>
-                {errors.playerExperience && <span>This field is required</span>}
-              </Form.Group>
+                <FloatingLabel style={{marginTop: "20px"}} controlId="elo" label="Elo ReallyBadChess">
+                  <Form.Select aria-label="elo" {...register("eloReallyBadChess", { required: true })}>
+                    <option disabled>choose your chess level</option>
+                    <option value={ELO_LEVEL[0]} selected>new to chess</option>
+                    <option value={ELO_LEVEL[1]}>beginner</option>
+                    <option value={ELO_LEVEL[2]}>intermediate</option>
+                    <option value={ELO_LEVEL[3]}>advanced</option>
+                    <option value={ELO_LEVEL[4]}>expert</option>
+                  </Form.Select>
+                </FloatingLabel>
+                {errors.eloReallyBadChess && (
+                  <span>This field is required</span>
+                )}
             </>
           )}
 
