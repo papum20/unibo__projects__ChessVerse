@@ -71,7 +71,6 @@ class Game(ABC):
 		self.turn = 0
 		self.popped = False
 
-		# TODO: handle seed
 
 
 	@property
