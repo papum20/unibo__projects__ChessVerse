@@ -31,15 +31,15 @@ pipeline {
 			when {
 				anyOf {
 					branch "main"
-					branch "testing"
-					branch "dev-api"
+					//branch "testing"
+					//branch "dev-api"
 				}
 			}
             steps {
-                dir('code/api') {
+                dir('code/django') {
                     // Add your Python testing commands here
                     sh 'pip install -r requirements.txt'
-                    sh 'python -m unittest discover -s tests -p "*.py"'
+                    sh 'python3.12 manage.py test backend.test"'
                 }
             }
         }
