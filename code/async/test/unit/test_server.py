@@ -1,6 +1,7 @@
 import unittest
 from unittest import TestCase, IsolatedAsyncioTestCase, mock
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
+import datetime
 
 import sys
 import socketio
@@ -205,6 +206,21 @@ class TestOnPop(IsolatedAsyncioTestCase):
         await self.server.on_pop(self.sid, {'type': 'some_data'})
         mock_move.assert_called_once_with(self.sid, {'type': 'some_data'})
     """
+
+
+class TestDailySeed(unittest.TestCase):
+    @mock.patch('datetime.date.today', return_value=datetime.date(2023, 12, 17))
+    def test_method_returns_correctly(self):
+        expected_seed = 2023 * 10000 + 12 * 100 + 17
+        self.assertEqual(expected_seed, GameHandler.daily_seed())
+
+
+class TestWeeklySeed(unittest.TestCase):
+    @mock.patch('datetime.date.today', return_value=datetime.date(2023, 12, 17))
+    def test_method_returns_correctly(self):
+        week_number = datetime.date(2023, 12, 17).isocalendar()[1]
+        expected_seed = 2023 * 100 + week_number
+        self.assertEqual(expected_seed, GameHandler.daily_seed())
 
 
 class TestCleaner(IsolatedAsyncioTestCase):

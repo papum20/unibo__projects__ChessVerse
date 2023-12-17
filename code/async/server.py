@@ -48,7 +48,8 @@ class GameHandler:
                 if game_id in Game.games:
                     await Game.games[game_id].disconnect(sid)
 
-    def daily_seed():
+    @classmethod
+    def daily_seed(cls):
         # Otteniamo la data corrente
         today = datetime.date.today()
         # Estraiamo anno, mese e giorno
@@ -59,7 +60,8 @@ class GameHandler:
         seed = year * 10000 + month * 100 + day
         return seed
 
-    def weekly_seed():
+    @classmethod
+    def weekly_seed(cls):
         # Otteniamo la data corrente
         today = datetime.date.today()
         # Otteniamo il numero della settimana e l'anno
