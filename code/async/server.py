@@ -29,7 +29,7 @@ class GameHandler:
                 return None
         return None
 
-    async def on_connect(self, sid, environ):
+    async def on_connect(self, sid):
         print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 

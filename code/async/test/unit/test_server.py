@@ -28,14 +28,8 @@ class TestOnConnect(IsolatedAsyncioTestCase):
         self.mock_emit = AsyncMock()
         Game.sio.emit = self.mock_emit
 
-    @mock.patch("Game.Game.login")
-    async def test_calls_login_correctly(self, mock_login):
-        await self.server.on_connect(self.sid, "some_environ", "some_auth")
-        mock_login.assert_called_once_with(self.sid)
-
-    @mock.patch("Game.Game.login")
-    async def test_emits_correct_msg(self, mock_login):
-        await self.server.on_connect(self.sid, "some_environ", "some_auth")
+    async def test_emits_correct_msg(self):
+        await self.server.on_connect(self.sid)
         Game.sio.emit.assert_called_once_with("connected", room=self.sid)
 
 
