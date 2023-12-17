@@ -11,6 +11,7 @@ from time import perf_counter
 import ssl
 import mysql.connector
 import schedule
+import random
 import time
 import datetime
 from ranks import dailyRank, weeklyRank
@@ -140,17 +141,17 @@ class GameHandler:
                         await Game.sio.emit("timeout", {}, room=player.sid)
                         await self.on_disconnect(player.sid)
 
-    def scheduleDaily(self):
-        schedule.every().day.at("00:00").do(self.updateDailyChallenge)
+    def schedule_daily(self):
+        schedule.every().day.at("00:00").do(self.update_daily_challenge)
 
-    def scheduleWeekly(self):
-        schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
+    def schedule_weekly(self):
+        schedule.every().monday.at("00:00").do(self.update_weekly_challenge)
 
-    def updateDailyChallenge(self):
+    def update_daily_challenge(self):
         dailyRank = random.randint(0, 100)
         print("Funzione giornaliera pianificata eseguita!")
 
-    def updateWeeklyChallenge(self):
+    def update_weekly_challenge(self):
         weeklyRank = random.randint(0, 100)
         print("Funzione settimanale pianificata eseguita!")
 
@@ -190,8 +191,8 @@ async def main():
     sio.on("resign", handler.on_resign)
     sio.on("pop", handler.on_pop)
 
-    handler.scheduleDaily()
-    handler.scheduleWeekly()
+    handler.schedule_daily()
+    handler.schedule_weekly()
 
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()

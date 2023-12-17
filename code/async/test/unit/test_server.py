@@ -176,7 +176,6 @@ class TestOnResign(IsolatedAsyncioTestCase):
         mock_on_disconnect.assert_called_once_with(self.sid)
 
 
-
 class TestOnPop(IsolatedAsyncioTestCase):
     def setUp(self):
         self.sid = "test_sid"
