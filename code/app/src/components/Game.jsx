@@ -1,4 +1,5 @@
 import ImageScacchi from "../assets/logo.png";
+import { Chess } from "chess.js";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Card, Col, Image, Modal, Nav, Row } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -58,7 +59,7 @@ function Game({
   const [timers, setTimers] = useState([gameTime, gameTime]);
   const [timerInterval, setTimerInterval] = useState(null);
   const [turn, setTurn] = useState(null);
-  const [game, setGame] = useState(null);
+  const [game, setGame] = useState(new Chess(""));
   const [position, setPosition] = useState("");
   const movesRef = useRef(null);
   const [timerOut, setTimerOut] = useState(false);
@@ -69,7 +70,6 @@ function Game({
     const interval = 100;
 
     if (timerInterval !== null) clearInterval(timerInterval);
-
     setTimerInterval(
       setInterval(() => {
         setTimers((prevTime) => {
@@ -77,7 +77,7 @@ function Game({
           updatedTime[Number(game.turn() === "b")] -= interval / 1000;
           return updatedTime;
         });
-      }, interval),
+      }, interval)
     );
 
     return () => {
@@ -139,8 +139,8 @@ function Game({
               modalType === "gameover"
                 ? "4px solid red"
                 : modalType === "won"
-                  ? "4px solid green"
-                  : "4px solid gray"
+                ? "4px solid green"
+                : "4px solid gray"
             }`,
           }}
         >
@@ -156,8 +156,8 @@ function Game({
                 modalType === "gameover"
                   ? "Game Over"
                   : modalType === "won"
-                    ? "You won!"
-                    : "It's a tie!"
+                  ? "You won!"
+                  : "It's a tie!"
               }`}</span>
               <ExclamationDiamond
                 size={40}
@@ -165,8 +165,8 @@ function Game({
                   modalType === "gameover"
                     ? "red"
                     : modalType === "won"
-                      ? "green"
-                      : "gray"
+                    ? "green"
+                    : "gray"
                 }`}
               />
               {mode === RANKED && (
@@ -175,8 +175,8 @@ function Game({
                     {modalType === "gameover"
                       ? -RANKED_SCORE_LOSS
                       : modalType === "won"
-                        ? +RANKED_SCORE_WIN
-                        : RANKED_SCORE_TIE}
+                      ? +RANKED_SCORE_WIN
+                      : RANKED_SCORE_TIE}
                   </p>
                   <FaCrown
                     style={{ marginTop: "-8px", color: "yellow" }}
@@ -217,6 +217,7 @@ function Game({
                       setSocket(null);
                       setGame(null);
                       setIsLoadingGame(true);
+                      setModalType(null);
                     }}
                     variant="contained"
                   >
@@ -227,15 +228,15 @@ function Game({
                   (mode === PVE && (
                     <div style={{ marginTop: "10px" }}>
                       <Social
-                        url={import.meta.env.VITE_SITO + location.pathname}
+                        url={import.meta.env.VITE_APP_HOST + location.pathname}
                         modalType={modalType}
                         enemyUser={enemyUsername}
                         diff={`${
                           mode === PVE
                             ? data.depth
                             : mode === DAILY || mode === WEEKLY
-                              ? `${Math.floor(numMoves / 2) + 1}`
-                              : `${color === "white" ? elo[0] : elo[1]}`
+                            ? `${Math.floor(numMoves / 2) + 1}`
+                            : `${color === "white" ? elo[0] : elo[1]}`
                         }`}
                         mode={mode}
                       />
@@ -244,7 +245,7 @@ function Game({
                 {mode === RANKED && (
                   <div style={{ marginTop: "10px" }}>
                     <Social
-                      url={import.meta.env.VITE_SITO + location.pathname}
+                      url={import.meta.env.VITE_APP_HOST + location.pathname}
                       modalType={modalType}
                       enemyUser={enemyUsername}
                       diff={0} /*fetch ranked points*/
@@ -337,8 +338,8 @@ function Game({
                           color === "white"
                             ? elo[0]
                             : color === "black"
-                              ? elo[1]
-                              : ""
+                            ? elo[1]
+                            : ""
                         })`}</span>
                       )}
                       {mode === PVP && (
@@ -360,9 +361,9 @@ function Game({
                             }}
                           />
                           <span>{`${String(
-                            Math.floor(timers[Number(color === "white")] / 60),
+                            Math.floor(timers[Number(color === "white")] / 60)
                           ).padStart(2, "0")}:${String(
-                            Math.floor(timers[Number(color === "white")] % 60),
+                            Math.floor(timers[Number(color === "white")] % 60)
                           ).padStart(2, "0")}`}</span>
                         </>
                       )}
@@ -431,7 +432,7 @@ function Game({
                     startFen={startFen}
                     color={color}
                     setTurn={setTurn}
-                    updateTimers={setTimers}
+                    setTimers={setTimers}
                     roomId={roomId}
                     game={game}
                     setGame={setGame}
@@ -627,9 +628,9 @@ function Game({
                   />
                   <span>
                     {`${String(
-                      Math.floor(timers[Number(color === "black")] / 60),
+                      Math.floor(timers[Number(color === "black")] / 60)
                     ).padStart(2, "0")}:${String(
-                      Math.floor(timers[Number(color === "black")] % 60),
+                      Math.floor(timers[Number(color === "black")] % 60)
                     ).padStart(2, "0")}`}
                   </span>
                 </>

@@ -46,16 +46,16 @@ A test can be executed runnning `npm run coverage:dev` in development phase (or 
 (to define)  
 Use `unittest` for python.  
 
-### async
+### game 
 
-Test are found by python in `code/async/test/unit`.    
+Test are found by python in `code/game/test/unit`.    
 The test can be executed from inside the folder above by 
 running `python3.12 -m unittest test_*`.
 
-### django
+### api
 
-Test are located at `code/django/backend/test/unit`. 
-They can be executed from the folder `code/django` by running 
+Test are located at `code/api/backend/test/unit`. 
+They can be executed from the folder `code/api` by running 
 `python3 manage.py test backend.test`. 
 
 ## branches

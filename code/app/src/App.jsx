@@ -22,7 +22,7 @@ function App() {
   const [botDiff, setBotDiff] = useState(MIN_BOT_DIFF);
   const [gameTime, setGameTime] = useState(DEFAULT_GAME_TIME);
   const [socket, setSocket] = useState(null);
-  const [isLoadingGame, setIsLoadingGame] = useState(false);
+  const [isLoadingGame, setIsLoadingGame] = useState(true);
   const [data, setData] = useState({});
   const [startFen, setStartFen] = useState(null);
   const [roomId, setRoomId] = useState(null);

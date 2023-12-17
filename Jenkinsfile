@@ -44,16 +44,16 @@ pipeline {
             }
         }
 
-        stage('Build and Test async backend') {
+        stage('Build and Test game backend') {
 			when {
 				anyOf {
 					branch "main"
 					branch "testing"
-					branch "dev-async"
+					branch "dev-game"
 				}
 			}
             steps {
-                dir('code/async/') {
+                dir('code/game/') {
                     // Add your Python testing commands here
                     sh 'pip install -r ../../requirements.txt'
                     sh 'cd test/unit'

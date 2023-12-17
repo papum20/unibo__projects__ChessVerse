@@ -20,7 +20,7 @@ Names should be consistent between
 List:
 -	`dev-app` : app, frontend  
 -	`dev-api` : backend providing api    
--	`dev-async` : asynchronous backend, for asynchronous stuff with websockets    
+-	`dev-game` : asynchronous backend, for asynchronous stuff with websockets    
 
 Here tests are made only on the specific service.  
 

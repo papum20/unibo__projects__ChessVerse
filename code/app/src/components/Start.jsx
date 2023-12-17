@@ -9,6 +9,7 @@ import ImageMultiPlayer from "../assets/multiplayer-removebg-preview.png";
 import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { joinPaths } from "../utils/path";
 import {
   MAX_BOT_DIFF,
   MAX_GAME_IMB,
@@ -22,6 +23,7 @@ import {
   WEEKLY,
   RANKED,
   TIME_OPTIONS,
+  SERVER_ADDR,
 } from "../const/const.js";
 import { io } from "socket.io-client";
 import * as users_api from "../network/users_api";
@@ -76,7 +78,7 @@ function Start({
     if (botDiff === 0) setBotDiff(MIN_BOT_DIFF);
     setShowModal(false);
     setIsLoadingGame(true);
-    const host = import.meta.env.VITE_ASYNC_HOST ?? "http://localhost:8080";
+    const host = import.meta.env.VITE_GAME_HOST ?? "http://localhost:8080";
     const secure = import.meta.env.VITE_NODE_ENV == "production";
     const options = { transports: ["websocket"], secure };
     setSocket(io(host, options));
@@ -158,8 +160,8 @@ function Start({
                       setBotDiff(
                         Math.max(
                           MIN_BOT_DIFF,
-                          Math.min(MAX_BOT_DIFF, e.target.value),
-                        ),
+                          Math.min(MAX_BOT_DIFF, e.target.value)
+                        )
                       );
                     }}
                     valueLabelDisplay="auto"
@@ -187,8 +189,8 @@ function Start({
                     setGameImb(
                       Math.max(
                         MIN_GAME_IMB,
-                        Math.min(MAX_GAME_IMB, e.target.value),
-                      ),
+                        Math.min(MAX_GAME_IMB, e.target.value)
+                      )
                     );
                   }}
                   valueLabelDisplay="auto"
@@ -378,14 +380,12 @@ function Start({
                       sessionStorage.getItem("session_id") === "undefined"
                     }
                     onClick={async () => {
+                      console.log(API.checkStartDaily.endpoint)
+                      console.log(`${API.checkStartDaily.endpoint}?username=${user}`)
                       const response = await fetch(
-                        API.checkStartDaily.endpoint,
-                        {
-                          body: JSON.stringify({
-                            username: user,
-                          }),
-                        },
+                        joinPaths(SERVER_ADDR, `${API.checkStartDaily.endpoint}?username=${user}`)
                       );
+                      console.log("response status", response.status);
                       if (
                         response.status ===
                         API.checkStartDaily.codes["maximum reached"]
@@ -399,7 +399,7 @@ function Start({
                         setMode(DAILY);
                         setBotDiff(MIN_BOT_DIFF);
                         setIsLoadingGame(true);
-                        const host = import.meta.env.VITE_ASYNC_HOST;
+                        const host = import.meta.env.VITE_GAME_HOST;
                         const secure =
                           import.meta.env.VITE_NODE_ENV == "production";
                         const options = { transports: ["websocket"], secure };
@@ -407,7 +407,7 @@ function Start({
                       } else {
                         toast.error(
                           "unexpected error on server communication",
-                          { className: "toast-message" },
+                          { className: "toast-message" }
                         );
                       }
                     }}
@@ -445,7 +445,7 @@ function Start({
                       setMode(WEEKLY);
                       setBotDiff(MIN_BOT_DIFF);
                       setIsLoadingGame(true);
-                      const host = import.meta.env.VITE_ASYNC_HOST;
+                      const host = import.meta.env.VITE_GAME_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
                       const options = { transports: ["websocket"], secure };
@@ -481,7 +481,7 @@ function Start({
                       setMode(RANKED);
                       setBotDiff(MIN_BOT_DIFF);
                       setIsLoadingGame(true);
-                      const host = import.meta.env.VITE_ASYNC_HOST;
+                      const host = import.meta.env.VITE_GAME_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
                       const options = { transports: ["websocket"], secure };

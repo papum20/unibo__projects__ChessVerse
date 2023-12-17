@@ -116,17 +116,21 @@ function LoginOrSignupCard(props) {
 
           {!isLogin && (
             <>
-              <Form.Group controlId="formElo1" style={{ marginTop: "10px" }}>
-                <Form.Label>Elo ReallyBadChess</Form.Label>
+              <Form.Group controlId="formEloRBC" style={{ marginTop: "10px" }}>
+                <Form.Label>Player Experience Level</Form.Label>
                 <Form.Control
+                  as="select"
                   name="eloReallyBadChess"
-                  placeholder="Elo ReallyBadChess"
-                  type="number"
+                  defaultValue={800}
                   {...register("eloReallyBadChess", { required: true })}
-                />
-                {errors.eloReallyBadChess && (
-                  <span>This field is required</span>
-                )}
+                >
+                  <option value="400">New Player - 400 elo</option>
+                  <option value="800">Beginner - 800 elo</option>
+                  <option value="1200">Intermediate - 1200 elo</option>
+                  <option value="1600">Advanced - 1600 elo</option>
+                  <option value="2000">Expert - 2000 elo</option>
+                </Form.Control>
+                {errors.playerExperience && <span>This field is required</span>}
               </Form.Group>
             </>
           )}

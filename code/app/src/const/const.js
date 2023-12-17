@@ -23,4 +23,4 @@ export const RANKED_SCORE_TIE = 0;
  * global vars (e.g. taken from env)
  */
 
-export const SERVER_ADDR = import.meta.env.VITE_SERVER_ADDR;
+export const SERVER_ADDR = import.meta.env.VITE_API_HOST;

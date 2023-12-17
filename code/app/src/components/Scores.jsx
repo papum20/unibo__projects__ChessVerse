@@ -18,7 +18,7 @@ function Scores() {
     return await response.json();
   }
 
-  async function getCurrentLeaderboard() {
+  const getCurrentLeaderboard = async () => {
     let leaderboard;
     if (focus === "daily board") {
       leaderboard = await fetchLeaderboard(API.dailyLeaderboard.endpoint);

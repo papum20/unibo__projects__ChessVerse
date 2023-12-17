@@ -3,7 +3,6 @@ import { useEffect } from "react";
 function MyTimer({ paused, timer, expiryTimestamp }) {
   useEffect(() => {
     restart(timer);
-    console.log("restart timer", timer);
   }, [timer]);
 
   useEffect(() => {

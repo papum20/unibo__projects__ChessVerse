@@ -4,7 +4,7 @@
 
 export const API = {
   login: {
-    endpoint: "backend/login/",
+    endpoint: "login/",
     method: "POST",
     codes: {
       ok: 200,
@@ -14,14 +14,14 @@ export const API = {
     response: ["message", "token"],
   },
   signout: {
-    endpoint: "backend/signout/",
+    endpoint: "signout/",
     method: "POST",
     codes: {
       ok: 200,
     },
   },
   signup: {
-    endpoint: "backend/signup/",
+    endpoint: "signup/",
     method: "POST",
     codes: {
       ok: 200,
@@ -32,11 +32,11 @@ export const API = {
     response: ["message"],
   },
   addGuest: {
-    endpoint: "backend/add_guest/",
+    endpoint: "add_guest/",
     method: "POST",
   },
   dailyLeaderboard: {
-    endpoint: "backend/get_daily_leaderboard",
+    endpoint: "get_daily_leaderboard",
     method: "GET",
     codes: {
       ok: 200,
@@ -45,7 +45,7 @@ export const API = {
     },
   },
   weeklyLeaderboard: {
-    endpoint: "backend/get_weekly_leaderboard",
+    endpoint: "get_weekly_leaderboard/",
     method: "GET",
     codes: {
       ok: 200,
@@ -59,7 +59,7 @@ export const API = {
     codes: "...",
   },
   checkStartDaily: {
-    endpoint: "backend/check_start_daily",
+    endpoint: "check_start_daily/",
     method: "GET",
     codes: {
       ok: 200,
@@ -69,7 +69,7 @@ export const API = {
     },
   },
   multiplayerLeaderboard: {
-    endpoint: "backend/get_multiplayer_leaderboard",
+    endpoint: "get_multiplayer_leaderboard/",
     method: "GET",
     codes: {
       ok: 200,

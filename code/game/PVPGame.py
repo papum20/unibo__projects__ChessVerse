@@ -77,9 +77,6 @@ class PVPGame(Game):
                 Game.sid_to_id[players[1]] = game_id
                 current = await Game.sio.get_session(players[0])
                 opponent = await Game.sio.get_session(players[1])
-                print(
-                    f"start sid_to_id={Game.sid_to_id}, waiting_list={Game.waiting_list}, games={Game.games}"
-                )
                 await Game.sio.emit(
                     "config",
                     {
@@ -112,7 +109,6 @@ class PVPGame(Game):
 
             # togliere l'id dal frontend
         else:
-            print("waiting_list", Game.waiting_list)
             session = await Game.sio.get_session(sid)
             Game.waiting_list[time][index].append(
                 {"sid": sid, "rank": rank, "elo": session["elo"]}
@@ -132,10 +128,13 @@ class PVPGame(Game):
     def is_player_turn(self, sid):
         return self.current.sid == sid
 
-    async def disconnect(self, sid: str) -> None:
+    async def disconnect(self, sid: str, sendToDisconnected: bool = True) -> None:
         await self.update_win_database(self.opponent(sid).sid, False)
+        print("Sto disconnettendo il giocatore", sid)
+        if sendToDisconnected:
+            await Game.sio.emit("end", {"winner": False}, room=sid)
         await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
-        await Game.sio.disconnect(sid=self.opponent(sid).sid)
+        # await Game.sio.disconnect(sid=self.opponent(sid).sid)
         if sid not in Game.sid_to_id:
             return
         elif Game.sid_to_id[sid] in Game.games:
@@ -143,9 +142,6 @@ class PVPGame(Game):
                 del Game.sid_to_id[self.opponent(sid).sid]
             del Game.games[Game.sid_to_id[sid]]
             del Game.sid_to_id[sid]
-        print(
-            f"1 sid_to_id={Game.sid_to_id}, waiting_list={Game.waiting_list}, games={Game.games}"
-        )
 
     async def pop(self, sid: str) -> None:
         if sid not in Game.sid_to_id:
@@ -180,7 +176,6 @@ class PVPGame(Game):
         if data["san"] is None:
             await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
             return
-        print(sid, self.current.sid, self.next.sid)
         if not self.is_player_turn(sid):
             await Game.sio.emit("error", {"cause": "It's not your turn"}, room=sid)
             return

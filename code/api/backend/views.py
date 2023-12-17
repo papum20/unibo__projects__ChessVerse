@@ -103,7 +103,7 @@ def user_signup(request):
             elo_really_bad_chess = data.get("eloReallyBadChess")
 
             possible_elos = [400, 800, 1200, 1600, 2000]
-            if(elo_really_bad_chess not in possible_elos):
+            if(int(elo_really_bad_chess) not in possible_elos):
                 return JsonResponse({'message': 'Invalid elo'}, status=400)
             # Check if all required fields are provided
             if not all([username, password, elo_really_bad_chess]):
@@ -183,16 +183,23 @@ MAX_DAILY_GAMES = 2
 # check if the user has already played the maximum number of games today
 def check_start_daily(request):
     if request.method == "GET":
-        data = json.loads(request.body)
-        username = data.get("username")
+        # Usa request.GET.get per ottenere il parametro della query string
+        username = request.GET.get("username")
+
+        if not username:
+            return JsonResponse(
+                {"message": "Username is required as a query parameter"},
+                status=400,
+            )
+
         try:
             daily_leaderboard = DailyLeaderboard.objects.filter(
                 challenge_date=date.today(), username=username
             ).values("username", "attempts")
-            if (
-                daily_leaderboard
-                and daily_leaderboard[0]["attempts"] == MAX_DAILY_GAMES
-            ):
+
+            if daily_leaderboard:
+                print(daily_leaderboard[0]["attempts"])
+            if daily_leaderboard and daily_leaderboard[0]["attempts"] >= MAX_DAILY_GAMES:
                 return JsonResponse(
                     {
                         "message": "You have already played the maximum number of games today"
@@ -204,7 +211,6 @@ def check_start_daily(request):
                     {"daily_leaderboard": list(daily_leaderboard)}, status=200
                 )
         except Exception as e:
-            # Log the exception for debugging
             print(f"Error in check_start_daily: {str(e)}")
             return JsonResponse(
                 {"message": "An error occurred while processing your request"},
@@ -212,6 +218,39 @@ def check_start_daily(request):
             )
     else:
         return JsonResponse({"message": "Invalid request method"}, status=405)
+
+# def check_start_daily(request):
+#     if request.method == "GET":
+#         print(request.body)
+#         data = json.loads(request.body)
+#         username = data.get("username")
+#         try:
+#             daily_leaderboard = DailyLeaderboard.objects.filter(
+#                 challenge_date=date.today(), username=username
+#             ).values("username", "attempts")
+#             if (
+#                 daily_leaderboard
+#                 and daily_leaderboard[0]["attempts"] == MAX_DAILY_GAMES
+#             ):
+#                 return JsonResponse(
+#                     {
+#                         "message": "You have already played the maximum number of games today"
+#                     },
+#                     status=400,
+#                 )
+#             else:
+#                 return JsonResponse(
+#                     {"daily_leaderboard": list(daily_leaderboard)}, status=200
+#                 )
+#         except Exception as e:
+#             # Log the exception for debugging
+#             print(f"Error in check_start_daily: {str(e)}")
+#             return JsonResponse(
+#                 {"message": "An error occurred while processing your request"},
+#                 status=500,
+#             )
+#     else:
+#         return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
 # get the Multiplayer leaderboard

@@ -1,28 +1,36 @@
-
 FROM node:20.9.0-bullseye-slim
+
 EXPOSE 3000
 
 USER root
 
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
-	
-# only install production dependencies
-ENV VITE_NODE_ENV production
-ENV VITE_ASYNC_HOST https://www.chessverse.cloud:8080
-ENV VITE_SERVER_ADDR https://www.chessverse.cloud:8000
-ENV VITE_SITO https://www.chessverse.cloud
-WORKDIR /usr/src/app
-# don't run as root #1
-COPY --chown=node:node . .
-# clean install
-RUN npm ci --omit=dev
 
+# Directory per i node_modules
+WORKDIR /usr/src/deps
+
+# Installa le dipendenze Node.js
+COPY package*.json ./
+RUN npm install
+
+# Directory per il codice dell'applicazione
+WORKDIR /usr/src/app
+
+# Copia il codice dell'applicazione
+COPY . .
+
+# Configurazione ambiente
+ENV VITE_NODE_ENV production
+ENV VITE_GAME_HOST https://www.chessverse.cloud:8080
+ENV VITE_API_HOST https://www.chessverse.cloud:8000
+ENV VITE_APP_HOST https://www.chessverse.cloud
+
+# Costruisci l'applicazione
 RUN npm run build
 
-# don't run as root #2
+# Cambia utente
 USER node
-# node isn't suitable to be run as pid 1, dumb-init is like a wrapper
+
+# Imposta script di avvio
 RUN chmod +x /usr/src/app/entrypoint.sh
 CMD ["/usr/src/app/entrypoint.sh"]
-
-# https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/

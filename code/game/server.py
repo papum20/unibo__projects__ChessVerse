@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import random
 import asyncio
 import os
 import socketio
@@ -10,7 +11,6 @@ from const import GameType
 from time import perf_counter
 import ssl
 import mysql.connector
-import schedule
 import time
 import datetime
 from ranks import dailyRank, weeklyRank
@@ -72,7 +72,7 @@ class GameHandler:
     async def on_start(self, sid, data):
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
-        print("start", sid)
+        print("start", sid, data)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
@@ -108,6 +108,7 @@ class GameHandler:
         await game.move(sid, data)
 
     async def on_resign(self, sid, data):
+        print("resign", sid)
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
@@ -131,27 +132,16 @@ class GameHandler:
                 if id not in Game.games:
                     continue
                 for player in Game.games[id].players:
-                    player_time = player.remaining_time - (
-                        perf_counter() - player.latest_timestamp
-                    )
-                    if player.is_timed and player_time <= 0:
-                        await Game.sio.emit("timeout", {}, room=player.sid)
-                        await self.on_disconnect(player.sid)
-
-    def scheduleDaily(self):
-        schedule.every().day.at("00:00").do(self.updateDailyChallenge)
-
-    def scheduleWeekly(self):
-        schedule.every().monday.at("00:00").do(self.updateWeeklyChallenge)
-
-    def updateDailyChallenge(self):
-        dailyRank = random.randint(0, 100)
-        print("Funzione giornaliera pianificata eseguita!")
-
-    def updateWeeklyChallenge(self):
-        weeklyRank = random.randint(0, 100)
-        print("Funzione settimanale pianificata eseguita!")
-
+                    if player.is_timed:
+                        player_time = player.remaining_time - (
+                            perf_counter() - player.latest_timestamp
+                        )
+                        if player.is_timed and player_time <= 0:
+                            await Game.sio.emit("timeout", {}, room=player.sid)
+                            if type(Game.games[id]).__name__ == "PVPGame":
+                                await Game.games[id].disconnect(player.sid, False)
+                            else:
+                                await Game.games[id].disconnect(player.sid)
 
 async def main():
     env = os.environ.get("ENV", "development")
@@ -173,11 +163,9 @@ async def main():
         database=os.environ.get("DATABASE_NAME"),
         port=os.environ.get("DATABASE_PORT"),
     )
-    cursor = conn.cursor()
 
     handler = GameHandler()
     Game.sio = sio
-    Game.cursor = cursor
     Game.conn = conn
 
     # Aggiorna le chiamate a handler
@@ -188,8 +176,6 @@ async def main():
     sio.on("resign", handler.on_resign)
     sio.on("pop", handler.on_pop)
 
-    handler.scheduleDaily()
-    handler.scheduleWeekly()
 
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
@@ -206,10 +192,9 @@ async def main():
 
     await site.start()
     print(f"Listening on 0.0.0.0:{port}")
-    cleaner_task = asyncio.create_task(handler.cleaner())
+    asyncio.create_task(handler.cleaner())
 
     while True:
-        schedule.run_pending()
         await asyncio.sleep(1)
 
 

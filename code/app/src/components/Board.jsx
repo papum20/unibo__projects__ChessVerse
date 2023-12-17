@@ -14,6 +14,7 @@ function Board(props) {
   const [optionSquares, setOptionSquares] = useState({});
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
+  const [hasGameLoaded, setHasGameLoaded] = useState(false);
 
   function getUndoMoves(moves) {
     var counter = 0;
@@ -65,8 +66,8 @@ function Board(props) {
       if (oppMoveSan) {
         const updatedGame = new Chess();
         updatedGame.load(props.game.fen()); // Carica la posizione attuale della scacchiera
-
         const move = updatedGame.move(oppMoveSan);
+        
         if (move) {
           // Ritarda l'esecuzione per un breve periodo per visualizzare l'animazione
           await new Promise((resolve) => setTimeout(resolve, 300));
@@ -85,6 +86,9 @@ function Board(props) {
 
   async function onSquareClick(square) {
     if (awaitingOppMove) return;
+    if (props.mode === PVP && props.game.turn() !== props.color[0]) return;
+    else if (props.mode !== PVP && props.game.turn() !== 'w') return;
+
     // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -100,7 +104,7 @@ function Board(props) {
         verbose: true,
       });
       const foundMove = moves.find(
-        (m) => m.from === moveFrom && m.to === square,
+        (m) => m.from === moveFrom && m.to === square
       );
       // not a valid move
       if (!foundMove) {
@@ -174,27 +178,21 @@ function Board(props) {
   }
 
   useEffect(() => {
-    if (props.startFen) {
-      const newGame = new Chess();
-      newGame.load(props.startFen);
-      props.setGame(newGame);
+    if (props.startFen && props.game) {
+      safeGameMutate((game) => {
+        props.game.load(props.startFen);
+      });
+      setHasGameLoaded(true);
     }
   }, [props.startFen]);
 
   useEffect(() => {
     async function wait() {
       await new Promise((resolve) => setTimeout(resolve, 600));
-      props.setIsLoadingGame(false);
+      if (props.game) props.setIsLoadingGame(false);
     }
     if (!!props.game) wait();
   }, [props.game]);
-
-  useEffect(() => {
-    function resetBoard() {
-      props.setGame(null);
-    }
-    resetBoard();
-  }, [props.socket?.sid]);
 
   useEffect(() => {
     if (!moveSan) return;
@@ -223,9 +221,7 @@ function Board(props) {
 
   useEffect(() => {
     props.socket?.on("ack", (res) => {
-      console.log("faccio l'update dei timers");
-      console.log(res.time);
-      props.updateTimers(res.time);
+      props.setTimers(res.time);
     });
     props.socket?.on("move", (res) => {
       props.setMoves((prevValue) => [
@@ -242,9 +238,7 @@ function Board(props) {
       props.setTurn((prevValue) => {
         return 1 - prevValue;
       });
-      console.log("faccio l'update dei timers");
-      console.log(res.time);
-      props.updateTimers(res.time);
+      props.setTimers(res.time);
     });
     props.socket?.on("end", (res) => {
       props.setShowEndGame(true);
@@ -258,6 +252,7 @@ function Board(props) {
       props.setShowEndGame(true);
       props.setModalType("gameover");
       props.setTimerOut(true);
+      props.socket.disconnect();
     });
 
     props.socket?.on("pop", () => {
@@ -279,12 +274,11 @@ function Board(props) {
   }, []);
 
   useEffect(() => {
-    if (!!props.game) {
+    if (!!props.game && props.moves.length>1) {
       const currentMoves = [...props.moves];
       currentMoves[currentMoves.length - 1].isUndo = true;
       currentMoves[currentMoves.length - 2].isUndo = true;
       props.setMoves(currentMoves);
-
       props.game.undo();
       props.game.undo();
       props.setPosition(props.game.fen());
@@ -295,14 +289,18 @@ function Board(props) {
 
   useEffect(() => {
     if (props.game) {
-      props.setPosition(props.game.fen());
-      props.setTurn(0);
+      // Game viene inizializzato con una board vuota (quindi anche la prima riga lo e')
+      // Quando viene caricata la fen iniziale, la board viene aggiornata
+      if (props.game.fen()[0] !== "8") {
+        props.setPosition(props.game.fen());
+        props.setTurn(0);
+      }
     }
   }, [props.game]);
 
   return (
     <>
-      {props.isLoadingGame ? (
+      {!hasGameLoaded ? (
         <>
           {props.mode === PVP ? (
             <div data-testid="Loading">

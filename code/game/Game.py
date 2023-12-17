@@ -3,7 +3,6 @@ import Player
 import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS, DEFAULT_ELO
-from ranks import sessionId
 
 
 def expected_score(rating_A, rating_B):
@@ -35,11 +34,10 @@ class Game(ABC):
     waiting_list: dict[str, list[list[str]]] = {
         key: [[] for _ in range(6)] for key in TIME_OPTIONS
     }
-    cursor = None
     conn = None
     __slots__ = ["fen", "board", "players", "turn", "popped"]
 
-    def __init__(self, sids: [], rank: int, time: int, seed: int | None = None) -> None:
+    def __init__(self, sids: [], rank: int|None, time: int, seed: int | None = None) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
         self.board = chess.Board(self.fen)
         self.players = []
@@ -77,15 +75,32 @@ class Game(ABC):
         pass
 
     @classmethod
+    async def get_username(cls, sid):
+        session = await Game.sio.get_session(sid)
+        print(f"sto ritirando l'username {session}")
+        return session["username"]
+    
+    @classmethod
+    async def get_session_id(cls, sid):
+        session = await Game.sio.get_session(sid)
+        return session["session_id"]
+    
+    @classmethod
+    def execute_query(cls, query, params=None):
+        with Game.conn.cursor() as cursor:
+            cursor.execute(query, params or ())
+            if query.strip().upper().startswith("SELECT"):
+                return cursor.fetchall()
+            else:
+                Game.conn.commit()
+                return None
+
+
+    @classmethod
     async def login(cls, session_id: str, sid: str) -> None:
-        sessionId = session_id
-        Game.cursor.execute(
-            "SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",
-            (session_id,),
-        )
-        user_info = Game.cursor.fetchone()
+        print(f"faccio login {session_id, sid}")
+        user_info = Game.execute_query("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",(session_id,))[0]
         if user_info is not None:
-            print(user_info)
             await Game.sio.save_session(
                 sid,
                 {
@@ -96,7 +111,7 @@ class Game(ABC):
             )
         else:
             await Game.sio.save_session(
-                sid, {"elo": DEFAULT_ELO, "session_id": None, "username": "Guest"}
+                sid, {"elo": DEFAULT_ELO, "session_id": session_id, "username": "Guest"}
             )
 
     async def update_win_database(self, sid: str, outcome: bool | None) -> None:
@@ -104,30 +119,30 @@ class Game(ABC):
         opponent = await Game.sio.get_session(self.opponent(sid).sid)
         if current["session_id"] is not None:
             field = "GamesWon" if outcome is not None else "GamesDrawn"
-            Game.cursor.execute(
+            Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-                (current["session_id"],),
+                (current["session_id"],)
             )
         if opponent["session_id"] is not None:
             field = "GamesLost" if outcome is not None else "GamesLost"
-            Game.cursor.execute(
+            Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-                (opponent["session_id"],),
+                (opponent["session_id"],)
             )
         new_elos = [None, None]
         if current["session_id"] is not None and opponent["session_id"] is not None:
             result = 1 if outcome is True else 0.5 if outcome is None else 0
             new_elos = update_rating(current["elo"], opponent["elo"], result)
-            Game.cursor.execute(
+            Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[0]} WHERE session_id = %s",
-                (current["session_id"],),
+                (current["session_id"],)
             )
-            Game.cursor.execute(
+            Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[1]} WHERE session_id = %s",
-                (opponent["session_id"],),
+                (opponent["session_id"],)
             )
-        Game.conn.commit()
         return new_elos
+
 
     async def game_found(self, sid: str, game_id: str):
         if game_id not in self.games:
