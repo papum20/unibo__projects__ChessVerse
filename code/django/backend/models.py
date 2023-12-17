@@ -25,9 +25,12 @@ class CustomUserManager(BaseUserManager):
 
 
 class RegisteredUsers(AbstractUser):
-    EloReallyBadChess = models.IntegerField(default=1000)
+    EloReallyBadChess = models.IntegerField(default=400)
     session_id = models.CharField(max_length=255, default="")
-
+    GamesWon = models.IntegerField(default=0)
+    GamesLost = models.IntegerField(default=0)
+    GameDraw = models.IntegerField(default=0)
+    
     groups = models.ManyToManyField(Group, blank=True, related_name="registered_users")
     user_permissions = models.ManyToManyField(
         Permission, blank=True, related_name="registered_users"
@@ -54,7 +57,7 @@ class DailyLeaderboard(models.Model):
     moves_count = models.PositiveIntegerField()
     challenge_date = models.DateField()
     result = models.CharField(max_length=10)
-    attempts = models.PositiveIntegerField()
+    attempts = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["moves_count"]

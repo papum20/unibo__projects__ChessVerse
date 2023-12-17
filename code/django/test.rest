@@ -1,4 +1,13 @@
+###
+POST http://127.0.0.1:8000/backend/add_guest/
+Content-Type: application/json
 
+{
+    
+    
+}
+
+###
 POST http://127.0.0.1:8000/backend/login/
 Content-Type: application/json
 
@@ -8,6 +17,7 @@ Content-Type: application/json
     "password": "admin"
     
 }
+
 
 ###
 
@@ -59,6 +69,8 @@ Content-Type: application/json
 }
 
 ###
+
+
 GET http://127.0.0.1:8000/backend/check_start_daily/
 Content-Type: application/json
 

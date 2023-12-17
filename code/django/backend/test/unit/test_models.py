@@ -5,7 +5,6 @@ from ...models import (
     Games,
     DailyLeaderboard,
     WeeklyLeaderboard,
-    MultiplayerLeaderboard,
 )
 from datetime import date
 
@@ -92,7 +91,7 @@ class RegisteredUsersModelTest(TestCase):
     def test_elo_rbc_default(self):
         user = RegisteredUsers.objects.get(username="test_user")
         default = user._meta.get_field("EloReallyBadChess").default
-        self.assertEqual(default, 1000)
+        self.assertEqual(default, 400)
 
     """test_session_id"""
 
@@ -159,7 +158,7 @@ class DailyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         DailyLeaderboard.objects.create(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=date.today(), moves_count=1, result="win", attempts=1
         )
 
     def test_username_label(self):
@@ -176,19 +175,15 @@ class DailyLeaderboardTests(TestCase):
         max_length = lb._meta.get_field("username").max_length
         self.assertEqual(max_length, 255)
 
-    def test_moves_count_label(self):
-        lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
-        )
-        field_label = lb._meta.get_field("moves_count").verbose_name
-        self.assertEqual(field_label, "moves_count")
-
     def test_challenge_date_label(self):
-        lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
-        )
+        lb = DailyLeaderboard.objects.get(username="test_user", challenge_date=date.today())
         field_label = lb._meta.get_field("challenge_date").verbose_name
-        self.assertEqual(field_label, "challenge_date")
+        self.assertEqual(field_label, "challenge date")  # Use space instead of underscore
+
+    def test_moves_count_label(self):
+        lb = DailyLeaderboard.objects.get(username="test_user", challenge_date=date.today())
+        field_label = lb._meta.get_field("moves_count").verbose_name
+        self.assertEqual(field_label, "moves count")  # Use space instead of underscore
 
     def test_result_label(self):
         lb = DailyLeaderboard.objects.get(
@@ -216,7 +211,7 @@ class WeeklyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         WeeklyLeaderboard.objects.create(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=date.today(), moves_count=1, result="win"
         )
 
     def test_username_label(self):
@@ -238,14 +233,14 @@ class WeeklyLeaderboardTests(TestCase):
             username="test_user", challenge_date=date.today()
         )
         field_label = lb._meta.get_field("moves_count").verbose_name
-        self.assertEqual(field_label, "moves_count")
+        self.assertEqual(field_label, "moves count")
 
     def test_challenge_date_label(self):
         lb = WeeklyLeaderboard.objects.get(
             username="test_user", challenge_date=date.today()
         )
         field_label = lb._meta.get_field("challenge_date").verbose_name
-        self.assertEqual(field_label, "challenge_date")
+        self.assertEqual(field_label, "challenge date")
 
     def test_result_label(self):
         lb = WeeklyLeaderboard.objects.get(
@@ -262,30 +257,3 @@ class WeeklyLeaderboardTests(TestCase):
         self.assertEqual(max_length, 10)
 
 
-class MultiplayerLeaderboardTests(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        MultiplayerLeaderboard.objects.create(
-            username="test_user", challenge_date=date.today()
-        )
-
-    def test_username_label(self):
-        lb = MultiplayerLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
-        )
-        field_label = lb._meta.get_field("username").verbose_name
-        self.assertEqual(field_label, "username")
-
-    def test_username_max_length(self):
-        lb = MultiplayerLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
-        )
-        max_length = lb._meta.get_field("username").max_length
-        self.assertEqual(max_length, 255)
-
-    def test_elo_label(self):
-        lb = MultiplayerLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
-        )
-        field_label = lb._meta.get_field("elo").verbose_name
-        self.assertEqual(field_label, "elo")

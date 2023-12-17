@@ -180,40 +180,41 @@ def get_weekly_leaderboard(request):
 MAX_DAILY_GAMES = 2
 
 
-# check if the user has already played the maximum number of games today
+@csrf_exempt  
 def check_start_daily(request):
-    if request.method == "GET":
-        data = json.loads(request.body)
+    try:
+        # Extract the JSON data from the request
+        data = json.loads(request.body.decode("utf-8"))
         username = data.get("username")
-        try:
-            daily_leaderboard = DailyLeaderboard.objects.filter(
-                challenge_date=date.today(), username=username
-            ).values("username", "attempts")
-            if (
-                daily_leaderboard
-                and daily_leaderboard[0]["attempts"] == MAX_DAILY_GAMES
-            ):
-                return JsonResponse(
-                    {
-                        "message": "You have already played the maximum number of games today"
-                    },
-                    status=400,
-                )
-            else:
-                return JsonResponse(
-                    {"daily_leaderboard": list(daily_leaderboard)}, status=200
-                )
-        except Exception as e:
-            # Log the exception for debugging
-            print(f"Error in check_start_daily: {str(e)}")
+
+        user_entry = DailyLeaderboard.objects.get(username=username)
+        if not user_entry:
+            return JsonResponse(status= 200)
+
+        # Check the number of attempts
+        attempts = user_entry.attempts
+
+        if attempts >= 2:
+            # If the user has made the maximum number of attempts
             return JsonResponse(
-                {"message": "An error occurred while processing your request"},
-                status=500,
+                {
+                    "message": f"You have already played the maximum number of games today. Attempts: {attempts}"
+                },
+                status=400,
             )
-    else:
-        return JsonResponse({"message": "Invalid request method"}, status=405)
-
-
+        else:
+            # If the user has made less than the maximum number of attempts
+            return JsonResponse(
+                {"message": f"Success! You have made {attempts} attempts today."},
+                status=200,
+            )
+    except Exception as e:
+        # Log the exception for debugging
+        print(f"Error in check_user_attempts: {str(e)}")
+        return JsonResponse(
+            {"message": "An error occurred while processing your request"},
+            status=500,
+        )
 # get the Multiplayer leaderboard
 def get_multiplayer_leaderboard(request):
     if request.method == "GET":
