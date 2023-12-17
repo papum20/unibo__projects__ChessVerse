@@ -109,7 +109,7 @@ class GameHandler:
             return
         await game.move(sid, data)
 
-    async def on_resign(self, sid, data):
+    async def on_resign(self, sid):
         await self.on_disconnect(sid)
 
     async def on_pop(self, sid, data):
