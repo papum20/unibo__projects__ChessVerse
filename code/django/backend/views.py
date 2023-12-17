@@ -181,7 +181,7 @@ def check_start_daily(request):
         data = json.loads(request.body.decode("utf-8"))
         username = data.get("username")
 
-        user_entry = DailyLeaderboard.objects.get(username=username)
+        user_entry = DailyLeaderboard.objects.get(username=username, challenge_date=date.today())
         if not user_entry:
             return JsonResponse(status= 200)
 
@@ -202,6 +202,9 @@ def check_start_daily(request):
                 {"message": f"Success! You have made {attempts} attempts today."},
                 status=200,
             )
+    except DailyLeaderboard.DoesNotExist:
+            return JsonResponse({'message': 'No attempts made today'}, status=200, safe=False)
+
     except Exception as e:
         # Log the exception for debugging
         print(f"Error in check_user_attempts: {str(e)}")
@@ -209,6 +212,7 @@ def check_start_daily(request):
             {"message": "An error occurred while processing your request"},
             status=500,
         )
+
 # get the Multiplayer leaderboard
 def get_multiplayer_leaderboard(request):
     if request.method == "GET":
