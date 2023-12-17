@@ -83,14 +83,12 @@ class TestDisconnect(IsolatedAsyncioTestCase):
 
     @mock.patch("Game.Game.update_win_database")
     @mock.patch("Game.Game.opponent")
-    async def test_update_win_database_is_called(
-        self, mock_opponent, mock_update_win_db
-    ):
+    async def test_update_win_database_is_called(self, mock_opponent, mock_update_win_db):
         type(mock_opponent.return_value).sid = PropertyMock(
             return_value=self.opponent_sid
         )
         await self.game.disconnect(self.sid)
-        mock_update_win_db.assert_awaited_once_with(sid=self.opponent_sid)
+        mock_update_win_db.assert_awaited_once_with(self.opponent_sid, outcome=False)
 
     @mock.patch("Game.Game.update_win_database")
     @mock.patch("Game.Game.opponent")
@@ -103,12 +101,12 @@ class TestDisconnect(IsolatedAsyncioTestCase):
 
     @mock.patch("Game.Game.update_win_database")
     @mock.patch("Game.Game.opponent")
-    async def test_emit_disconnected_msg(self, mock_opponent, mock_update_win_db):
+    async def test_disconnected_is_called(self, mock_opponent, mock_update_win_db):
         type(mock_opponent.return_value).sid = PropertyMock(
             return_value=self.opponent_sid
         )
         await self.game.disconnect(self.sid)
-        Game.sio.emit.assert_any_call("disconnected", room=self.opponent_sid)
+        Game.sio.disconnect.assert_any_call(sid=self.opponent_sid)
 
     @mock.patch("Game.Game.update_win_database")
     @mock.patch("Game.Game.opponent")
@@ -172,11 +170,12 @@ class TestPop(IsolatedAsyncioTestCase):
         )
 
     @mock.patch("PVPGame.PVPGame.is_player_turn", return_value=True)
+    @mock.patch("PVPGame.PVPGame.get_times", return_value=[0, 1, 2])
     async def test_correct_pop(self, mock_is_player_turn):
         self.game.board.push_uci("e2e4")
         self.game.board.push_uci("e7e5")
         await self.game.pop(self.sid)
-        Game.sio.emit.assert_called_once_with("pop", {}, room=self.game.players)
+        Game.sio.emit.assert_called_once_with("pop", {"time": [0, 1, 2]}, room=self.game.players)
         self.assertTrue(self.game.popped)
 
 
