@@ -2,19 +2,19 @@
 import random
 import asyncio
 import os
-import socketio
 import aiohttp
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
+from GameRanked import GameRanked
 from const import GameType
 from time import perf_counter
 import ssl
 import mysql.connector
+import schedule
 import time
 import datetime
 from ranks import dailyRank, weeklyRank
-
 
 class GameHandler:
     def __init__(self):
@@ -30,7 +30,7 @@ class GameHandler:
         return None
 
     async def on_connect(self, sid, environ):
-        print("connect", sid)
+        #print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
@@ -47,7 +47,7 @@ class GameHandler:
             else:
                 if game_id in Game.games:
                     await Game.games[game_id].disconnect(sid)
-
+    
     def daily_seed():
         # Otteniamo la data corrente
         today = datetime.date.today()
@@ -58,7 +58,7 @@ class GameHandler:
         # Combiniamo anno, mese e giorno per creare il seed
         seed = year * 10000 + month * 100 + day
         return seed
-
+    
     def weekly_seed():
         # Otteniamo la data corrente
         today = datetime.date.today()
@@ -69,10 +69,10 @@ class GameHandler:
         seed = year * 100 + week_number
         return seed
 
-    async def on_start(self, sid, data):
+    async def on_start(self, sid, data): 
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
-        print("start", sid, data)
+        print("start", data["type"])
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
@@ -83,11 +83,14 @@ class GameHandler:
             await PVEGame.start(sid, data)
         elif data["type"] == GameType.PVP:
             await PVPGame.start(sid, data)
-        # add new GameTypes Daily and Wekkly challenges
+        #add new GameTypes Daily and Wekkly challenges
         elif data["type"] == GameType.DAILY:
-            await PVEGame.start(sid, data, daily_seed, GameType.DAILY)
+            await PVEGame.start(sid, data, seed = daily_seed, type = GameType.DAILY)
         elif data["type"] == GameType.WEEKLY:
-            await PVEGame.start(sid, data, weekly_seed, GameType.WEEKLY)
+            await PVEGame.start(sid, data, seed = weekly_seed, type = GameType.WEEKLY)
+        elif data["type"] == GameType.RANKED:
+            await GameRanked.start(sid, data)
+        #add new GameTypes Daily and Wekkly challenges
         else:
             await Game.sio.emit(
                 "error", {"cause": "Invalid type", "fatal": True}, room=sid
@@ -136,7 +139,7 @@ class GameHandler:
                         player_time = player.remaining_time - (
                             perf_counter() - player.latest_timestamp
                         )
-                        if player.is_timed and player_time <= 0:
+                        if player_time <= 0:
                             await Game.sio.emit("timeout", {}, room=player.sid)
                             if type(Game.games[id]).__name__ == "PVPGame":
                                 await Game.games[id].disconnect(player.sid, False)
@@ -147,7 +150,6 @@ async def main():
     env = os.environ.get("ENV", "development")
     if env == "development":
         from dotenv import load_dotenv
-
         env_file = f".env.{env}"
         load_dotenv(dotenv_path=env_file)
 
@@ -163,6 +165,7 @@ async def main():
         database=os.environ.get("DATABASE_NAME"),
         port=os.environ.get("DATABASE_PORT"),
     )
+    cursor = conn.cursor()
 
     handler = GameHandler()
     Game.sio = sio
@@ -176,7 +179,7 @@ async def main():
     sio.on("resign", handler.on_resign)
     sio.on("pop", handler.on_pop)
 
-
+    
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 

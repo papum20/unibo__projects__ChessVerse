@@ -53,11 +53,13 @@ export const API = {
       "invalid request": 405,
     },
   },
-  rankedLeaderboard: {
-    endpoint: "...",
-    method: "...",
-    codes: "...",
-  },
+    rankedLeaderboard: {
+        endpoint: "get_leaderboard_ranked/",
+        method: "GET",
+        codes: {
+
+        }
+    },
   checkStartDaily: {
     endpoint: "check_start_daily/",
     method: "GET",
