@@ -36,26 +36,29 @@ pipeline {
 				}
 			}
             steps {
-                dir('code/api') {
+                dir('code/django') {
                     // Add your Python testing commands here
                     sh 'pip install -r requirements.txt'
-                    sh 'python -m unittest discover -s tests -p "*.py"'
+                    sh 'python3.12 manage.py test backend.test"'
                 }
             }
         }
 
-        stage('Build and Test async backend') {
+        stage('Build and Test game backend') {
 			when {
 				anyOf {
 					branch "main"
 					branch "testing"
-					branch "dev-async"
+					branch "dev-game"
 				}
 			}
+            agent {
+                docker { image 'python3:3' }
+            }
             steps {
-                dir('code/async/') {
+                dir('code/game/') {
                     // Add your Python testing commands here
-                    sh 'pip install -r ../../requirements.txt'
+                    sh 'pip install -r requirements.txt'
                     sh 'cd test/unit'
                     sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
