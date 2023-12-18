@@ -6,15 +6,14 @@ import aiohttp
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
-from GameRanked import GameRanked
 from const import GameType
 from time import perf_counter
 import ssl
+import socketio
 import mysql.connector
 import schedule
 import time
 import datetime
-from ranks import dailyRank, weeklyRank
 
 class GameHandler:
     def __init__(self):
@@ -89,7 +88,7 @@ class GameHandler:
         elif data["type"] == GameType.WEEKLY:
             await PVEGame.start(sid, data, seed = weekly_seed, type = GameType.WEEKLY)
         elif data["type"] == GameType.RANKED:
-            await GameRanked.start(sid, data)
+            await PVEGame.start(sid, data, seed = None, type = GameType.RANKED)
         #add new GameTypes Daily and Wekkly challenges
         else:
             await Game.sio.emit(

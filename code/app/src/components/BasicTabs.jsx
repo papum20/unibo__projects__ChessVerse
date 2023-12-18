@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import { CloseButton, Row, Col } from "react-bootstrap";
 import { Tabs, Tab, Box } from "@mui/material";
@@ -14,11 +14,7 @@ function TabPanel(props) {
       aria-labelledby={`vertical-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <>{children}</>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -37,7 +33,7 @@ function a11yProps(index) {
 }
 
 export default function BasicTabs(props) {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -46,12 +42,12 @@ export default function BasicTabs(props) {
   return (
     <Box sx={{ flexGrow: 1, display: "flex", height: "80vh" }}>
       <Tabs
-        style={{ backgroundColor: "rgb(101, 67, 33)" }}
         orientation="vertical"
         value={value}
         onChange={handleChange}
         aria-label="Vertical tabs example"
         sx={{ borderRight: 1, borderColor: "divider" }}
+        style={{ backgroundColor: "rgb(101, 67, 33)" }}
       >
         <Tab
           style={{ color: "white", marginTop: "20px" }}
@@ -80,123 +76,144 @@ export default function BasicTabs(props) {
       </Tabs>
 
       <div style={{ backgroundColor: "rgb(150, 111, 51)", width: "95vw" }}>
-        <TabPanel value={value} index={0}>
-          <Row style={{ marginBottom: "20px" }}>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                Username
-              </span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                Turni Minimi
-              </span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-              <CloseButton onClick={() => props.setShowModal(false)} />
-            </Col>
-          </Row>
-
-          {props.data.map((el, i) => (
-            <Row style={{ marginBottom: "10px" }} key={i}>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.username}</span>
-              </Col>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.minMoves}</span>
-              </Col>
-              <Col
-                style={{ display: "flex", justifyContent: "flex-end" }}
-              ></Col>
-            </Row>
-          ))}
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <Row style={{ marginBottom: "20px" }}>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                Username
-              </span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                Turni Minimi
-              </span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-              <CloseButton onClick={() => props.setShowModal(false)} />
-            </Col>
-          </Row>
-          {props.data.map((el, i) => (
-            <Row style={{ marginBottom: "10px" }} key={i}>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.username}</span>
-              </Col>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.minMoves}</span>
-              </Col>
-              <Col
-                style={{ display: "flex", justifyContent: "flex-end" }}
-              ></Col>
-            </Row>
-          ))}
-        </TabPanel>
-        <TabPanel value={value} index={2}>
-          <Row style={{ marginBottom: "20px" }}>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                Username
-              </span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>Rank</span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-              <CloseButton onClick={() => props.setShowModal(false)} />
-            </Col>
-          </Row>
-          {props.data.map((el, i) => (
-            <Row style={{ marginBottom: "10px" }} key={i}>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.username}</span>
-              </Col>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.rank}</span>
-              </Col>
-              <Col
-                style={{ display: "flex", justifyContent: "flex-end" }}
-              ></Col>
-            </Row>
-          ))}
-        </TabPanel>
-        <TabPanel value={value} index={3}>
-          <Row style={{ marginBottom: "20px" }}>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                Username
-              </span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "center" }}>
-              <span style={{ fontWeight: "bold", fontSize: "22px" }}>Elo</span>
-            </Col>
-            <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-              <CloseButton onClick={() => props.setShowModal(false)} />
-            </Col>
-          </Row>
-          {props.data.map((el, i) => (
-            <Row style={{ marginBottom: "10px" }} key={i}>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.username}</span>
-              </Col>
-              <Col style={{ display: "flex", justifyContent: "center" }}>
-                <span>{el.elo}</span>
-              </Col>
-              <Col
-                style={{ display: "flex", justifyContent: "flex-end" }}
-              ></Col>
-            </Row>
-          ))}
-        </TabPanel>
+        {!Array.isArray(props.data) ? (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <span
+              style={{
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: "22px",
+              }}
+            >
+              {JSON.stringify(props.data)}
+              <br />
+              No data available. Play and try again!
+            </span>
+          </div>
+        ) : (
+          <>
+            <TabPanel value={value} index={0}>
+              <Row style={{ marginBottom: "20px" }}>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Username
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Turni Minimi
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <CloseButton onClick={() => props.setShowModal(false)} />
+                </Col>
+              </Row>
+              {props.data.map((el, i) => (
+                <Row style={{ marginBottom: "10px" }} key={i}>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.username}</span>
+                  </Col>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.minMoves}</span>
+                  </Col>
+                  <Col
+                    style={{ display: "flex", justifyContent: "flex-end" }}
+                  ></Col>
+                </Row>
+              ))}
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              <Row style={{ marginBottom: "20px" }}>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Username
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Turni Minimi
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <CloseButton onClick={() => props.setShowModal(false)} />
+                </Col>
+              </Row>
+              {props.data.map((el, i) => (
+                <Row style={{ marginBottom: "10px" }} key={i}>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.username}</span>
+                  </Col>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.minMoves}</span>
+                  </Col>
+                  <Col
+                    style={{ display: "flex", justifyContent: "flex-end" }}
+                  ></Col>
+                </Row>
+              ))}
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+              <Row style={{ marginBottom: "20px" }}>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Username
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Rank
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <CloseButton onClick={() => props.setShowModal(false)} />
+                </Col>
+              </Row>
+              {props.data.map((el, i) => (
+                <Row style={{ marginBottom: "10px" }} key={i}>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.username}</span>
+                  </Col>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.rank}</span>
+                  </Col>
+                  <Col
+                    style={{ display: "flex", justifyContent: "flex-end" }}
+                  ></Col>
+                </Row>
+              ))}
+            </TabPanel>
+            <TabPanel value={value} index={3}>
+              <Row style={{ marginBottom: "20px" }}>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Username
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                    Elo
+                  </span>
+                </Col>
+                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <CloseButton onClick={() => props.setShowModal(false)} />
+                </Col>
+              </Row>
+              {props.data.map((el, i) => (
+                <Row style={{ marginBottom: "10px" }} key={i}>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.username}</span>
+                  </Col>
+                  <Col style={{ display: "flex", justifyContent: "center" }}>
+                    <span>{el.elo}</span>
+                  </Col>
+                  <Col
+                    style={{ display: "flex", justifyContent: "flex-end" }}
+                  ></Col>
+                </Row>
+              ))}
+            </TabPanel>
+          </>
+        )}
       </div>
     </Box>
   );

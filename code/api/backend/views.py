@@ -1,8 +1,12 @@
 import random
 from django.contrib.auth import login, logout
+from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
+
+from django.views.decorators.http import require_http_methods
+
 from .models import (
     RegisteredUsers,
     Guest,
@@ -103,7 +107,7 @@ def user_signup(request):
             elo_really_bad_chess = data.get("eloReallyBadChess")
 
             possible_elos = [400, 800, 1200, 1600, 2000]
-            if(int(elo_really_bad_chess) not in possible_elos):
+            if (int(elo_really_bad_chess) not in possible_elos):
                 return JsonResponse({'message': 'Invalid elo'}, status=400)
             # Check if all required fields are provided
             if not all([username, password, elo_really_bad_chess]):
@@ -153,7 +157,6 @@ def get_daily_leaderboard(request):
         return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
-
 def get_weekly_leaderboard(request):
     if request.method == "GET":
         try:
@@ -176,6 +179,7 @@ def get_weekly_leaderboard(request):
     else:
         # Return an error response for invalid request methods
         return JsonResponse({"message": "Invalid request method"}, status=405)
+
 
 MAX_DAILY_GAMES = 2
 
@@ -219,6 +223,7 @@ def check_start_daily(request):
     else:
         return JsonResponse({"message": "Invalid request method"}, status=405)
 
+
 # get the Multiplayer leaderboard
 def get_multiplayer_leaderboard(request):
     if request.method == "GET":
@@ -235,3 +240,16 @@ def get_multiplayer_leaderboard(request):
     else:
         # Return an error response for invalid request methods
         return JsonResponse({"message": "Invalid request method"}, status=405)
+
+
+@require_http_methods(["GET"])
+def get_ranked_leaderboard(request):
+    try:
+        # Retrieve all users ordered by score_ranked in descending order
+        ranked_leaderboard = RegisteredUsers.objects.all().values('username', 'score_ranked').order_by('-score_ranked')
+        return JsonResponse(
+                {"ranked_leaderboard": list(ranked_leaderboard)}, status=200
+            )
+    except Exception as e:
+        # Return an error response for any exception
+        return JsonResponse({"message": str(e)}, status=500)

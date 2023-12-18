@@ -29,8 +29,9 @@ class RegisteredUsers(AbstractUser):
     session_id = models.CharField(max_length=255, default="")
     GamesWon = models.IntegerField(default=0)
     GamesLost = models.IntegerField(default=0)
-    GameDraw = models.IntegerField(default=0)
-    
+    GamesDrawn = models.IntegerField(default=0)
+    score_ranked = models.IntegerField(default=0)
+
     groups = models.ManyToManyField(Group, blank=True, related_name="registered_users")
     user_permissions = models.ManyToManyField(
         Permission, blank=True, related_name="registered_users"

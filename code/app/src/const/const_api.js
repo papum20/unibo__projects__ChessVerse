@@ -36,7 +36,7 @@ export const API = {
     method: "POST",
   },
   dailyLeaderboard: {
-    endpoint: "get_daily_leaderboard",
+    endpoint: "get_daily_leaderboard/",
     method: "GET",
     codes: {
       ok: 200,
@@ -53,13 +53,13 @@ export const API = {
       "invalid request": 405,
     },
   },
-    rankedLeaderboard: {
-        endpoint: "get_leaderboard_ranked/",
-        method: "GET",
-        codes: {
+  rankedLeaderboard: {
+      endpoint: "get_ranked_leaderboard/",
+      method: "GET",
+      codes: {
 
-        }
-    },
+      }
+  },
   checkStartDaily: {
     endpoint: "check_start_daily/",
     method: "GET",

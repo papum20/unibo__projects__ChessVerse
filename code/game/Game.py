@@ -1,9 +1,10 @@
+from typing import Optional
 import chess
 import Player
 import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS, DEFAULT_ELO
-
+from const import FIELDS
 
 def expected_score(rating_A, rating_B):
     return 1.0 / (1 + 10 ** ((rating_B - rating_A) / 400))
@@ -36,7 +37,7 @@ class Game(ABC):
     }
     conn = None
     __slots__ = ["fen", "board", "players", "turn", "popped"]
-
+    
     def __init__(self, sids: [], rank: int|None, time: int, seed: int | None = None) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
         self.board = chess.Board(self.fen)
@@ -77,13 +78,17 @@ class Game(ABC):
     @classmethod
     async def get_username(cls, sid):
         session = await Game.sio.get_session(sid)
-        print(f"sto ritirando l'username {session}")
         return session["username"]
     
     @classmethod
     async def get_session_id(cls, sid):
         session = await Game.sio.get_session(sid)
         return session["session_id"]
+    
+    @classmethod
+    async def get_session_field(cls, sid, field):
+        session = await Game.sio.get_session(sid)
+        return session[field]
     
     @classmethod
     def execute_query(cls, query, params=None):
@@ -94,6 +99,58 @@ class Game(ABC):
             else:
                 Game.conn.commit()
                 return None
+    
+    @classmethod
+    def set_user_field(cls, session_id: str, field: str, new_value: int) -> bool:
+        """
+		:param session_id: session id field
+		:param rank_type: game type, form const.RANKS
+		:param new_rank: new_rank
+		
+		:return: True if success, False otherwise
+		"""
+
+        if field not in FIELDS:
+            # print("[err][db] Invalid rank type")
+            return 0
+
+        if session_id is None:
+            # print("[err][db] Invalid session id")
+            return 0
+
+        Game.execute_query(
+            f"""
+			UPDATE backend_registeredusers 
+			SET {field} = %(new_value)s
+			WHERE session_id = %(session_id)s
+			""",
+            {
+                'new_value': new_value,
+                'session_id': session_id
+            }
+        )
+
+        print(f"[db] set rank to:{new_value}")
+        return True
+    
+    @classmethod
+    def get_user_field(cls, session_id: str, field: str) -> int:
+        """
+		:param session_id: session id field
+		"""
+
+        if session_id is None:
+            # print("[err][db] Invalid session id")
+            return 0
+        field = Game.execute_query(
+            f"""
+			SELECT {field}
+			FROM backend_registeredusers
+			WHERE session_id = %s
+			""",
+            (session_id,)
+        )
+        return field[0] if field is not None and len(field) > 0 else None
 
 
     @classmethod

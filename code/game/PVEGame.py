@@ -1,9 +1,9 @@
+from typing import Optional, Tuple
 import chess
 from chess.engine import Limit, popen_uci
 from Game import Game
-from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME
+from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, MODE_RANKED_PT_DIFF
 from time import perf_counter
-from ranks import dailyRank, weeklyRank
 from const import GameType
 from datetime import date, timedelta
 
@@ -24,6 +24,15 @@ class PVEGame(Game):
         self.bot = None
         self.depth = depth
         self.type = type
+
+    @staticmethod
+    def get_new_ranked(cur_ranked:int, outcome:Optional[bool]) -> Tuple[int,int]:
+        if outcome is None:
+            return cur_ranked + MODE_RANKED_PT_DIFF[1]
+        elif outcome:
+            return cur_ranked + MODE_RANKED_PT_DIFF[0]
+        else:
+            return cur_ranked + MODE_RANKED_PT_DIFF[2]
 
     @classmethod
     async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
@@ -58,14 +67,23 @@ class PVEGame(Game):
             Game.sid_to_id[sid] = sid  # solo in PVE;
             if seed is not None:
                 if type == GameType.DAILY:
-                    #TODO aggiungere incremneto tentativi utente
                     Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
                 elif type == GameType.WEEKLY:
                     Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
             else: # 1v1, freeplay, ranked
-                Game.games[sid] = PVEGame(
-                    sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
-                )
+                if type == GameType.RANKED:
+                    session_id = await Game.get_session_id(sid)
+                    rank = Game.get_user_field(session_id, "score_ranked")
+                    if rank is not None: 
+                        rank = rank[0]
+                    else:
+                        rank = 0
+                    print(f"score_ranked = {rank}")
+                    Game.games[sid] = PVEGame(sid, rank, 1, -1, None, type)
+                else :
+                    Game.games[sid] = PVEGame(
+                        sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
+                    )
             await Game.games[sid].instantiate_bot()
             await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
         else:
@@ -128,6 +146,19 @@ class PVEGame(Game):
                 """,
                 (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today()),
             )
+    
+    async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):
+        session_id = await Game.get_session_id(sid)
+        if session_id is not None:
+            score_ranked = PVEGame.get_user_field(session_id, "score_ranked")
+            if score_ranked is not None:
+                score_ranked = score_ranked[0]
+            else:
+                score_ranked = 0
+            new_ranked = PVEGame.get_new_ranked(score_ranked, outcome)
+            print(f"new_ranked = {new_ranked}")
+            PVEGame.set_user_field(session_id, "score_ranked", new_ranked)
+
 
     async def disconnect(self, sid: str) -> None:
         outcome = self.board.outcome()
@@ -136,6 +167,8 @@ class PVEGame(Game):
             await self.disconnect_daily(sid, outcome)
         elif self.type == GameType.WEEKLY:
             await self.disconnect_weekly(sid, outcome)
+        elif self.type == GameType.RANKED:
+            await self.disconnect_ranked(sid, outcome)
         await self.bot.quit()
         if sid in Game.games:
             del Game.games[sid]
