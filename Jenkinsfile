@@ -52,10 +52,13 @@ pipeline {
 					branch "dev-game"
 				}
 			}
+            agent {
+                docker { image 'python3:3' }
+            }
             steps {
                 dir('code/game/') {
                     // Add your Python testing commands here
-                    sh 'pip install -r ../../requirements.txt'
+                    sh 'pip install -r requirements.txt'
                     sh 'cd test/unit'
                     sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
