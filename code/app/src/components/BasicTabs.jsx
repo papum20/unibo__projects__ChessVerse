@@ -2,6 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { CloseButton, Row, Col } from "react-bootstrap";
 import { Tabs, Tab, Box } from "@mui/material";
+import "../styles/BasicTabs.css";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -76,21 +77,7 @@ export default function BasicTabs(props) {
       </Tabs>
 
       <div style={{ backgroundColor: "rgb(150, 111, 51)", width: "95vw" }}>
-        {!Array.isArray(props.data) ? (
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <span
-              style={{
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "22px",
-              }}
-            >
-              {JSON.stringify(props.data)}
-              <br />
-              No data available. Play and try again!
-            </span>
-          </div>
-        ) : (
+        
           <>
             <TabPanel value={value} index={0}>
               <Row style={{ marginBottom: "20px" }}>
@@ -108,19 +95,21 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              {props.data.map((el, i) => (
+              <div style={{overflow: "auto"}}>
+              {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
                   </Col>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
-                    <span>{el.minMoves}</span>
+                    <span>{el.moves_count}</span>
                   </Col>
                   <Col
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              ))}
+              )}
+              </div>
             </TabPanel>
             <TabPanel value={value} index={1}>
               <Row style={{ marginBottom: "20px" }}>
@@ -138,19 +127,21 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              {props.data.map((el, i) => (
+              <div style={{overflow: "auto"}}>
+              {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
                   </Col>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
-                    <span>{el.minMoves}</span>
+                    <span>{el.moves_count}</span>
                   </Col>
                   <Col
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              ))}
+              )}
+              </div>
             </TabPanel>
             <TabPanel value={value} index={2}>
               <Row style={{ marginBottom: "20px" }}>
@@ -168,19 +159,21 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              {props.data.map((el, i) => (
+              <div style={{overflow: "auto"}}>
+              {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
                   </Col>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
-                    <span>{el.rank}</span>
+                    <span>{el.score_ranked}</span>
                   </Col>
                   <Col
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              ))}
+              )}
+              </div>
             </TabPanel>
             <TabPanel value={value} index={3}>
               <Row style={{ marginBottom: "20px" }}>
@@ -198,22 +191,24 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              {props.data.map((el, i) => (
+              <div style={{overflow: "auto"}}>
+              {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
                   </Col>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
-                    <span>{el.elo}</span>
+                    <span>{el.EloReallyBadChess}</span>
                   </Col>
                   <Col
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              ))}
+              )}
+              </div>
             </TabPanel>
           </>
-        )}
+        
       </div>
     </Box>
   );

@@ -21,24 +21,21 @@ function Scores() {
   }
 
   const getCurrentLeaderboard = async () => {
-    let leaderboard;
-    console.log(focus)
     if (focus === "daily board") {
-      leaderboard = await fetchLeaderboard(API.dailyLeaderboard.endpoint);
+      setData((await fetchLeaderboard(API.dailyLeaderboard.endpoint)).daily_leaderboard);
     } else if (focus === "weekly challenge") {
-      leaderboard = await fetchLeaderboard(API.weeklyLeaderboard.endpoint);
+      setData((await fetchLeaderboard(API.weeklyLeaderboard.endpoint)).weekly_leaderboard);
     } else if (focus === "ranked") {
-      leaderboard = await fetchLeaderboard(API.rankedLeaderboard.endpoint);
+      //setData(await fetchLeaderboard(API.rankedLeaderboard.endpoint))
     } else {
-      leaderboard = await fetchLeaderboard(API.multiplayerLeaderboard.endpoint);
+      setData((await fetchLeaderboard(API.multiplayerLeaderboard.endpoint)).multiplayer_leaderboard)
     }
-    console.log(leaderboard)
-    setData(leaderboard);
   }
 
   useEffect(() => {
     getCurrentLeaderboard();
   }, [focus]);
+
 
   return (
     <>

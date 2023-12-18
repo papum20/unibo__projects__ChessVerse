@@ -118,9 +118,9 @@ function LoginOrSignupCard(props) {
           {!isLogin && (
             <>
                 <FloatingLabel style={{marginTop: "20px"}} controlId="elo" label="Elo ReallyBadChess">
-                  <Form.Select aria-label="elo" {...register("eloReallyBadChess", { required: true })}>
+                  <Form.Select  aria-label="elo" {...register("eloReallyBadChess", { required: true })}>
                     <option disabled>choose your chess level</option>
-                    <option value={ELO_LEVEL[0]} selected>new to chess</option>
+                    <option value={ELO_LEVEL[0]} defaultValue >new to chess</option>
                     <option value={ELO_LEVEL[1]}>beginner</option>
                     <option value={ELO_LEVEL[2]}>intermediate</option>
                     <option value={ELO_LEVEL[3]}>advanced</option>
