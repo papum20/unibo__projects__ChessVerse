@@ -7,13 +7,18 @@ services:
       context: ./code/database/
       dockerfile: Dockerfile
     ports:
-      - "3306:3306"
+      - '3306:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_ROOT_PASSWORD: root
     volumes:
-      - "./db_data:/var/lib/mysql"
+      - './db_data:/var/lib/mysql'
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - '-h'
+        - localhost
       timeout: 5s
       retries: 160
 
@@ -34,11 +39,11 @@ services:
       - DATABASE_USER=root
       - DATABASE_PASSWORD=root
     ports:
-      - "8080:8080"
+      - '8080:8080'
     secrets:
-      - game_cert 
-      - game_priv
-        
+      - ssl_cert
+      - ssl_priv
+
   django:
     depends_on:
       mysql:
@@ -56,10 +61,10 @@ services:
       - DATABASE_USER=root
       - DATABASE_PASSWORD=root
     ports:
-      - "8000:8000"
+      - '8000:8000'
     secrets:
-      - api_cert
-      - api_priv
+      - ssl_cert
+      - ssl_priv
 
   app:
     container_name: app
@@ -69,17 +74,17 @@ services:
       dockerfile: Dockerfile
     env_file: ./env/app.env
     ports:
-      - "3000:3000"
+      - '3000:3000'
+    secrets:
+      - ssl_cert
+      - ssl_priv
+ 
 
 secrets:
-  game_cert:
-    file: /etc/ssl/www/certificate.crt
-  game_priv:
-    file: /etc/ssl/www/private.key
-  api_cert:
-    file: /etc/ssl/www/certificate.crt
-  api_priv:
-    file: /etc/ssl/www/private.key
+  ssl_cert:
+    file: /etc/letsencrypt/live/chessverse.cloud-0003/fullchain.pem
+  ssl_priv:
+    file: /etc/letsencrypt/live/chessverse.cloud-0003/privkey.pem
 
 networks:
   default:

@@ -73,14 +73,15 @@ export async function signout() {
 }
 
 export async function addGuest() {
-	console.log(SERVER_ADDR);
         const response = await fetch(joinPaths(SERVER_ADDR, API.addGuest.endpoint), {method: API.addGuest.method, headers: { "Content-Type": "application/json" }, body: {}});
         if(response.ok) {
                 const json = await response.json();
                 return json.guest_nickname;
         } 
-        else
+        else{
                 toast.error(`error`, {className: "toast-message"});
+
+	}
 
 }
 

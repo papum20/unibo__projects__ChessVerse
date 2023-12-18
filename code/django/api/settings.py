@@ -47,6 +47,7 @@ SECRET_KEY = 'django-insecure-5edbub374@ktlft1dupti2t*74ri&86l^hz9h-=-qeomtf#ya5
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env == "development"
+DEBUG = True
 
 ADDRESS = '0.0.0.0'
 
@@ -72,8 +73,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

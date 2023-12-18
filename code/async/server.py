@@ -174,11 +174,7 @@ async def main():
     await runner.setup()
 
     port = os.environ.get("PORT", 8080)
-    ssl_context = None
-    if os.environ.get("ENV") == "production":
-        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(certfile="/run/secrets/game_cert", keyfile="/run/secrets/game_priv")
-    site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
+    site = aiohttp.web.TCPSite(runner, "0.0.0.0", port)
     
     
     await site.start()
