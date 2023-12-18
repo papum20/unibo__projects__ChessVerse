@@ -53,7 +53,9 @@ pipeline {
 				}
 			}
             agent {
-                docker { image 'python3:3' }
+                docker {
+                    image 'python:3'
+                }
             }
             steps {
                 dir('code/game/') {
