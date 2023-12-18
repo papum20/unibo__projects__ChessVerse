@@ -21,7 +21,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    container_name: game 
+    container_name: game
     restart: always
     build:
       context: ./code/game
@@ -31,14 +31,14 @@ services:
     volumes:
       - game-python-deps:/usr/src/deps
     secrets:
-      - game_cert 
-      - game_priv
-        
+      - ssl_cert
+      - ssl_priv
+
   api:
     depends_on:
       mysql:
         condition: service_healthy
-    container_name: api 
+    container_name: api
     restart: always
     build:
       context: ./code/api
@@ -48,8 +48,8 @@ services:
     volumes:
       - api-python-deps:/usr/src/deps
     secrets:
-      - api_cert
-      - api_priv
+      - ssl_cert
+      - ssl_priv
 
   app:
     container_name: app
@@ -62,16 +62,16 @@ services:
       - app-node-deps:/usr/src/deps
     ports:
       - "3000:3000"
+    secrets:
+      - ssl_cert
+      - ssl_priv
+
 
 secrets:
-  game_cert:
-    file: /etc/ssl/www/certificate.crt
-  game_priv:
-    file: /etc/ssl/www/private.key
-  api_cert:
-    file: /etc/ssl/www/certificate.crt
-  api_priv:
-    file: /etc/ssl/www/private.key
+  ssl_cert:
+    file: /etc/letsencrypt/live/chessverse.cloud-0003/fullchain.pem
+  ssl_priv:
+    file: /etc/letsencrypt/live/chessverse.cloud-0003/privkey.pem
 
 networks:
   default:

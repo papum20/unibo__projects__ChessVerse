@@ -21,8 +21,8 @@ COPY . .
 
 # Configurazione ambiente
 ENV VITE_NODE_ENV production
-ENV VITE_GAME_HOST https://www.chessverse.cloud:8080
-ENV VITE_API_HOST https://www.chessverse.cloud:8000
+ENV VITE_GAME_HOST https://game.chessverse.cloud
+ENV VITE_API_HOST https://api.chessverse.cloud
 ENV VITE_APP_HOST https://www.chessverse.cloud
 
 # Costruisci l'applicazione

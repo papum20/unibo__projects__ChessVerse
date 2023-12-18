@@ -16,7 +16,6 @@ import os
 env = os.environ.get("ENV", "development")
 if env == "development":
     from dotenv import load_dotenv
-
     env_file = f".env.{env}"
     load_dotenv(dotenv_path=env_file)
 
@@ -53,7 +52,7 @@ ADDRESS = "0.0.0.0"
 
 
 # Application definition
-
+#TODO togliere sslserver
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
