@@ -26,7 +26,7 @@ function Scores() {
     } else if (focus === "weekly challenge") {
       setData((await fetchLeaderboard(API.weeklyLeaderboard.endpoint)).weekly_leaderboard);
     } else if (focus === "ranked") {
-      //setData(await fetchLeaderboard(API.rankedLeaderboard.endpoint))
+      setData((await fetchLeaderboard(API.rankedLeaderboard.endpoint)).ranked_leaderboard)
     } else {
       setData((await fetchLeaderboard(API.multiplayerLeaderboard.endpoint)).multiplayer_leaderboard)
     }
