@@ -36,10 +36,10 @@ pipeline {
 				}
 			}
             steps {
-                dir('code/django') {
+                dir('code/api/') {
                     // Add your Python testing commands here
                     sh 'pip install -r requirements.txt'
-                    sh 'python3.12 manage.py test backend.test"'
+                    sh 'python3.12 manage.py test'
                 }
             }
         }
