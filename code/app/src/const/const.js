@@ -19,6 +19,7 @@ export const RANKED_SCORE_WIN = 8;
 export const RANKED_SCORE_LOSS = 2;
 export const RANKED_SCORE_TIE = 0;
 export const ELO_LEVEL = [400,800,1200,1600,2000]
+export const MOBILEWIDTH = 600;
 /*
  * global vars (e.g. taken from env)
  */

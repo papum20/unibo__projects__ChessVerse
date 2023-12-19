@@ -1,3 +1,4 @@
+import math
 from typing import Optional, Tuple
 import chess
 from chess.engine import Limit, popen_uci
@@ -65,6 +66,7 @@ class PVEGame(Game):
             return
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid  # solo in PVE;
+            data = {"fen": Game.games[sid].fen}
             if seed is not None:
                 if type == GameType.DAILY:
                     Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
@@ -79,13 +81,14 @@ class PVEGame(Game):
                     else:
                         rank = 0
                     print(f"score_ranked = {rank}")
+                    data["rank"] = rank
                     Game.games[sid] = PVEGame(sid, rank, 1, -1, None, type)
                 else :
                     Game.games[sid] = PVEGame(
                         sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
                     )
             await Game.games[sid].instantiate_bot()
-            await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
+            await Game.sio.emit("config", data, room=sid)
         else:
             await Game.sio.emit(
                 "error", {"cause": "SID already used", "fatal": True}, room=sid
@@ -101,7 +104,7 @@ class PVEGame(Game):
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
                 (
                     current_username,
-                    self.current.move_count,
+                    math.floor(self.current.move_count/2),
                     date.today(),
                     "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
                     attempts+1,
@@ -114,7 +117,7 @@ class PVEGame(Game):
                 SET moves_count = %s, attempts = attempts + 1, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today(),)
+                (math.floor(self.current.move_count/2), "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today(),)
             )
 
     async def disconnect_weekly(self, sid: str, outcome: chess.Outcome) -> None:
@@ -132,7 +135,7 @@ class PVEGame(Game):
                 "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
                 (
                     current_username,
-                    self.current.move_count,
+                    math.floor(self.current.move_count/2),
                     date.today(),
                     "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
                 ),
@@ -144,7 +147,7 @@ class PVEGame(Game):
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today()),
+                (math.floor(self.current.move_count/2), "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today()),
             )
     
     async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):

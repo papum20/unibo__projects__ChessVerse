@@ -363,8 +363,8 @@ function Board(props) {
             promotionToSquare={moveTo}
             showPromotionDialog={showPromotionDialog}
             boardWidth={`${
-              props.width / 2 > props.height - 180
-                ? props.height - 180
+              props.width < 600
+                ? props.width/10*9
                 : props.width / 2
             }`}
             boardOrientation={props.mode === PVE ? "white" : props.color}
