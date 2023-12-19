@@ -52,7 +52,6 @@ ADDRESS = "0.0.0.0"
 
 
 # Application definition
-#TODO togliere sslserver
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -61,7 +60,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "sslserver",
     "backend",
     "rest_framework",
     "rest_framework.authtoken",

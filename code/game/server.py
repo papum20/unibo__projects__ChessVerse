@@ -71,7 +71,7 @@ class GameHandler:
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
         print("start", data["type"])
-        if "session_id" in data.keys():
+        if "session_id" in data.keys() and data["session_id"] != 'undefined':
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
             await Game.sio.emit(
