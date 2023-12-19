@@ -61,12 +61,12 @@ class RegisteredUsersModelTest(TestCase):
 
     def test_game_draw_label(self):
         user = RegisteredUsers.objects.get(username="test_user")
-        field_label = user._meta.get_field("GameDraw").verbose_name
-        self.assertEqual(field_label, "GameDraw")
+        field_label = user._meta.get_field("GamesDrawn").verbose_name
+        self.assertEqual(field_label, "GamesDrawn")
 
     def test_game_draw_default(self):
         user = RegisteredUsers.objects.get(username="test_user")
-        default = user._meta.get_field("GameDraw").default
+        default = user._meta.get_field("GamesDrawn").default
         self.assertEqual(default, 0)
 
     """test_games_lost"""
