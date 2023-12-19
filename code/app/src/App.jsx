@@ -103,6 +103,7 @@ function App() {
               youAreLogged={youAreLogged}
               setEnemyUsername={setEnemyUsername}
               setElo={setElo}
+              setRank={setRank}
             />
           }
         />

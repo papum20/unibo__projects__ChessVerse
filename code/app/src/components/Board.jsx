@@ -365,7 +365,7 @@ function Board(props) {
             boardWidth={`${
               props.width < 600
                 ? props.width/10*9
-                : props.width / 2
+                : props.width / 2.7
             }`}
             boardOrientation={props.mode === PVE ? "white" : props.color}
           />

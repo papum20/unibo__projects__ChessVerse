@@ -68,26 +68,28 @@ function Game({
   const [timerOut, setTimerOut] = useState(false);
 
   useEffect(() => {
-    if (turn === null) return;
+    if (turn !== null && !isLoadingGame) {
+      const interval = 100;
 
-    const interval = 100;
+      if (timerInterval !== null) clearInterval(timerInterval);
+      setTimerInterval(
+        setInterval(() => {
+          setTimers((prevTime) => {
+            const updatedTime = [...prevTime];
+            updatedTime[Number(game.turn() === "b")] -= interval / 1000;
+            return updatedTime;
+          });
+        }, interval)
+      );
+    }
 
-    if (timerInterval !== null) clearInterval(timerInterval);
-    setTimerInterval(
-      setInterval(() => {
-        setTimers((prevTime) => {
-          const updatedTime = [...prevTime];
-          updatedTime[Number(game.turn() === "b")] -= interval / 1000;
-          return updatedTime;
-        });
-      }, interval)
-    );
+    
 
     return () => {
       clearInterval(timerInterval);
       setTimerInterval(null);
     };
-  }, [turn]);
+  }, [turn, isLoadingGame]);
 
   var location = useLocation();
 
@@ -316,6 +318,30 @@ function Game({
                 Time has run out!
               </p>
             )}
+            {mode===RANKED && (
+              <p
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                  marginTop: "20px",
+                  fontSize: "22px",
+                }}
+              >
+                {modalType === "gameover" ? 
+                - 2
+                :
+                modalType === "won" ?
+                + 8
+                : 
+                + 0
+                }
+                <FaCrown
+                    style={{ marginTop: "-4px", color: "yellow", marginRight: "5px" }}
+                    size="25"
+                  />
+              </p>
+            )}
             <div
               style={{
                 display: "flex",
@@ -488,6 +514,7 @@ function Game({
             </Row>
           </div>
           <Row>
+            {!isLoadingGame &&
             <Col>
               <div style={{ marginTop: "40px", marginLeft: "150px", marginBottom: "10px" }}>
                 <span style={{ fontWeight: "bold" }}>
@@ -531,6 +558,7 @@ function Game({
                 )}
               </div>
             </Col>
+            }
           </Row>
           <Row>
             <Col>
@@ -578,7 +606,7 @@ function Game({
                   <Card
                     style={{
                       backgroundColor: "#b6884e",
-                      marginTop: "120px",
+                      marginTop: "4vh",
                       marginRight: "80px",
                       marginLeft: "-50px",
                     }}
@@ -712,12 +740,13 @@ function Game({
             }
           </Row>
           <Row>
+            {!isLoadingGame &&
             <Col
               style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: "20px",
-                marginLeft: `${width < MOBILEWIDTH ? "" : "-140px"}`,
+                marginTop: "10px",
+                marginRight: `${width < MOBILEWIDTH ? "" : "25vw"}`,
               }}
             >
               <span style={{ marginRight: "15px", fontWeight: "bold" }}>
@@ -774,6 +803,7 @@ function Game({
                 </>
               )}
             </Col>
+            }
           </Row>
         </ThemeProvider>
       </div>
@@ -795,6 +825,7 @@ Game.propTypes = {
   user: PropTypes.string,
   elo: PropTypes.array,
   enemyUsername: PropTypes.string,
+  rank: PropTypes.number,
 };
 
 export default Game;

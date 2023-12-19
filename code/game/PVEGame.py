@@ -66,7 +66,7 @@ class PVEGame(Game):
             return
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid  # solo in PVE;
-            data = {"fen": Game.games[sid].fen}
+            rank = -1
             if seed is not None:
                 if type == GameType.DAILY:
                     Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
@@ -81,14 +81,13 @@ class PVEGame(Game):
                     else:
                         rank = 0
                     print(f"score_ranked = {rank}")
-                    data["rank"] = rank
                     Game.games[sid] = PVEGame(sid, rank, 1, -1, None, type)
                 else :
                     Game.games[sid] = PVEGame(
                         sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
                     )
             await Game.games[sid].instantiate_bot()
-            await Game.sio.emit("config", data, room=sid)
+            await Game.sio.emit("config", {"fen": Game.games[sid].fen, "rank": rank}, room=sid)
         else:
             await Game.sio.emit(
                 "error", {"cause": "SID already used", "fatal": True}, room=sid
