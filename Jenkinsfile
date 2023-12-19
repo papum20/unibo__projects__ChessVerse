@@ -54,9 +54,10 @@ pipeline {
 			}
             steps {
                 dir('code/game/') {
-                    // Add your Python testing commands here
                     sh 'pip3 install -r requirements.txt'
-                    sh 'cd test/unit'
+                }
+                dir('code/game/test/unit') {
+                    // to fix
                     sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
             }
