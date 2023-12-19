@@ -156,8 +156,9 @@ class Game(ABC):
     @classmethod
     async def login(cls, session_id: str, sid: str) -> None:
         print(f"faccio login {session_id, sid}")
-        user_info = Game.execute_query("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",(session_id,))[0]
-        if user_info is not None:
+        users_info = Game.execute_query("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",(session_id,))
+        if len(users_info) > 0:
+            user_info = users_info[0]
             await Game.sio.save_session(
                 sid,
                 {
