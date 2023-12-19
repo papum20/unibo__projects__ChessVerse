@@ -77,7 +77,6 @@ function Start({
     e.preventDefault();
     if (botDiff === 0) setBotDiff(MIN_BOT_DIFF);
     setShowModal(false);
-    setIsLoadingGame(true);
     const host = import.meta.env.VITE_GAME_HOST ?? "http://localhost:8080";
     const secure = import.meta.env.VITE_NODE_ENV == "production";
     const options = { transports: ["websocket"], secure };
@@ -104,6 +103,7 @@ function Start({
         tmpData.type = mode; //ho messo sta riga perche' mi dava dei bug
 
         socket.emit("start", tmpData);
+        setIsLoadingGame(true);
       });
       navigator("../game", { relative: "path" });
     }
@@ -398,7 +398,6 @@ function Start({
                       ) {
                         setMode(DAILY);
                         setBotDiff(MIN_BOT_DIFF);
-                        setIsLoadingGame(true);
                         const host = import.meta.env.VITE_GAME_HOST;
                         const secure =
                           import.meta.env.VITE_NODE_ENV == "production";
@@ -444,7 +443,6 @@ function Start({
                     onClick={() => {
                       setMode(WEEKLY);
                       setBotDiff(MIN_BOT_DIFF);
-                      setIsLoadingGame(true);
                       const host = import.meta.env.VITE_GAME_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
@@ -480,7 +478,6 @@ function Start({
                     onClick={() => {
                       setMode(RANKED);
                       setBotDiff(MIN_BOT_DIFF);
-                      setIsLoadingGame(true);
                       const host = import.meta.env.VITE_GAME_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";

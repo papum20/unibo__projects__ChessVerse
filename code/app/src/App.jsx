@@ -111,7 +111,6 @@ function App() {
             <Game
               data={data}
               isLoadingGame={isLoadingGame}
-              setIsLoadingGame={setIsLoadingGame}
               socket={socket}
               setSocket={setSocket}
               mode={mode}

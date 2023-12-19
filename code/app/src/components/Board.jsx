@@ -14,7 +14,6 @@ function Board(props) {
   const [optionSquares, setOptionSquares] = useState({});
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
-  const [hasGameLoaded, setHasGameLoaded] = useState(false);
 
   function getUndoMoves(moves) {
     var counter = 0;
@@ -182,14 +181,12 @@ function Board(props) {
       safeGameMutate((game) => {
         props.game.load(props.startFen);
       });
-      setHasGameLoaded(true);
     }
   }, [props.startFen]);
 
   useEffect(() => {
     async function wait() {
       await new Promise((resolve) => setTimeout(resolve, 600));
-      if (props.game) props.setIsLoadingGame(false);
     }
     if (!!props.game) wait();
   }, [props.game]);
@@ -300,7 +297,7 @@ function Board(props) {
 
   return (
     <>
-      {!hasGameLoaded ? (
+      {props.isLoadingGame ? (
         <>
           {props.mode === PVP ? (
             <div data-testid="Loading">

@@ -5,6 +5,11 @@ import random
 from const import TIME_OPTIONS, MIN_RANK, MAX_RANK
 import chess
 
+def get_prop_safe(obj, prop, default=None):
+    try:
+        return obj[prop]
+    except KeyError:
+        return default
 
 class PVPGame(Game):
     waiting_list: dict[str, list[list[str]]] = {
@@ -60,7 +65,8 @@ class PVPGame(Game):
             session = await Game.sio.get_session(sid)
             found_guest = None
             for waiting in Game.waiting_list[time][index]:
-                if abs(waiting["elo"] - session["elo"]) < 100:
+                elo = get_prop_safe(session, "elo", 1000)
+                if abs(waiting["elo"] - elo) < 100:
                     found_guest = waiting
                     break
             if found_guest is not None:
@@ -77,14 +83,16 @@ class PVPGame(Game):
                 Game.sid_to_id[players[1]] = game_id
                 current = await Game.sio.get_session(players[0])
                 opponent = await Game.sio.get_session(players[1])
+                usernames = [get_prop_safe(obj, "username", "Guest") for obj in [current, opponent]]
+                elos = [get_prop_safe(obj, "elo", 1000) for obj in [current, opponent]]
                 await Game.sio.emit(
                     "config",
                     {
                         "fen": Game.games[game_id].fen,
                         "id": game_id,
                         "color": "white",
-                        "elo": [current["elo"], opponent["elo"]],
-                        "username": opponent["username"],
+                        "elo": elos,
+                        "username": usernames[1]
                     },
                     room=players[0],
                 )
@@ -94,15 +102,16 @@ class PVPGame(Game):
                         "fen": Game.games[game_id].fen,
                         "id": game_id,
                         "color": "black",
-                        "elo": [current["elo"], opponent["elo"]],
-                        "username": current["username"],
+                        "elo": elos,
+                        "username": usernames[0]
                     },
                     room=players[1],
                 )
             else:
                 session = await Game.sio.get_session(sid)
+                elo = get_prop_safe(session, "elo", 1000)
                 Game.waiting_list[time][index].append(
-                    {"sid": sid, "rank": rank, "elo": session["elo"]}
+                    {"sid": sid, "rank": rank, "elo": elo}
                 )
                 # serve per eliminarlo dalla entry
                 Game.sid_to_id[sid] = {"time": time, "index": index}
@@ -110,8 +119,9 @@ class PVPGame(Game):
             # togliere l'id dal frontend
         else:
             session = await Game.sio.get_session(sid)
+            elo = get_prop_safe(session, "elo", 1000)
             Game.waiting_list[time][index].append(
-                {"sid": sid, "rank": rank, "elo": session["elo"]}
+                {"sid": sid, "rank": rank, "elo": elo}
             )
             # serve per eliminarlo dalla entry
             Game.sid_to_id[sid] = {"time": time, "index": index}

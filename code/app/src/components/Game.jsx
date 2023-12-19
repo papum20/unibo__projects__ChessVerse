@@ -28,7 +28,6 @@ import { FaCrown } from "react-icons/fa";
 function Game({
   gameTime,
   isLoadingGame,
-  setIsLoadingGame,
   socket,
   setSocket,
   data,
@@ -216,7 +215,6 @@ function Game({
                       socket.emit("resign", { type: mode, id: roomId });
                       setSocket(null);
                       setGame(null);
-                      setIsLoadingGame(true);
                       setModalType(null);
                     }}
                     variant="contained"
@@ -425,7 +423,6 @@ function Game({
                     setMoves={setMoves}
                     data={data}
                     isLoadingGame={isLoadingGame}
-                    setIsLoadingGame={setIsLoadingGame}
                     socket={socket}
                     setSocket={setSocket}
                     mode={mode}

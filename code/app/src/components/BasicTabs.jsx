@@ -95,7 +95,7 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
@@ -127,7 +127,7 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
@@ -159,7 +159,7 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
@@ -191,7 +191,7 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
