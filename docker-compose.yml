@@ -10,8 +10,6 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "root"
-    volumes:
-      - "./db_data:/var/lib/mysql"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
@@ -28,8 +26,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    volumes:
-      - game-python-deps:/usr/src/deps
     secrets:
       - ssl_cert
       - ssl_priv
@@ -45,11 +41,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      - api-python-deps:/usr/src/deps
-    secrets:
-      - ssl_cert
-      - ssl_priv
 
   app:
     container_name: app
@@ -58,27 +49,19 @@ services:
       context: ./code/app
       dockerfile: Dockerfile
     env_file: ./env/app.env
-    volumes:
-      - app-node-deps:/usr/src/deps
     ports:
       - "3000:3000"
-    secrets:
-      - ssl_cert
-      - ssl_priv
 
-
-secrets:
-  ssl_cert:
-    file: /etc/letsencrypt/live/chessverse.cloud-0003/fullchain.pem
-  ssl_priv:
-    file: /etc/letsencrypt/live/chessverse.cloud-0003/privkey.pem
 
 networks:
   default:
     name: chessverse
 
 volumes:
-  game-python-deps:
-  api-python-deps:
-  app-node-deps:
   db_data:
+
+secrets:
+  ssl_cert:
+    file: /etc/letsencrypt/live/chessverse.cloud-0003/fullchain.pem
+  ssl_priv:
+    file: /etc/letsencrypt/live/chessverse.cloud-0003/privkey.pem
