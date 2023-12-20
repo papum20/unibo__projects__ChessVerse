@@ -123,7 +123,7 @@ stage('Create DB') {
                 }
                 dir('code/game/test/unit') {
                     // to fix
-                    sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
+                    sh 'python3.12 -m unittest test_*'
                 }
             }
         }
