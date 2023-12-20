@@ -38,7 +38,7 @@ pipeline {
                 dir('code/api') {
                     // Add your Python testing commands here
                     sh 'pip3 install -r requirements.txt'
-                    sh 'python3.12 manage.py test backend.test"'
+                    sh 'python3.12 manage.py test"'
                 }
             }
         }
