@@ -25,6 +25,7 @@ DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
@@ -35,6 +36,7 @@ DATABASES = {
         "PORT": DATABASE_PORT,
     }
 }
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

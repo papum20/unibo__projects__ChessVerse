@@ -18,6 +18,7 @@ services:
        - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - cas-network
+      - chessverse 
   game:
       depends_on:
         mysql:
@@ -29,6 +30,8 @@ services:
         dockerfile: Dockerfile
       ports:
         - "8080:8080"
+      networks:
+        - chessverse 
   api:
       depends_on:
         mysql:
@@ -40,6 +43,8 @@ services:
         dockerfile: Dockerfile
       ports:
         - "8000:8000"
+      networks:
+        - chessverse 
   app:
       container_name: app
       restart: always
@@ -49,7 +54,11 @@ services:
       env_file: ../env/app.env
       ports:
         - "3000:3000"
+      networks:
+        - chessverse 
 
 networks:
   cas-network:
     external: true
+  default:
+    name: chessverse
