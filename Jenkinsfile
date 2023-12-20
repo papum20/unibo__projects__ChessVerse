@@ -42,7 +42,7 @@ stage('Install MySQL Client') {
             steps {
                 script {
                     // Esegui il comando di installazione di mysql-client
-                    sh 'sudo apt-get update && sudo apt-get install -y mysql-client'
+                    sh ' apt-get update &&  apt-get install -y mysql-client'
                 }
             }
         }
