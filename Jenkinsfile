@@ -35,8 +35,16 @@ pipeline {
 
         stage('Migrate DB') {
             steps {
-                sh 'python3.12 manage.py makemigrations'
-                sh 'python3.12 manage.py migrate'
+                when {
+				anyOf {
+					branch "main"
+				}
+			}
+                dir('code/api'){
+                    sh 'pip3 install -r requirements.txt'
+                    sh 'python3.12 manage.py makemigrations'
+                    sh 'python3.12 manage.py migrate'
+                }
             }
         }
 
@@ -69,7 +77,6 @@ pipeline {
             steps {
                 dir('code/api') {
                     // Add your Python testing commands here
-                    sh 'pip3 install -r requirements.txt'
                     sh 'python3.12 manage.py test'
                 }
             }
