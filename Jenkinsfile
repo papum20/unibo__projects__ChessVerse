@@ -36,6 +36,9 @@ pipeline {
             done
             '''
             sh '''
+            docker exec -i mysql mysql -uroot -proot --execute="INSERT INTO mysql.user (Host, User) VALUES ('%', 'root'); ALTER USER 'root'@'%' IDENTIFIED BY 'root'; GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+            '''
+            sh '''
             docker exec -i mysql mysql -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
             '''
         }
