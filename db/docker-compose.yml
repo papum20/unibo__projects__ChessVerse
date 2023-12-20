@@ -16,3 +16,8 @@ services:
       retries: 160
     volumes:
        - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - cas-network
+networks:
+  cas-network:
+    external: true
