@@ -91,23 +91,36 @@ class PVEGame(Game):
                 "error", {"cause": "SID already used", "fatal": True}, room=sid
             )
 
+    @classmethod
+    def current_week_and_year(cls):
+        # Get the current date
+        current_date = datetime.now()
+
+        # Extract the current week number and year
+        week_number = current_date.isocalendar()[1]
+        year = current_date.year
+
+        # Format as WWYYYY
+        return f"{week_number:02d}{year}"
+
+    @classmethod
+    def current_day_month_year(cls):
+        # Get the current date
+        current_date = datetime.now()
+
+        # Extract the day, month, and year
+        day = current_date.day
+        month = current_date.month
+        year = current_date.year
+
+        # Format as DDMMYYYY
+        return f"{day:02d}{month:02d}{year}"
+
     async def disconnect_daily(self, sid: str, outcome: chess.Outcome) -> None:
-        def current_day_month_year():
-            # Get the current date
-            current_date = datetime.now()
-
-            # Extract the day, month, and year
-            day = current_date.day
-            month = current_date.month
-            year = current_date.year
-
-            # Format as DDMMYYYY
-            return f"{day:02d}{month:02d}{year}"
-
         # get user information based on the sessionId
         current_username = await Game.get_username(sid)
         attempts = PVEGame.get_attempts(current_username)
-        date = current_day_month_year()
+        date = PVEGame.current_day_month_year()
         if attempts == 0:
             Game.execute_query(
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
@@ -130,19 +143,9 @@ class PVEGame(Game):
             )
 
     async def disconnect_weekly(self, sid: str, outcome: chess.Outcome) -> None:
-        def current_week_and_year():
-            # Get the current date
-            current_date = datetime.now()
-
-            # Extract the current week number and year
-            week_number = current_date.isocalendar()[1]
-            year = current_date.year
-
-            # Format as WWYYYY
-            return f"{week_number:02d}{year}"
         # Insert into weekly leaderboard
         current_username = await Game.get_username(sid)
-        weekno = current_week_and_year()
+        weekno = PVEGame.current_week_and_year()
         # check if the current user has already played the weekly challenge
         result = Game.execute_query(
             "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s AND challenge_date = %s",
@@ -202,7 +205,7 @@ class PVEGame(Game):
     
     @classmethod
     def get_attempts(cls, username: str):
-        result = Game.execute_query("SELECT attempts FROM backend_dailyleaderboard WHERE username = %s AND challenge_date = %s", (username, date.today()),)
+        result = Game.execute_query("SELECT attempts FROM backend_dailyleaderboard WHERE username = %s AND challenge_date = %s", (username, PVEGame.current_day_month_year()),)
         print(result, username, date.today())
         return 0 if result is None or len(result) <= 0 else result[0][0]
 

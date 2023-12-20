@@ -106,7 +106,6 @@ class Game(ABC):
 		:param session_id: session id field
 		:param rank_type: game type, form const.RANKS
 		:param new_rank: new_rank
-		
 		:return: True if success, False otherwise
 		"""
 

@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from datetime import datetime, date
 import json
 
 from django.views.decorators.http import require_http_methods
@@ -198,6 +199,18 @@ MAX_DAILY_GAMES = 2
 
 # check if the user has already played the maximum number of games today
 def check_start_daily(request):
+    def current_day_month_year():
+        # Get the current date
+        current_date = datetime.now()
+
+        # Extract the day, month, and year
+        day = current_date.day
+        month = current_date.month
+        year = current_date.year
+
+        # Format as DDMMYYYY
+        return f"{day:02d}{month:02d}{year}"
+
     if request.method == "GET":
         # Usa request.GET.get per ottenere il parametro della query string
         username = request.GET.get("username")
@@ -210,7 +223,7 @@ def check_start_daily(request):
 
         try:
             daily_leaderboard = DailyLeaderboard.objects.filter(
-                challenge_date=date.today(), username=username
+                challenge_date=current_day_month_year(), username=username
             ).values("username", "attempts")
 
             if daily_leaderboard:
