@@ -39,14 +39,14 @@ stage('Setup DB') {
     }
 }
     stage('Check MySQL') {
-        steps {
-            script {
-                sh '''
-                docker exec -it mysql mysqladmin  --verbose --wait=30 -uroot -proot ping || exit 1
-                '''
-            }
+    steps {
+        script {
+            sh '''
+            mysqladmin --verbose --wait=30 -h mysql -uroot -proot ping || exit 1
+            '''
         }
     }
+}
         stage('Migrate DB') {
 
             steps {
