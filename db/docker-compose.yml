@@ -44,7 +44,7 @@ services:
       container_name: app
       restart: always
       build:
-        context: ./code/app
+        context: ../code/app
         dockerfile: Dockerfile
       env_file: ./env/app.env
       ports:
