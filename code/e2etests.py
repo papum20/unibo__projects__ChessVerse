@@ -106,7 +106,7 @@ class ChessverseE2ETest(unittest.TestCase):
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/signup')
     
     
-    def test_signout(self):
+    def test_signout_login(self):
         #checks if when the user signs out he is redirected to the main page
         self.driver.get('https://www.chessverse.cloud/login')
         wait = WebDriverWait(self.driver, 10)
@@ -123,6 +123,23 @@ class ChessverseE2ETest(unittest.TestCase):
         button = self.driver.find_element(By.ID, 'quit-button')
         self.driver.execute_script("arguments[0].click();", button)
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/')
+        session_id = self.driver.execute_script("return window.sessionStorage.getItem('session_id');")
+        self.assertEqual(session_id, "undefined")
+        
+    def test_signout_guest(self):
+        #checks if when the guest signs out he is redirected to the main page
+        self.driver.get('https://www.chessverse.cloud/')
+        wait = WebDriverWait(self.driver, 10)
+        #check if all elements are present
+        playAsGuest_button = wait.until(EC.presence_of_element_located((By.ID, 'play-as-guest')))
+        playAsGuest_button.click()
+        wait.until(EC.url_changes(self.driver.current_url))
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
+        wait = WebDriverWait(self.driver, 10)
+        button = self.driver.find_element(By.ID, 'quit-button')
+        self.driver.execute_script("arguments[0].click();", button)
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/')
+        
     
     
     def test_main_page_login(self):
