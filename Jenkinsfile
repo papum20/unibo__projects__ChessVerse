@@ -7,6 +7,15 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Cleanup previous DB') {
+            steps {
+                script {
+                    sh '''
+                    docker rm mysql
+                    '''
+                }
+            }
+        }
         stage('Setup DB') {
             steps {
                 script {
