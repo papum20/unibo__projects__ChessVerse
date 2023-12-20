@@ -145,15 +145,12 @@ stage('Create DB') {
 				}
 			}
             steps {
-                dir('code/app') {
-                    nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-						script {
-							def scannerHome = tool 'SonarScanner4'
-                            sh 'print("SonarQube Scanner Home: ${scannerHome}")'
-							withSonarQubeEnv("sonarqube") {
-								sh "${scannerHome}/bin/sonar-scanner"
-							}
-						}
+                nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
+                    script {
+                        def scannerHome = tool 'SonarScanner4'
+                        withSonarQubeEnv("sonarqube") {
+                            sh "${scannerHome}/bin/sonar-scanner"
+                        }
                     }
                 }
             }
