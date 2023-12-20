@@ -22,12 +22,15 @@ pipeline {
         stage('Setup DB') {
             steps {
                 script {
-                    dir('code/database') {
-                        sh '''
-                            docker build -t my-mysql Dockerfile
-                        '''
-                    }
-                    sh 'sleep 30'
+                    sh '''
+                    docker run --name mysql -e MYSQL_ROOT_HOST='%' -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:latest
+                    '''
+                   sh '''
+                    echo "Waiting for mysql to be ready..."
+                    while ! docker exec mysql mysqladmin ping -h localhost --silent; do
+                        sleep 1
+                    done
+                    '''
                     sh '''
                     docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
                     '''
