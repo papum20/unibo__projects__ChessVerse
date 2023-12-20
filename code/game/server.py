@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import logging
+
 logging.basicConfig(level=logging.INFO)
 import ssl
 import asyncio
@@ -14,6 +15,7 @@ from time import perf_counter
 import mysql.connector
 import datetime
 
+
 class GameHandler:
     def __init__(self):
         pass
@@ -27,7 +29,7 @@ class GameHandler:
                 return None
         return None
 
-    async def on_connect(self, sid):
+    async def on_connect(self, sid, _):
         print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
@@ -45,16 +47,18 @@ class GameHandler:
             else:
                 if game_id in Game.games:
                     await Game.games[game_id].disconnect(sid)
-    
-    def daily_seed():
+
+    @classmethod
+    def daily_seed(cls):
         today = datetime.date.today()
         year = today.year
         month = today.month
         day = today.day
         seed = year * 10000 + month * 100 + day
         return seed
-    
-    def weekly_seed():
+
+    @classmethod
+    def weekly_seed(cls):
         # Otteniamo la data corrente
         today = datetime.date.today()
         # Otteniamo il numero della settimana e l'anno
@@ -64,7 +68,7 @@ class GameHandler:
         seed = year * 100 + week_number
         return seed
 
-    async def on_start(self, sid, data): 
+    async def on_start(self, sid, data):
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
         print("start", sid)
@@ -78,14 +82,14 @@ class GameHandler:
             await PVEGame.start(sid, data)
         elif data["type"] == GameType.PVP:
             await PVPGame.start(sid, data)
-        #add new GameTypes Daily and Wekkly challenges
+        # add new GameTypes Daily and Wekkly challenges
         elif data["type"] == GameType.DAILY:
-            await PVEGame.start(sid, data, seed = daily_seed, type = GameType.DAILY)
+            await PVEGame.start(sid, data, seed=daily_seed, type=GameType.DAILY)
         elif data["type"] == GameType.WEEKLY:
-            await PVEGame.start(sid, data, seed = weekly_seed, type = GameType.WEEKLY)
+            await PVEGame.start(sid, data, seed=weekly_seed, type=GameType.WEEKLY)
         elif data["type"] == GameType.RANKED:
-            await PVEGame.start(sid, data, seed = None, type = GameType.RANKED)
-        #add new GameTypes Daily and Wekkly challenges
+            await PVEGame.start(sid, data, seed=None, type=GameType.RANKED)
+        # add new GameTypes Daily and Wekkly challenges
         else:
             await Game.sio.emit(
                 "error", {"cause": "Invalid type", "fatal": True}, room=sid
@@ -105,7 +109,7 @@ class GameHandler:
             return
         await game.move(sid, data)
 
-    async def on_resign(self, sid):
+    async def on_resign(self, sid, _):
         print("resign", sid)
         await self.on_disconnect(sid)
 
@@ -132,7 +136,7 @@ class GameHandler:
                 for player in Game.games[id].players:
                     if player.is_timed:
                         player_time = player.remaining_time - (
-                            perf_counter() - player.latest_timestamp
+                                perf_counter() - player.latest_timestamp
                         )
                         if player_time <= 0:
                             await Game.sio.emit("timeout", {}, room=player.sid)
@@ -140,6 +144,7 @@ class GameHandler:
                                 await Game.games[id].disconnect(player.sid, False)
                             else:
                                 await Game.games[id].disconnect(player.sid)
+
 
 async def main():
     env = os.environ.get("ENV", "development")
@@ -174,7 +179,6 @@ async def main():
     sio.on("resign", handler.on_resign)
     sio.on("pop", handler.on_pop)
 
-    
     runner = aiohttp.web.AppRunner(app)
     await runner.setup()
 
@@ -183,14 +187,13 @@ async def main():
     if os.environ.get("ENV") == "production":
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         ssl_context.load_cert_chain(
-                certfile="/run/secrets/ssl_cert",
-                keyfile="/run/secrets/ssl_priv",
+            certfile="/run/secrets/ssl_cert",
+            keyfile="/run/secrets/ssl_priv",
         )
     print(os.environ.get("ENV"))
-    #site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
+    # site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
     site = aiohttp.web.TCPSite(runner, "0.0.0.0", port)
-    
-    
+
     await site.start()
     print(f"Listening on 0.0.0.0:{port}")
     asyncio.create_task(handler.cleaner())
