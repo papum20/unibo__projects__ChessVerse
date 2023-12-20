@@ -58,6 +58,14 @@ Test are located at `code/api/backend/test/unit`.
 They can be executed from the folder `code/api` by running 
 `python3 manage.py test backend.test`. 
 
+
+### end-to-end tests
+Contenuti nel file e2etests.py in 'code/'.
+Possono essere eseguiti da code/ lanciando 'python e2etests.py'.
+Importante: i test ora usano Chrome e CromeDriver. Per eseguirli è necesssario scaricare chromedriver, se si vuole utilizzare
+un browser diverso da Chrome si deve cambiare questo: 'self.driver = webdriver.Chrome()' e scaricare i webdriver appropriati per il
+browser che si vuole utilizzare.
+
 ## branches
 
 The following branches are automatically tested:

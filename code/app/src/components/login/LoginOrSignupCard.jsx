@@ -141,7 +141,7 @@ function LoginOrSignupCard(props) {
             }}
           >
             <Button
-              id="buttonSubmit"
+              id={isLogin ? "Login" : "Sign Up"}
               className="mt-3"
               size="lg"
               type="submit"
@@ -153,8 +153,10 @@ function LoginOrSignupCard(props) {
         </Form>
 
         <span
+          id={isLogin
+            ? "don't-have-an-account?-sign-up"
+            : "already-have-an-account?-login"}
           size="lg"
-          id="buttonSwitchLoginSignup"
           type="submit"
           onClick={() => {
             isLogin
