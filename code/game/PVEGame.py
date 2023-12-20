@@ -103,7 +103,7 @@ class PVEGame(Game):
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
                 (
                     current_username,
-                    math.floor(self.current.move_count/2),
+                    self.current.move_count,
                     date.today(),
                     "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
                     attempts+1,
@@ -116,7 +116,7 @@ class PVEGame(Game):
                 SET moves_count = %s, attempts = attempts + 1, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (math.floor(self.current.move_count/2), "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today(),)
+                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today(),)
             )
 
     async def disconnect_weekly(self, sid: str, outcome: chess.Outcome) -> None:
@@ -134,7 +134,7 @@ class PVEGame(Game):
                 "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
                 (
                     current_username,
-                    math.floor(self.current.move_count/2),
+                    self.current.move_count,
                     date.today(),
                     "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
                 ),
@@ -146,11 +146,12 @@ class PVEGame(Game):
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (math.floor(self.current.move_count/2), "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today()),
+                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today()),
             )
     
     async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):
         session_id = await Game.get_session_id(sid)
+        print(session_id)
         if session_id is not None:
             score_ranked = PVEGame.get_user_field(session_id, "score_ranked")
             if score_ranked is not None:
