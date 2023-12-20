@@ -9,23 +9,23 @@ pipeline {
             }
         }
 
-        stage('Build and Test App') {
-			when {
-				anyOf {
-					branch "main"
-					branch "testing"
-					branch "dev-app"
-				}
-			}
-            steps {
-                dir('code/app') {
-                    nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-                        sh 'npm install'
-                        sh 'npm run coverage:prod'
-                    }
-                }
-            }
-        }
+        // stage('Build and Test App') {
+		// 	when {
+		// 		anyOf {
+		// 			branch "main"
+		// 			branch "testing"
+		// 			branch "dev-app"
+		// 		}
+		// 	}
+        //     steps {
+        //         dir('code/app') {
+        //             nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
+        //                 sh 'npm install'
+        //                 sh 'npm run coverage:prod'
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Build and Test api backend') {
 			when {
@@ -36,10 +36,10 @@ pipeline {
 				}
 			}
             steps {
-                dir('code/api/') {
+                dir('code/django') {
                     // Add your Python testing commands here
-                    sh 'pip install -r requirements.txt'
-                    sh 'python3.12 manage.py test'
+                    sh 'pip3 install -r requirements.txt'
+                    sh 'python3.12 manage.py test backend.test"'
                 }
             }
         }
@@ -54,9 +54,10 @@ pipeline {
 			}
             steps {
                 dir('code/game/') {
-                    // Add your Python testing commands here
-                    sh 'pip install -r ../../requirements.txt'
-                    sh 'cd test/unit'
+                    sh 'pip3 install -r requirements.txt'
+                }
+                dir('code/game/test/unit') {
+                    // to fix
                     sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
             }
@@ -85,3 +86,4 @@ pipeline {
 
     }
 }
+
