@@ -11,6 +11,7 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    docker stop mysql
                     docker rm mysql
                     '''
                 }
