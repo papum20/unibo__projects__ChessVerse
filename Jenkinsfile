@@ -19,15 +19,7 @@ pipeline {
                 chmod +x /usr/local/bin/docker-compose
             fi
             '''
-             sh '''
-            if ! command -v mysql &> /dev/null
-            then
-                echo "mysql could not be found"
-                echo "Installing mysql-server"
-                sudo apt-get update
-                sudo apt-get install -y mysql-server
-            fi
-            '''
+           
         }
     }
 }
@@ -45,7 +37,7 @@ stage('Setup DB') {
             docker-compose up -d
             '''
             sh '''
-            docker exec -i mysql mysql -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
+            docker exec -i mysql mysql -h 127.0.0.1 -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
             '''
         }
     }
