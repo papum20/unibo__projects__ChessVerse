@@ -38,16 +38,23 @@ stage('Setup DB') {
         }
     }
 }
-stage('Check MySQL') {
+stage('Install MySQL Client') {
+            steps {
+                script {
+                    // Esegui il comando di installazione di mysql-client
+                    sh 'sudo apt-get update && sudo apt-get install -y mysql-client'
+                }
+            }
+        }
+    stage('Check MySQL') {
     steps {
         script {
             sh '''
-            docker run --network host --rm mysql:5.7 sh -c 'mysqladmin --verbose --wait=30 -h mysql -uroot -proot ping || exit 1'
+            mysqladmin --verbose --wait=30 -h mysql -uroot -proot ping || exit 1
             '''
         }
     }
 }
-
         stage('Migrate DB') {
 
             steps {
