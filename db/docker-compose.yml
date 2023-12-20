@@ -18,7 +18,7 @@ services:
        - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - cas-network
-    game:
+  game:
       depends_on:
         mysql:
           condition: service_healthy
@@ -29,7 +29,7 @@ services:
         dockerfile: Dockerfile
       ports:
         - "8080:8080"
-    api:
+  api:
       depends_on:
         mysql:
           condition: service_healthy
@@ -40,7 +40,7 @@ services:
         dockerfile: Dockerfile
       ports:
         - "8000:8000"
-    app:
+  app:
       container_name: app
       restart: always
       build:
