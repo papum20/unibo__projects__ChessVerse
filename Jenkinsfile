@@ -11,11 +11,11 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker run --name mysql -e MYSQL_ROOT_PASSWORD=yourpassword -d -p 3306:3306 mysql:5.7
+                    docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:5.7
                     '''
                     sh 'sleep 30'
                     sh '''
-                    docker exec -i mysql mysql -uroot -pyourpassword < data.sql
+                    docker exec -i mysql mysql -u root -p root < data.sql
                     '''
                 }
             }
