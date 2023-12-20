@@ -2,16 +2,6 @@ pipeline {
     agent any
 
     stages {
-         stage('Install Docker Compose') {
-            steps {
-                script {
-                    sh '''
-                    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-                    sudo chmod +x /usr/local/bin/docker-compose
-                    '''
-                }
-            }
-        }
         stage('SCM') {
             steps {
                 checkout scm
@@ -19,23 +9,30 @@ pipeline {
         }
         stage('Cleanup previous DB') {
             steps {
-               script {
-                   sh '''
-                   docker-compose -f ./docker-compose.yml down
-                   '''
-                }
-           }
-       }
-        stage('Setup DB') {
-            steps {
                 script {
                     sh '''
-                    docker-compose -f ./docker-compose.yml up -d
+                    docker stop mysql
+                    docker rm mysql
                     '''
-                    sh 'sleep 30'
                 }
             }
         }
+        stage('Setup DB') {
+            steps {
+                script {
+                    // Build the Docker image using your custom Dockerfile
+                    sh '''
+                    docker build -t my-mysql .code/database/dockerfile
+                    '''
+                    sh 'sleep 30'
+                    sh '''
+                    docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
+                    '''
+                }
+            }
+        }
+
+        
 
         stage('Migrate DB') {
             steps {
@@ -47,6 +44,24 @@ pipeline {
             }
         }
 
+        // stage('Build and Test App') {
+		// 	when {
+		// 		anyOf {
+		// 			branch "main"
+		// 			branch "testing"
+		// 			branch "dev-app"
+		// 		}
+		// 	}
+        //     steps {
+        //         dir('code/app') {
+        //             nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
+        //                 sh 'npm install'
+        //                 sh 'npm run coverage:prod'
+        //             }
+        //         }
+        //     }
+        // }
+
         stage('Build and Test api backend') {
 			when {
 				anyOf {
@@ -57,6 +72,7 @@ pipeline {
 			}
             steps {
                 dir('code/api') {
+                    // Add your Python testing commands here
                     sh 'python3.12 manage.py test'
                 }
             }
@@ -75,6 +91,7 @@ pipeline {
                     sh 'pip3 install -r requirements.txt'
                 }
                 dir('code/game/test/unit') {
+                    // to fix
                     sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
             }
@@ -83,7 +100,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker-compose -f ./code/database/docker-compose.yml down
+                    docker stop mysql
+                    docker rm mysql
                     '''
                 }
             }
@@ -111,3 +129,4 @@ pipeline {
 
     }
 }
+
