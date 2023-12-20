@@ -3,7 +3,6 @@ aiosignal==1.3.1
 attrs==23.1.0
 bidict==0.22.1
 chess==1.10.0
-coverage==7.3.4
 dnspython==2.4.2
 frozenlist==1.4.0
 gevent==23.9.1

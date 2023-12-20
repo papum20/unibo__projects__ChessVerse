@@ -1,6 +1,5 @@
 asgiref==3.7.2
 cffi==1.16.0
-coverage==7.3.4
 cryptography==41.0.7
 DateTime==5.3
 Django==5.0

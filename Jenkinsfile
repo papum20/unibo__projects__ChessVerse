@@ -104,8 +104,7 @@ stage('Create DB') {
             steps {
                 dir('code/api') {
                     // Add your Python testing commands here
-                    sh 'coverage run manage.py test '
-                    sh 'coverage xml -i'
+                    sh 'python3.12 manage.py test'
                 }
             }
         }
@@ -124,8 +123,7 @@ stage('Create DB') {
                 }
                 dir('code/game/test/unit') {
                     // to fix
-                    sh 'python3.12 -m coverage run -m unittest'
-                    sh 'python3.12 -m coverage xml -i'
+                    sh 'python3.12 -m unittest test_*'
                 }
             }
         }
@@ -147,15 +145,15 @@ stage('Create DB') {
 				}
 			}
             steps {
-                nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-                    script {
-                        def scannerHome = tool 'SonarScanner4'
-                        withSonarQubeEnv("sonarqube") {
-                            sh "${scannerHome}/bin/sonar-scanner"
-                        }
+            nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
+                script {
+                    def scannerHome = tool 'SonarScanner4'
+                    withSonarQubeEnv("sonarqube") {
+                        sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
             }
+        }
         }
 
     }
