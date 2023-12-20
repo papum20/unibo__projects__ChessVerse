@@ -318,6 +318,7 @@ function Start({
                 >
                   <Nav.Link as={Link} to="/login">
                     <Button
+                      id="login"
                       color="brown"
                       style={{ fontSize: "1.5rem" }}
                       variant="contained"
@@ -334,6 +335,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="play-as-guest"
                     color="brown"
                     style={{ fontSize: "1.5rem" }}
                     onClick={async () => {
@@ -382,6 +384,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="daily-board"
                     color="brown"
                     disabled={
                       sessionStorage.getItem("session_id") === "undefined"
@@ -441,6 +444,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="weekly-challenge"
                     color="brown"
                     disabled={
                       sessionStorage.getItem("session_id") === "undefined"
@@ -478,6 +482,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="ranked"
                     color="brown"
                     disabled={
                       sessionStorage.getItem("session_id") === "undefined"
@@ -515,6 +520,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="freeplay"
                     color="brown"
                     onClick={() => {
                       setMode(PVE);
@@ -554,6 +560,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="1v1"
                     color="brown"
                     onClick={() => {
                       setMode(PVP);
@@ -593,6 +600,7 @@ function Start({
                 >
                   <Button
                     color="brown"
+                    id="quit-button"
                     style={{ fontSize: "1.5rem", borderRadius: "20px" }}
                     onClick={async () => {
                       sessionStorage.setItem("session_id", undefined);
