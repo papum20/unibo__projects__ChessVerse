@@ -35,16 +35,6 @@ stage('Setup DB') {
             docker-compose up -d
             '''
             sh '''
-            echo "Waiting for mysql to be ready..."
-            attempt=0
-            while [ $attempt -le 160 ]; do
-                docker exec mysql mysqladmin ping -h localhost --silent && break
-                echo "MySQL not ready yet, sleeping for 5 seconds..."
-                sleep 5
-                attempt=$(( attempt + 1 ))
-            done
-            '''
-            sh '''
             docker exec -i mysql mysql -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
             '''
         }
