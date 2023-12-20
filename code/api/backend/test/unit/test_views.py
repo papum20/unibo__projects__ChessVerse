@@ -13,6 +13,9 @@ from ...models import (
 import json
 from datetime import date
 
+today = date.today()
+formatted_date_daily =today.strftime("%d%m%Y")
+formatted_date_weekly = today.strftime('%U%Y')
 
 class IsNicknameInDatabaseTest(TestCase):
     @classmethod
@@ -206,18 +209,18 @@ class GetDailyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         DailyLeaderboard.objects.create(
-            username="test_user1", challenge_date=date.today(), moves_count=10
+            username="test_user1", challenge_date=formatted_date_daily, moves_count=10
         )
         DailyLeaderboard.objects.create(
-            username="test_user2", challenge_date=date.today(), moves_count=15
+            username="test_user2", challenge_date=formatted_date_daily, moves_count=15
         )
 
     def test_view_exists_at_desired_location(self):
-        response = self.client.get("/get_daily_leaderboard/")
+        response = self.client.get("/get_daily_leaderboard/", {'date': formatted_date_daily})
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
-        response = self.client.get(reverse("get_daily_leaderboard"))
+        response = self.client.get(reverse("get_daily_leaderboard"), {'date': formatted_date_daily})
         self.assertEqual(response.status_code, 200)
 
     def test_response_405_on_post_request(self):
@@ -225,24 +228,14 @@ class GetDailyLeaderboardTests(TestCase):
         self.assertEqual(response.status_code, 405)
         self.assertJSONEqual(response.content, {"message": "Invalid request method"})
 
-    def test_view_returns_correct_data(self):
-        response = self.client.get(reverse("get_daily_leaderboard"))
-        self.assertEqual(
-            response.content,
-            {
-                "daily_leaderboard": [
-                    {"username": "test_user1", "moves_count": 10},
-                    {"username": "test_user2", "moves_count": 15},
-                ]
-            },
-        )
+
 
     def test_view_returns_correct_data(self):
         # Ensure the database state
-        DailyLeaderboard.objects.create(username="test_user1", moves_count=10, challenge_date=date.today(), result="win")
-        DailyLeaderboard.objects.create(username="test_user2", moves_count=15,  challenge_date=date.today(), result="win")
+        DailyLeaderboard.objects.create(username="test_user1", moves_count=10, challenge_date=formatted_date_daily, result="win")
+        DailyLeaderboard.objects.create(username="test_user2", moves_count=15,  challenge_date=formatted_date_daily, result="win")
         
-        response = self.client.get(reverse("get_daily_leaderboard"))
+        response = self.client.get(reverse("get_daily_leaderboard"), {'date': formatted_date_daily})
         # Decode the response content and parse it as JSON
         content = json.loads(response.content.decode())
         print(content)  # Print the response content
@@ -262,18 +255,18 @@ class GetWeeklyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         WeeklyLeaderboard.objects.create(
-            username="test_user1", challenge_date=date.today(), moves_count=10, result="win"
+            username="test_user1", challenge_date=formatted_date_weekly, moves_count=10, result="win"
         )
         WeeklyLeaderboard.objects.create(
-            username="test_user2", challenge_date=date.today(), moves_count=15, result="win"
+            username="test_user2", challenge_date=formatted_date_weekly, moves_count=15, result="win"
         )
 
     def test_view_exists_at_desired_location(self):
-        response = self.client.get("/get_weekly_leaderboard/")
+        response = self.client.get("/get_weekly_leaderboard/", {'date': formatted_date_weekly})
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
-        response = self.client.get(reverse("get_weekly_leaderboard"))
+        response = self.client.get(reverse("get_weekly_leaderboard"), {'date': formatted_date_weekly})
         self.assertEqual(response.status_code, 200)
 
     def test_response_405_on_post_request(self):
@@ -283,7 +276,7 @@ class GetWeeklyLeaderboardTests(TestCase):
 
     def test_view_returns_correct_data(self):
       
-        response = self.client.get(reverse("get_weekly_leaderboard"))
+        response = self.client.get(reverse("get_weekly_leaderboard"), {'date': formatted_date_weekly})
         # Decode the response content and parse it as JSON
         content = json.loads(response.content.decode())
         self.assertEqual(

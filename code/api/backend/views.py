@@ -138,23 +138,6 @@ def user_signout(request):
     return JsonResponse({"message": "Logout successful"})
 
 
-def get_daily_leaderboard(request):
-    if request.method == "GET":
-        try:
-            # Retrieve only the games played today from the database
-            daily_leaderboard = DailyLeaderboard.objects.filter(
-                challenge_date=date.today(), result="win"
-            ).values("username", "moves_count").order_by("moves_count")
-            # Return the daily leaderboard as a JSON response
-            return JsonResponse(
-                {"daily_leaderboard": list(daily_leaderboard)}, status=200
-            )
-        except Exception as e:
-            # Return an error response for any exception
-            return JsonResponse({"message": str(e)}, status=500)
-    else:
-        # Return an error response for invalid request methods
-        return JsonResponse({"message": "Invalid request method"}, status=405)
 
 def get_daily_leaderboard(request):
     if request.method == "GET":
@@ -208,28 +191,6 @@ def get_weekly_leaderboard(request):
         return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
-# def get_weekly_leaderboard(request):
-#     if request.method == "GET":
-#         try:
-#             # Retrieve only the games played from this Monday to this Sunday from the database
-#             start_of_week = date.today() - timedelta(days=date.today().weekday())
-#             end_of_week = start_of_week + timedelta(days=6)
-
-#             weekly_leaderboard = WeeklyLeaderboard.objects.filter(
-#                 result="win",
-#                 challenge_date__range=[start_of_week, end_of_week],  # Add this filter
-#             ).values("username", "moves_count").order_by("moves_count")
-
-#             # Return the weekly leaderboard as a JSON response
-#             return JsonResponse(
-#                 {"weekly_leaderboard": list(weekly_leaderboard)}, status=200
-#             )
-#         except Exception as e:
-#             # Return an error response for any exception
-#             return JsonResponse({"message": str(e)}, status=500)
-#     else:
-#         # Return an error response for invalid request methods
-#         return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
 MAX_DAILY_GAMES = 2
