@@ -37,3 +37,6 @@ __pycache__/
 venv/
 
 t4-chessverse/
+
+code/game/.env.development
+code/api/.env.development
