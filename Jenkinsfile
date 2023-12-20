@@ -25,7 +25,7 @@ pipeline {
                     '''
                     sh 'sleep 30'
                     sh '''
-                    docker exec -i mysql mysql -u root -p root -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
+                    docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
                     '''
                 }
             }
