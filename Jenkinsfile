@@ -42,7 +42,7 @@ stage('Setup MySQL Client') {
     steps {
         script {
             sh '''
-            apt-get update && apt-get install -y mysql-client
+            apt-get update && apt-get install -y mysql-community-client
             '''
         }
     }
