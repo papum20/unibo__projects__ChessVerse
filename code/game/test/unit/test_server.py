@@ -28,7 +28,7 @@ class TestOnConnect(IsolatedAsyncioTestCase):
         Game.sio.emit = self.mock_emit
 
     async def test_emits_correct_msg(self):
-        await self.server.on_connect(self.sid)
+        await self.server.on_connect(self.sid, None)
         Game.sio.emit.assert_called_once_with("connected", room=self.sid)
 
 
@@ -171,7 +171,7 @@ class TestOnResign(IsolatedAsyncioTestCase):
 
     @mock.patch('server.GameHandler.on_disconnect')
     async def test_method_calls_correctly(self, mock_on_disconnect):
-        await self.server.on_resign(self.sid)
+        await self.server.on_resign(self.sid, None)
         mock_on_disconnect.assert_called_once_with(self.sid)
 
 
