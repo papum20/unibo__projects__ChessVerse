@@ -38,24 +38,16 @@ stage('Setup DB') {
         }
     }
 }
-stage('Setup MySQL Client') {
+stage('Check MySQL') {
     steps {
         script {
             sh '''
-            apt-get update && apt-get install -y mysql-community-client
+            docker run --network host --rm mysql:5.7 sh -c 'mysqladmin --verbose --wait=30 -h mysql -uroot -proot ping || exit 1'
             '''
         }
     }
 }
-    stage('Check MySQL') {
-    steps {
-        script {
-            sh '''
-            mysqladmin --verbose --wait=30 -h mysql -uroot -proot ping || exit 1
-            '''
-        }
-    }
-}
+
         stage('Migrate DB') {
 
             steps {
