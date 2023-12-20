@@ -38,6 +38,15 @@ stage('Setup DB') {
         }
     }
 }
+stage('Setup MySQL Client') {
+    steps {
+        script {
+            sh '''
+            apt-get update && apt-get install -y mysql-client
+            '''
+        }
+    }
+}
     stage('Check MySQL') {
     steps {
         script {
