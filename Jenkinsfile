@@ -39,13 +39,13 @@ stage('Setup DB') {
     }
 }
 stage('Install MySQL Client') {
-            steps {
-                script {
-                    // Esegui il comando di installazione di mysql-client
-                    sh ' apt-get update &&  apt-get install -y mysql-client'
-                }
-            }
+    steps {
+        script {
+            // Run the installation command for default-mysql-client
+            sh 'apt-get update && apt-get install -y default-mysql-client'
         }
+    }
+}
     stage('Check MySQL') {
     steps {
         script {
