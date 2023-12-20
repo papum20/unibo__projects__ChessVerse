@@ -23,7 +23,7 @@ pipeline {
     steps {
         script {
             sh '''
-            docker run --name mysql -e MYSQL_ROOT_HOST='%' -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:latest
+            docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:latest
             '''
             sh '''
             echo "Waiting for mysql to be ready..."
@@ -34,9 +34,6 @@ pipeline {
                 sleep 5
                 attempt=$(( attempt + 1 ))
             done
-            '''
-            sh '''
-            docker exec -i mysql mysql -uroot -proot --execute="GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost'; FLUSH PRIVILEGES;"
             '''
             sh '''
             docker exec -i mysql mysql -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
