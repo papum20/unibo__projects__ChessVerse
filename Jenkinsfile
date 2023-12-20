@@ -24,7 +24,7 @@ pipeline {
                 script {
                     dir('code/database') {
                         sh '''
-                            docker build -t my-mysql dockerfile
+                            docker build -t my-mysql Dockerfile
                         '''
                     }
                     sh 'sleep 30'
