@@ -20,10 +20,11 @@ pipeline {
         stage('Setup DB') {
             steps {
                 script {
-                    // Build the Docker image using your custom Dockerfile
-                    sh '''
-                    docker build -t my-mysql .code/database/dockerfile
-                    '''
+                    dir('code/database') {
+                        sh '''
+                            docker build -t my-mysql dockerfile
+                        '''
+                    }
                     sh 'sleep 30'
                     sh '''
                     docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
