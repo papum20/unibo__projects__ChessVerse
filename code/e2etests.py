@@ -18,16 +18,16 @@ class ChessverseE2ETest(unittest.TestCase):
     def test_login_happyPath(self):
         #checks if when the user logs in with correct credentials he is redirected to the options page
         self.driver.get('https://www.chessverse.cloud/login') 
-        
+
         wait = WebDriverWait(self.driver, 10)
         #check if all elements are present
         username = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-        submit = wait.until(EC.presence_of_element_located((By.ID, 'buttonSubmit')))
-        
+        login_button = self.driver.find_element(By.ID, 'Login')
+
         username.send_keys('ccirone')
         password.send_keys('Ciao1234!')
-        submit.click()
+        login_button.click()
         
         wait.until(EC.url_changes(self.driver.current_url))
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
@@ -40,11 +40,11 @@ class ChessverseE2ETest(unittest.TestCase):
         #check if all elements are present
         username = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-        submit = wait.until(EC.presence_of_element_located((By.ID, 'buttonSubmit')))
+        login_button = self.driver.find_element(By.ID, 'Login')
         
         username.send_keys('provaErrore')
         password.send_keys('provaErrore1')
-        submit.click()
+        login_button.click()
         
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/login')
        
@@ -60,13 +60,13 @@ class ChessverseE2ETest(unittest.TestCase):
         username = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
         eloSelect = wait.until(EC.presence_of_element_located((By.ID, 'elo')))
-        submit = wait.until(EC.presence_of_element_located((By.ID, 'buttonSubmit')))
+        signup_button = self.driver.find_element(By.ID, 'Sign Up')
         
         #check if with all correct credentials the user is redirected to the login page
         username.send_keys(nickname)
         password.send_keys('Prova1!')
         eloSelect.send_keys('400')
-        submit.click()
+        signup_button.click()
         
         wait.until(EC.url_changes(self.driver.current_url))
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/login')
@@ -82,28 +82,29 @@ class ChessverseE2ETest(unittest.TestCase):
         username = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
         eloSelect = wait.until(EC.presence_of_element_located((By.ID, 'elo')))
-        submit = wait.until(EC.presence_of_element_located((By.ID, 'buttonSubmit')))
+        signup_button = self.driver.find_element(By.ID, 'Sign Up')
         
         #check if with a nickname already taken the user isn't signed up
         username.send_keys('ccirone')
         password.send_keys('Ciao1234!')
         eloSelect.send_keys('400')
-        submit.click()
+        signup_button.click()
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/signup')
         
         #check if with a password that doesn't respect the requirements the user isn't signed up
         username.send_keys(nickname)
         password.send_keys('prova')
         eloSelect.send_keys('400')
-        submit.click()
+        signup_button.click()
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/signup')
         
         #check if with an elo that doesn't respect the requirements the user isn't signed up
         username.send_keys(nickname)
         password.send_keys('Prova1!')
         eloSelect.send_keys('1000')
-        submit.click()
+        signup_button.click()
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/signup')
+    
     
     def test_signout(self):
         #checks if when the user signs out he is redirected to the main page
@@ -111,18 +112,35 @@ class ChessverseE2ETest(unittest.TestCase):
         wait = WebDriverWait(self.driver, 10)
         username = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-        submit = wait.until(EC.presence_of_element_located((By.ID, 'buttonSubmit')))
+        login_button = self.driver.find_element(By.ID, 'Login')
         
         username.send_keys('ccirone')
         password.send_keys('Ciao1234!')
-        submit.click()
+        login_button.click()
         wait.until(EC.url_changes(self.driver.current_url))
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
-        button = wait.until(EC.presence_of_element_located((By.ID, 'quit-button')))
-        button.click()
-        wait.until(EC.url_changes(self.driver.current_url))
-        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/')
         
+        button = self.driver.find_element(By.ID, 'quit-button')
+        self.driver.execute_script("arguments[0].click();", button)
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/')
+    
+    
+    def test_main_page_login(self):
+        self.driver.get('https://www.chessverse.cloud/')
+        wait = WebDriverWait(self.driver, 10)
+        #check if all elements are present
+        login_button = wait.until(EC.presence_of_element_located((By.ID, 'login')))
+        login_button.click()
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/login')
+       
+    def test_main_page_guest(self):
+        self.driver.get('https://www.chessverse.cloud/')
+        wait = WebDriverWait(self.driver, 10)
+        #check if all elements are present
+        playAsGuest_button = wait.until(EC.presence_of_element_located((By.ID, 'play-as-guest')))
+        playAsGuest_button.click()
+        wait.until(EC.url_changes(self.driver.current_url))
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
  
 if __name__ == "__main__":
     unittest.main()
