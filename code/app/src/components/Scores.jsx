@@ -14,7 +14,7 @@ function Scores() {
 
   // Array di oggetti che tiene traccia di username e dato elo o altre cose in base in che sezione sei
   const [data, setData] = useState([]);
-
+  
   
 
   async function fetchLeaderboard(API, date=null) {
@@ -23,8 +23,14 @@ function Scores() {
     return await response.json();
   }
 
+  const getDate = () => {
+    const [day, month, year] = dateArr;
+    return new Date(year, month - 1, day);
+  };
+
+
   const getWeeklyDateString = () => {
-    const now = new Date();
+    const now = getDate();
     const start = new Date(now.getFullYear(), 0, 1);
     const weekNo = Math.ceil(
       ((now - start) / 86400000 + start.getDay() + 1) / 7
@@ -32,11 +38,21 @@ function Scores() {
     return `${weekNo < 10 ? "0" + weekNo : weekNo}${now.getFullYear()}`;
   };
 
+  const getDailyDateString = () => {
+    return getDate().toLocaleDateString("en-GB").replaceAll('/', "");
+  };
+
+
+  const [weeklyDate, setWeeklyDate] = useState("");
+  const [dailyDate, setDailyDate] = useState("");
+  const [dateArr, setDateArr] = useState([parseInt(new Date().getDate()), parseInt(new Date().getMonth() + 1), parseInt(new Date().getFullYear())]);
+
+
   const getCurrentLeaderboard = async () => {
     if (focus === "daily board") {
-      setData((await fetchLeaderboard(API.dailyLeaderboard.endpoint, new Date().toLocaleDateString("en-GB").split('/').join(''))).daily_leaderboard);
+      setData((await fetchLeaderboard(API.dailyLeaderboard.endpoint, (() => { setDailyDate(getDailyDateString()); return getDailyDateString(); })() )).daily_leaderboard);
     } else if (focus === "weekly challenge") {
-      setData((await fetchLeaderboard(API.weeklyLeaderboard.endpoint, getWeeklyDateString())).weekly_leaderboard);
+      setData((await fetchLeaderboard(API.weeklyLeaderboard.endpoint, (() => { setWeeklyDate(getWeeklyDateString()); return getWeeklyDateString(); })() )).weekly_leaderboard);
     } else if (focus === "ranked") {
       setData((await fetchLeaderboard(API.rankedLeaderboard.endpoint)).ranked_leaderboard)
     } else {
@@ -46,16 +62,19 @@ function Scores() {
 
   useEffect(() => {
     getCurrentLeaderboard();
-  }, [focus]);
+  }, [focus,dateArr]);
 
 
   return (
     <>
       <Modal show={showModal} fullscreen>
         <BasicTabs
+          setDateArr={setDateArr}
           data={data}
           setFocus={setFocus}
           setShowModal={setShowModal}
+          setWeeklyDate={setWeeklyDate}
+          setDailyDate={setDailyDate}
         />
       </Modal>
 
@@ -63,8 +82,8 @@ function Scores() {
         style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
       >
         <Button
+          onClick={()=>setShowModal(true)}
           color="brown"
-          onClick={() => setShowModal(true)}
           style={{ fontSize: "1.5rem", borderRadius: "20px" }}
           variant="contained"
         >
