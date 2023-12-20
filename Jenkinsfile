@@ -23,6 +23,7 @@ pipeline {
                     sh '''
                     docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:5.7
                     '''
+                    sh 'sleep 30'
                     sh '''
                     docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
                     '''
