@@ -7,6 +7,26 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Setup DB') {
+            steps {
+                script {
+                    sh '''
+                    docker run --name mysql -e MYSQL_ROOT_PASSWORD=yourpassword -d -p 3306:3306 mysql:5.7
+                    '''
+                    sh 'sleep 30'
+                    sh '''
+                    docker exec -i mysql mysql -uroot -pyourpassword < data.sql
+                    '''
+                }
+            }
+        }
+
+        stage('Migrate DB') {
+            steps {
+                sh 'python3.12 manage.py makemigrations'
+                sh 'python3.12 manage.py migrate'
+            }
+        }
 
         // stage('Build and Test App') {
 		// 	when {
@@ -61,7 +81,16 @@ pipeline {
                 }
             }
         }
-
+        stage('Cleanup DB') {
+            steps {
+                script {
+                    sh '''
+                    docker stop mysql
+                    docker rm mysql
+                    '''
+                }
+            }
+        }
         stage('SonarQube Analysis') {
 			when {
 				anyOf {
