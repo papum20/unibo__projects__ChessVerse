@@ -15,16 +15,28 @@ function Scores() {
   // Array di oggetti che tiene traccia di username e dato elo o altre cose in base in che sezione sei
   const [data, setData] = useState([]);
 
-  async function fetchLeaderboard(API) {
-    const response = await fetch(joinPaths(SERVER_ADDR,API));
+  
+
+  async function fetchLeaderboard(API, date=null) {
+    const url = date ? `${API}?date=${date}` : API;
+    const response = await fetch(joinPaths(SERVER_ADDR, url));
     return await response.json();
   }
 
+  const getWeeklyDateString = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    const weekNo = Math.ceil(
+      ((now - start) / 86400000 + start.getDay() + 1) / 7
+    );
+    return `${weekNo < 10 ? "0" + weekNo : weekNo}${now.getFullYear()}`;
+  };
+
   const getCurrentLeaderboard = async () => {
     if (focus === "daily board") {
-      setData((await fetchLeaderboard(API.dailyLeaderboard.endpoint)).daily_leaderboard);
+      setData((await fetchLeaderboard(API.dailyLeaderboard.endpoint, new Date().toLocaleDateString("en-GB").split('/').join(''))).daily_leaderboard);
     } else if (focus === "weekly challenge") {
-      setData((await fetchLeaderboard(API.weeklyLeaderboard.endpoint)).weekly_leaderboard);
+      setData((await fetchLeaderboard(API.weeklyLeaderboard.endpoint, getWeeklyDateString())).weekly_leaderboard);
     } else if (focus === "ranked") {
       setData((await fetchLeaderboard(API.rankedLeaderboard.endpoint)).ranked_leaderboard)
     } else {
