@@ -104,8 +104,25 @@ class ChessverseE2ETest(unittest.TestCase):
         eloSelect.send_keys('1000')
         submit.click()
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/signup')
-        
     
+    def test_signout(self):
+        #checks if when the user signs out he is redirected to the main page
+        self.driver.get('https://www.chessverse.cloud/login')
+        wait = WebDriverWait(self.driver, 10)
+        username = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
+        password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
+        submit = wait.until(EC.presence_of_element_located((By.ID, 'buttonSubmit')))
+        
+        username.send_keys('ccirone')
+        password.send_keys('Ciao1234!')
+        submit.click()
+        wait.until(EC.url_changes(self.driver.current_url))
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
+        button = wait.until(EC.presence_of_element_located((By.ID, 'quit-button')))
+        button.click()
+        wait.until(EC.url_changes(self.driver.current_url))
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/')
+        
  
 if __name__ == "__main__":
     unittest.main()
