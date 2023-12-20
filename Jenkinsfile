@@ -11,7 +11,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker-compose -f docker-compose.yml down
+                    docker-compose -f t4-chessverse/docker-compose.yml down
                     '''
                 }
             }
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker-compose -f docker-compose.yml up -d
+                    docker-compose -f t4-chessverse/docker-compose.yml up -d
                     '''
                     sh 'sleep 30'
                 }
