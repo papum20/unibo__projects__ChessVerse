@@ -1,3 +1,4 @@
+import math
 from typing import Optional, Tuple
 import chess
 from chess.engine import Limit, popen_uci
@@ -5,8 +6,7 @@ from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, MODE_RANKED_PT_DIFF
 from time import perf_counter
 from const import GameType
-from datetime import date, timedelta
-
+from datetime import datetime, date, timedelta
 
 class PVEGame(Game):
     __slots__ = ["bot", "depth", "type"]
@@ -65,6 +65,7 @@ class PVEGame(Game):
             return
         if sid not in Game.sid_to_id:
             Game.sid_to_id[sid] = sid  # solo in PVE;
+            rank = -1
             if seed is not None:
                 if type == GameType.DAILY:
                     Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
@@ -85,24 +86,36 @@ class PVEGame(Game):
                         sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
                     )
             await Game.games[sid].instantiate_bot()
-            await Game.sio.emit("config", {"fen": Game.games[sid].fen}, room=sid)
+            await Game.sio.emit("config", {"fen": Game.games[sid].fen, "rank": rank}, room=sid)
         else:
             await Game.sio.emit(
                 "error", {"cause": "SID already used", "fatal": True}, room=sid
             )
 
     async def disconnect_daily(self, sid: str, outcome: chess.Outcome) -> None:
+        def current_day_month_year():
+            # Get the current date
+            current_date = datetime.now()
+
+            # Extract the day, month, and year
+            day = current_date.day
+            month = current_date.month
+            year = current_date.year
+
+            # Format as DDMMYYYY
+            return f"{day:02d}{month:02d}{year}"
+
         # get user information based on the sessionId
         current_username = await Game.get_username(sid)
         attempts = PVEGame.get_attempts(current_username)
-        print(attempts)
+        date = current_day_month_year()
         if attempts == 0:
             Game.execute_query(
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
                 (
                     current_username,
                     self.current.move_count,
-                    date.today(),
+                    date,
                     "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
                     attempts+1,
                 )
@@ -114,18 +127,27 @@ class PVEGame(Game):
                 SET moves_count = %s, attempts = attempts + 1, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today(),)
+                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date,)
             )
 
     async def disconnect_weekly(self, sid: str, outcome: chess.Outcome) -> None:
+        def current_week_and_year():
+            # Get the current date
+            current_date = datetime.now()
+
+            # Extract the current week number and year
+            week_number = current_date.isocalendar()[1]
+            year = current_date.year
+
+            # Format as WWYYYY
+            return f"{week_number:02d}{year}"
         # Insert into weekly leaderboard
         current_username = await Game.get_username(sid)
-        start_of_week = date.today() - timedelta(days=date.today().weekday())
-        end_of_week = start_of_week + timedelta(days=6)
+        weekno = current_week_and_year()
         # check if the current user has already played the weekly challenge
         result = Game.execute_query(
-            "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s",
-            (current_username,)
+            "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s AND challenge_date = %s",
+            (current_username,weekno)
         )
         if result is None or len(result) == 0:
             Game.execute_query(
@@ -133,7 +155,7 @@ class PVEGame(Game):
                 (
                     current_username,
                     self.current.move_count,
-                    date.today(),
+                    weekno,
                     "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
                 ),
             )
@@ -144,11 +166,12 @@ class PVEGame(Game):
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date.today()),
+                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, weekno),
             )
     
     async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):
         session_id = await Game.get_session_id(sid)
+        print(session_id)
         if session_id is not None:
             score_ranked = PVEGame.get_user_field(session_id, "score_ranked")
             if score_ranked is not None:

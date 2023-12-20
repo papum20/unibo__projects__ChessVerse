@@ -33,7 +33,7 @@ class GenerateRandomNicknameTest(TestCase):
 
 class AddGuestViewTest(TestCase):
     def test_view_url_exists_at_desired_location(self):
-        response = self.client.post("/backend/add_guest/")
+        response = self.client.post("/add_guest/")
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
@@ -139,7 +139,7 @@ class UserLoginViewTest(TestCase):
 
     def test_view_url_exists_at_correct_location(self):
         response = self.client.post(
-            "/backend/login/",
+            "/login/",
             json.dumps({"username": "test_user", "password": "secret"}),
             content_type="application/json",
         )
@@ -213,7 +213,7 @@ class GetDailyLeaderboardTests(TestCase):
         )
 
     def test_view_exists_at_desired_location(self):
-        response = self.client.get("/backend/get_daily_leaderboard/")
+        response = self.client.get("/get_daily_leaderboard/")
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
@@ -269,7 +269,7 @@ class GetWeeklyLeaderboardTests(TestCase):
         )
 
     def test_view_exists_at_desired_location(self):
-        response = self.client.get("/backend/get_weekly_leaderboard/")
+        response = self.client.get("/get_weekly_leaderboard/")
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
@@ -340,4 +340,20 @@ class GetMultiplayerLeaderboardViewTest(TestCase):
             ]
         }
         self.assertEqual(leaderboard, expected_leaderboard)
+
+class GetRankedLeaderboardViewTest(TestCase):
+        def setUp(self):
+            self.client = Client()
+            self.url = reverse('get_ranked_leaderboard')
+            RegisteredUsers.objects.create(username='user1', score_ranked=100)
+            RegisteredUsers.objects.create(username='user2', score_ranked=200)
+
+        def test_get_ranked_leaderboard(self):
+            response = self.client.get(self.url)
+            self.assertEqual(response.status_code, 200)
+            expected_data = [
+                {'username': 'user2', 'score_ranked': 200},
+                {'username': 'user1', 'score_ranked': 100},
+            ]
+            self.assertListEqual(response.json()['ranked_leaderboard'], expected_data)
         

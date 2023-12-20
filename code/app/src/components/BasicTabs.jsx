@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { CloseButton, Row, Col } from "react-bootstrap";
 import { Tabs, Tab, Box } from "@mui/material";
 import "../styles/BasicTabs.css";
+import {MOBILEWIDTH} from "../const/const.js"
+import useWindowDimensions from "./useWindowDimensions.jsx";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -39,6 +41,8 @@ export default function BasicTabs(props) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const { width, height } = useWindowDimensions();
 
   return (
     <Box sx={{ flexGrow: 1, display: "flex", height: "80vh" }}>
@@ -82,20 +86,20 @@ export default function BasicTabs(props) {
             <TabPanel value={value} index={0}>
               <Row style={{ marginBottom: "20px" }}>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
                     Username
                   </span>
                 </Col>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Turni Minimi
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
+                    mosse
                   </span>
                 </Col>
                 <Col style={{ display: "flex", justifyContent: "flex-end" }}>
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
@@ -114,20 +118,20 @@ export default function BasicTabs(props) {
             <TabPanel value={value} index={1}>
               <Row style={{ marginBottom: "20px" }}>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
                     Username
                   </span>
                 </Col>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Turni Minimi
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
+                    mosse
                   </span>
                 </Col>
                 <Col style={{ display: "flex", justifyContent: "flex-end" }}>
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
@@ -146,12 +150,12 @@ export default function BasicTabs(props) {
             <TabPanel value={value} index={2}>
               <Row style={{ marginBottom: "20px" }}>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
                     Username
                   </span>
                 </Col>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
                     Rank
                   </span>
                 </Col>
@@ -159,7 +163,7 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
@@ -178,12 +182,12 @@ export default function BasicTabs(props) {
             <TabPanel value={value} index={3}>
               <Row style={{ marginBottom: "20px" }}>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
                     Username
                   </span>
                 </Col>
                 <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}` }}>
                     Elo
                   </span>
                 </Col>
@@ -191,7 +195,7 @@ export default function BasicTabs(props) {
                   <CloseButton onClick={() => props.setShowModal(false)} />
                 </Col>
               </Row>
-              <div style={{overflow: "auto"}}>
+              <div style={{overflow: "auto", overflowX: "hidden"}}>
               {props.data.map((el, i) => 
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>

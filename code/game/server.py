@@ -1,18 +1,17 @@
 #!/usr/bin/env python
-import random
+import logging
+logging.basicConfig(level=logging.INFO)
+import ssl
 import asyncio
 import os
+import socketio
 import aiohttp
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from Game import Game
 from const import GameType
 from time import perf_counter
-import ssl
-import socketio
 import mysql.connector
-import schedule
-import time
 import datetime
 
 class GameHandler:
@@ -29,7 +28,7 @@ class GameHandler:
         return None
 
     async def on_connect(self, sid, environ):
-        #print("connect", sid)
+        print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
     async def on_disconnect(self, sid):
@@ -71,7 +70,7 @@ class GameHandler:
     async def on_start(self, sid, data): 
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
-        print("start", data["type"])
+        print("start", GameType(data["type"]).name, sid)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
@@ -187,11 +186,14 @@ async def main():
     if os.environ.get("ENV") == "production":
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         ssl_context.load_cert_chain(
-            certfile="/run/secrets/game_cert",
-            keyfile="/run/secrets/game_priv",
+                certfile="/run/secrets/ssl_cert",
+                keyfile="/run/secrets/ssl_priv",
         )
-    site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
-
+    print(os.environ.get("ENV"))
+    #site = aiohttp.web.TCPSite(runner, "0.0.0.0", port, ssl_context=ssl_context)
+    site = aiohttp.web.TCPSite(runner, "0.0.0.0", port)
+    
+    
     await site.start()
     print(f"Listening on 0.0.0.0:{port}")
     asyncio.create_task(handler.cleaner())

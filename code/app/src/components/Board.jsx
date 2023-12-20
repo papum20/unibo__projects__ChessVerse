@@ -14,7 +14,6 @@ function Board(props) {
   const [optionSquares, setOptionSquares] = useState({});
   const [oppMoveSan, setOppMoveSan] = useState("");
   const [awaitingOppMove, setAwaitingOppMove] = useState(false);
-  const [hasGameLoaded, setHasGameLoaded] = useState(false);
 
   function getUndoMoves(moves) {
     var counter = 0;
@@ -182,20 +181,20 @@ function Board(props) {
       safeGameMutate((game) => {
         props.game.load(props.startFen);
       });
-      setHasGameLoaded(true);
     }
   }, [props.startFen]);
 
   useEffect(() => {
     async function wait() {
       await new Promise((resolve) => setTimeout(resolve, 600));
-      if (props.game) props.setIsLoadingGame(false);
     }
     if (!!props.game) wait();
   }, [props.game]);
 
   useEffect(() => {
     if (!moveSan) return;
+
+    console.log("mando emit di mia mossa")
     props.socket.emit("move", {
       san: moveSan,
       type: props.mode,
@@ -224,6 +223,7 @@ function Board(props) {
       props.setTimers(res.time);
     });
     props.socket?.on("move", (res) => {
+      console.log("ricevo mossa dal backend")
       props.setMoves((prevValue) => [
         ...prevValue,
         {
@@ -273,6 +273,8 @@ function Board(props) {
     });
   }, []);
 
+
+
   useEffect(() => {
     if (!!props.game && props.moves.length>1) {
       const currentMoves = [...props.moves];
@@ -281,6 +283,7 @@ function Board(props) {
       props.setMoves(currentMoves);
       props.game.undo();
       props.game.undo();
+      console.log(props.game.fen());
       props.setPosition(props.game.fen());
       setMoveSan(null);
       setOppMoveSan(null);
@@ -289,18 +292,21 @@ function Board(props) {
 
   useEffect(() => {
     if (props.game) {
-      // Game viene inizializzato con una board vuota (quindi anche la prima riga lo e')
-      // Quando viene caricata la fen iniziale, la board viene aggiornata
-      if (props.game.fen()[0] !== "8") {
+      if (props.game.fen() !== "8/8/8/8/8/8/8/8 w - - 0 1") {
         props.setPosition(props.game.fen());
         props.setTurn(0);
       }
     }
   }, [props.game]);
 
+  useEffect(() => {
+    console.log("stampo position");
+    console.log(props.position);
+  }, [props.position]);
+
   return (
     <>
-      {!hasGameLoaded ? (
+      {props.isLoadingGame ? (
         <>
           {props.mode === PVP ? (
             <div data-testid="Loading">
@@ -366,9 +372,9 @@ function Board(props) {
             promotionToSquare={moveTo}
             showPromotionDialog={showPromotionDialog}
             boardWidth={`${
-              props.width / 2 > props.height - 180
-                ? props.height - 180
-                : props.width / 2
+              props.width < 600
+                ? props.width/10*9
+                : props.width / 2.7
             }`}
             boardOrientation={props.mode === PVE ? "white" : props.color}
           />

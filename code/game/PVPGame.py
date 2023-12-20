@@ -77,14 +77,16 @@ class PVPGame(Game):
                 Game.sid_to_id[players[1]] = game_id
                 current = await Game.sio.get_session(players[0])
                 opponent = await Game.sio.get_session(players[1])
+                usernames = [obj["username"] for obj in [current, opponent]]
+                elos = [obj["elo"] for obj in [current, opponent]]
                 await Game.sio.emit(
                     "config",
                     {
                         "fen": Game.games[game_id].fen,
                         "id": game_id,
                         "color": "white",
-                        "elo": [current["elo"], opponent["elo"]],
-                        "username": opponent["username"],
+                        "elo": elos,
+                        "username": usernames[1]
                     },
                     room=players[0],
                 )
@@ -94,8 +96,8 @@ class PVPGame(Game):
                         "fen": Game.games[game_id].fen,
                         "id": game_id,
                         "color": "black",
-                        "elo": [current["elo"], opponent["elo"]],
-                        "username": current["username"],
+                        "elo": elos,
+                        "username": usernames[0]
                     },
                     room=players[1],
                 )

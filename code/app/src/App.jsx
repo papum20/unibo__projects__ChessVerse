@@ -30,6 +30,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [enemyUsername, setEnemyUsername] = useState("");
   const [elo, setElo] = useState([0, 0]);
+  const [rank, setRank] = useState(0);
 
   const [youAreLogged, setYouAreLogged] = useState(false);
 
@@ -72,6 +73,7 @@ function App() {
               youAreLogged={youAreLogged}
               setEnemyUsername={setEnemyUsername}
               setElo={setElo}
+              setRank={setRank}
             />
           }
         />
@@ -101,6 +103,7 @@ function App() {
               youAreLogged={youAreLogged}
               setEnemyUsername={setEnemyUsername}
               setElo={setElo}
+              setRank={setRank}
             />
           }
         />
@@ -111,7 +114,6 @@ function App() {
             <Game
               data={data}
               isLoadingGame={isLoadingGame}
-              setIsLoadingGame={setIsLoadingGame}
               socket={socket}
               setSocket={setSocket}
               mode={mode}
@@ -122,6 +124,7 @@ function App() {
               user={user}
               elo={elo}
               enemyUsername={enemyUsername}
+              rank={rank}
             />
           }
           data-testid="game"

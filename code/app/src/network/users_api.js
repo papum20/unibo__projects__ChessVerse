@@ -53,8 +53,7 @@ export async function login(credentials) {
     },
     API.login,
   );
-  const json = response.json();
-  return json;
+  return await response.json();
 }
 
 export async function signup(credentials) {
@@ -68,7 +67,7 @@ export async function signup(credentials) {
     API.signup,
   );
 
-  return response.json();
+  return await response.json();
 }
 
 export async function signout() {

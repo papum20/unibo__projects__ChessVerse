@@ -16,7 +16,6 @@ import os
 env = os.environ.get("ENV", "development")
 if env == "development":
     from dotenv import load_dotenv
-
     env_file = f".env.{env}"
     load_dotenv(dotenv_path=env_file)
 
@@ -24,6 +23,7 @@ DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
+DATABASE_PORT = os.getenv("DATABASE_PORT")
 
 DATABASES = {
     "default": {
@@ -32,7 +32,7 @@ DATABASES = {
         "USER": DATABASE_USER,
         "PASSWORD": DATABASE_PASSWORD,
         "HOST": DATABASE_HOST,
-        "PORT": "3306",
+        "PORT": DATABASE_PORT,
     }
 }
 
@@ -53,7 +53,6 @@ ADDRESS = "0.0.0.0"
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -62,7 +61,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "sslserver",
     "backend",
     "rest_framework",
     "rest_framework.authtoken",

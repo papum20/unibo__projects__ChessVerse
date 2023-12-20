@@ -56,7 +56,7 @@ class Games(models.Model):
 class DailyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
-    challenge_date = models.DateField()
+    challenge_date = models.CharField(max_length=8, default="01011970")
     result = models.CharField(max_length=10)
     attempts = models.PositiveIntegerField(default=0)
 
@@ -67,7 +67,7 @@ class DailyLeaderboard(models.Model):
 class WeeklyLeaderboard(models.Model):
     username = models.CharField(max_length=255)
     moves_count = models.PositiveIntegerField()
-    challenge_date = models.DateField()
+    challenge_date = models.CharField(max_length=6, default="511970")
     result = models.CharField(max_length=10)
 
     class Meta:

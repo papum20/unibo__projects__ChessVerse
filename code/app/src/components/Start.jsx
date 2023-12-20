@@ -10,6 +10,7 @@ import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { joinPaths } from "../utils/path";
+import useWindowDimensions from "./useWindowDimensions.jsx";
 import {
   MAX_BOT_DIFF,
   MAX_GAME_IMB,
@@ -55,7 +56,10 @@ function Start({
   youAreLogged,
   setElo,
   setEnemyUsername,
+  setRank,
 }) {
+
+  const { width } = useWindowDimensions();
   const theme = createTheme({
     palette: {
       brown: {
@@ -77,7 +81,6 @@ function Start({
     e.preventDefault();
     if (botDiff === 0) setBotDiff(MIN_BOT_DIFF);
     setShowModal(false);
-    setIsLoadingGame(true);
     const host = import.meta.env.VITE_GAME_HOST ?? "http://localhost:8080";
     const secure = import.meta.env.VITE_NODE_ENV == "production";
     const options = { transports: ["websocket"], secure };
@@ -95,6 +98,8 @@ function Start({
           setColor(config.color);
           setRoomId(config.id);
           setIsLoadingGame(false);
+          if ("rank" in config)
+            setRank(config.rank);
         });
 
         const tmpData = {
@@ -104,6 +109,7 @@ function Start({
         tmpData.type = mode; //ho messo sta riga perche' mi dava dei bug
 
         socket.emit("start", tmpData);
+        setIsLoadingGame(true);
       });
       navigator("../game", { relative: "path" });
     }
@@ -275,14 +281,15 @@ function Start({
           backgroundRepeat: "no-repeat",
           backgroundColor: `${getShowOptions() ? "#b99b69" : ""}`,
           width: "100vw",
-          height: "100vh",
+          minHeight: "100vh",
+          paddingBottom: "20px",
         }}
       >
         <ThemeProvider theme={theme}>
           <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : ""}` }}>
             {!getShowOptions() ? (
               <>
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: `${width<600?"column":"row"}`}}>
                   <Image
                     src={`${ImageScacchi}`}
                     alt="immagine di scacchi"
@@ -293,12 +300,12 @@ function Start({
                       marginTop: "-5px",
                     }}
                   />
-                  <span style={{ color: "white", fontSize: "5rem" }}>
+                  <span style={{ color: "white", fontSize: `${width<600?"2rem":"5rem"}`}}>
                     ChessVerse
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <p style={{ color: "white", fontSize: "3rem" }}>
+                  <p style={{ color: "white", fontSize: `${width<600?"1.2rem":"3rem"}`}}>
                     Challenge yourself, Challenge the world
                   </p>
                 </div>
@@ -363,7 +370,7 @@ function Start({
                     marginTop: "-20px",
                   }}
                 >
-                  <p style={{ color: "white", fontSize: "4rem" }}>
+                  <p style={{ color: "white", fontSize: `${width<600?"2.5rem":"4rem"}`}}>
                     Choose an option:
                   </p>
                 </div>
@@ -398,7 +405,6 @@ function Start({
                       ) {
                         setMode(DAILY);
                         setBotDiff(MIN_BOT_DIFF);
-                        setIsLoadingGame(true);
                         const host = import.meta.env.VITE_GAME_HOST;
                         const secure =
                           import.meta.env.VITE_NODE_ENV == "production";
@@ -444,7 +450,6 @@ function Start({
                     onClick={() => {
                       setMode(WEEKLY);
                       setBotDiff(MIN_BOT_DIFF);
-                      setIsLoadingGame(true);
                       const host = import.meta.env.VITE_GAME_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
@@ -480,7 +485,6 @@ function Start({
                     onClick={() => {
                       setMode(RANKED);
                       setBotDiff(MIN_BOT_DIFF);
-                      setIsLoadingGame(true);
                       const host = import.meta.env.VITE_GAME_HOST;
                       const secure =
                         import.meta.env.VITE_NODE_ENV == "production";
