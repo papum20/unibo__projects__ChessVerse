@@ -25,14 +25,13 @@ pipeline {
 }
 stage('Setup DB') {
     steps {
-        dir('db'){
+        dir('./db'){
              sh '''
             if [ $(docker ps -a -q -f name=mysql) ]; then
                 docker stop mysql
                 docker rm mysql
             fi
             '''
-            
             sh '''
             docker-compose up -d
             '''
@@ -43,10 +42,7 @@ stage('Setup DB') {
         steps {
             script {
                 sh '''
-                until mysql -hmysql -uroot -proot -e 'select 1'; do
-                    echo "Waiting for MySQL to start"
-                    sleep 5
-                done
+                docker exec mysql mysqladmin --silent --wait=30 -uroot -proot ping || exit 1
                 '''
             }
         }
