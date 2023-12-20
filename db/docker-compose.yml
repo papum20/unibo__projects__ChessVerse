@@ -60,5 +60,6 @@ services:
 networks:
   default:
     name: chessverse
+  chessverse:
   cas-network:
     external: true
