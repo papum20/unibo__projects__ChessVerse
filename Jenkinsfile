@@ -35,11 +35,6 @@ pipeline {
 
         stage('Migrate DB') {
             steps {
-                when {
-				anyOf {
-					branch "main"
-				}
-			}
                 dir('code/api'){
                     sh 'pip3 install -r requirements.txt'
                     sh 'python3.12 manage.py makemigrations'
