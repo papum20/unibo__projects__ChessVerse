@@ -36,9 +36,6 @@ stage('Setup DB') {
             sh '''
             docker-compose up -d
             '''
-            sh '''
-            docker exec -i mysql mysql -h 127.0.0.1 -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
-            '''
         }
     }
 }
