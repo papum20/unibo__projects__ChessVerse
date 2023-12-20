@@ -42,7 +42,7 @@ stage('Setup DB') {
         steps {
             script {
                 sh '''
-                docker exec mysql mysqladmin --verbose --wait=30 -uroot -proot ping || exit 1
+                docker exec -it mysql mysqladmin  --verbose --wait=30 -uroot -proot ping || exit 1
                 '''
             }
         }
