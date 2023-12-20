@@ -39,18 +39,18 @@ stage('Setup DB') {
         }
     }
 }
-stage('Check MySQL') {
-    steps {
-        script {
-            sh '''
-            until mysql -hmysql -uroot -proot -e 'select 1'; do
-                echo "Waiting for MySQL to start"
-                sleep 5
-            done
-            '''
+    stage('Check MySQL') {
+        steps {
+            script {
+                sh '''
+                until mysql -hmysql -uroot -proot -e 'select 1'; do
+                    echo "Waiting for MySQL to start"
+                    sleep 5
+                done
+                '''
+            }
         }
     }
-}
         stage('Migrate DB') {
 
             steps {
