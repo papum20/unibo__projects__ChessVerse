@@ -10,24 +10,33 @@ pipeline {
         stage('Cleanup previous DB') {
             steps {
                 script {
-                    sh '''
-                    docker stop mysql
-                    docker rm mysql
-                    '''
+                    sh 'docker-compose down'
                 }
             }
         }
-        stage('Setup DB') {
+        stage('Build and Run MySQL') {
             steps {
-                script {
-                    sh '''
-                    docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:5.7
-                    '''
-                    sh 'sleep 30'
-                    sh '''
-                    docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
-                    '''
-                }
+                sh 'docker-compose up -d mysql'
+            }
+        }
+
+        stage('Wait for MySQL') {
+            steps {
+                sh '''
+                    for i in {1..30}; do
+                        if docker exec mysql mysqladmin ping -h localhost; then
+                            break
+                        else
+                            sleep 1
+                        fi
+                    done
+                '''
+            }
+        }
+
+        stage('Run Migrations') {
+            steps {
+                sh 'docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"'
             }
         }
 
