@@ -18,6 +18,38 @@ services:
        - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - cas-network
+    game:
+      depends_on:
+        mysql:
+          condition: service_healthy
+      container_name: game
+      restart: always
+      build:
+        context: ../code/game
+        dockerfile: Dockerfile
+      ports:
+        - "8080:8080"
+    api:
+      depends_on:
+        mysql:
+          condition: service_healthy
+      container_name: api
+      restart: always
+      build:
+        context: ../code/api
+        dockerfile: Dockerfile
+      ports:
+        - "8000:8000"
+    app:
+      container_name: app
+      restart: always
+      build:
+        context: ./code/app
+        dockerfile: Dockerfile
+      env_file: ./env/app.env
+      ports:
+        - "3000:3000"
+
 networks:
   cas-network:
     external: true
