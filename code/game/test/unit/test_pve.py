@@ -4,20 +4,25 @@ from unittest import mock
 from unittest.mock import AsyncMock, PropertyMock
 
 import sys
-
+import random
 import chess
 import socketio
 
 sys.path.append("../..")
 from PVEGame import PVEGame
 from Game import Game
+from const import MODE_RANKED_PT_DIFF
 
+import os
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+target_dir = "/".join(project_root.split("/")[:-1])
+os.chdir(target_dir)
 
 class TestInitialization(TestCase):
     @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
     def setUp(self, mock_gen_start_fen):
-        self.player = "guest"
-        self.sid = "test_sid"
+        self.player = "".join(random.choice("0123456789abcdef") for _ in range(16))
+        self.sid = "".join(random.choice("0123456789abcdef") for _ in range(16))
         self.rank = 1
         self.depth = 5
         self.time = 100
@@ -39,14 +44,28 @@ class TestInitialization(TestCase):
         self.assertEqual(Game.games[self.sid].turn, 0)
 
 
+class TestGetNewRanked(unittest.TestCase):
+    def setUp(self):
+        self.cur_ranked = 1
+
+    def test_with_outcome_none(self):
+        self.assertEqual(self.cur_ranked + MODE_RANKED_PT_DIFF[1], PVEGame.get_new_ranked(self.cur_ranked, None))
+
+    def test_with_outcome_true(self):
+        self.assertEqual(self.cur_ranked + MODE_RANKED_PT_DIFF[0], PVEGame.get_new_ranked(self.cur_ranked, True))
+
+    def test_with_outcome_false(self):
+        self.assertEqual(self.cur_ranked + MODE_RANKED_PT_DIFF[2], PVEGame.get_new_ranked(self.cur_ranked, False))
+
+
 class TestStart(IsolatedAsyncioTestCase):
     @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
     def setUp(self, mock_gen_start_fen):
-        self.player = "guest"
+        self.player = "".join(random.choice("0123456789abcdef") for _ in range(16))
+        self.sid = "".join(random.choice("0123456789abcdef") for _ in range(16))
         self.rank = 1
         self.depth = 5
         self.time = 100
-        self.sid = "test_sid"
         Game.sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
         self.mock_emit = AsyncMock()
         Game.sio.emit = self.mock_emit
@@ -82,6 +101,7 @@ class TestStart(IsolatedAsyncioTestCase):
         data = {"rank": self.rank, "depth": self.depth, "time": self.time}
         Game.sid_to_id[self.sid] = self.sid
         await PVEGame.start(self.sid, data)
+        self.assertTrue(self.sid in Game.sid_to_id)
         Game.sio.emit.assert_called_once_with(
             "error", {"cause": "SID already used", "fatal": True}, room=self.sid
         )
@@ -90,10 +110,8 @@ class TestStart(IsolatedAsyncioTestCase):
     async def test_correct_start(self):
         data = {"rank": self.rank, "depth": self.depth, "time": self.time}
         await PVEGame.start(self.sid, data)
-        self.assertTrue(self.sid in Game.sid_to_id)
-        # self.assertIsNotNone(Game.games[self.sid].bot)
         Game.sio.emit.assert_called_once_with(
-            "config", {"fen": Game.games[self.sid].fen}, room=self.sid
+            "config", {"fen": Game.games[self.sid].fen, "rank": -1}, room=self.sid
         )
 
 
@@ -144,10 +162,12 @@ class TestInstantiateBot(IsolatedAsyncioTestCase):
             self.sid, self.rank, self.depth, self.time
         )
 
-    # @mock.patch('chess.engine.popen_uci')
-    # async def test(self, mock_popen):
-    # await self.game.instantiate_bot()
-    # mock_popen.assert_awaited_once_with('./stockfish')
+    '''
+    @mock.patch('chess.engine.popen_uci')
+    async def test(self, mock_popen):
+        await self.game.instantiate_bot()([call(1, 2, 3))
+        mock_popen.assert_called_once_with('./stockfish')
+    '''
 
 
 class TestMove(IsolatedAsyncioTestCase):
@@ -246,7 +266,8 @@ class TestPop(IsolatedAsyncioTestCase):
             "error", {"cause": "No moves to undo"}, room=self.sid
         )
 
-    async def test_correct_pop(self):
+    @mock.patch("Game.Game.get_times", return_value=[1, 2, 3])
+    async def test_correct_pop(self, mock_get_times):
         self.game.popped = False
         self.game.board.push_uci("e2e4")
         self.game.board.push_uci("e7e5")
@@ -254,7 +275,7 @@ class TestPop(IsolatedAsyncioTestCase):
 
         await self.game.pop(self.sid)
         self.assertTrue(self.game.popped)
-        Game.sio.emit.assert_called_once_with("pop", {}, room=self.sid)
+        Game.sio.emit.assert_called_once_with("pop", {"time": [1, 2, 3]}, room=self.sid)
 
 
 if __name__ == "__main__":

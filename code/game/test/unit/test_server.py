@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase, IsolatedAsyncioTestCase, mock
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 import datetime
 
 import sys
@@ -12,7 +12,6 @@ from Game import Game
 from PVEGame import PVEGame
 from PVPGame import PVPGame
 from const import GameType
-
 
 class TestSid2Game(TestCase):
     ...
@@ -96,17 +95,17 @@ class TestOnStart(IsolatedAsyncioTestCase):
 
     @mock.patch("PVEGame.PVEGame.start")
     @mock.patch("server.GameHandler.daily_seed", return_value=0)
-    async def test_gametype_daily(self, mock_daily_start):
+    async def test_gametype_daily(self, mock_daily_seed, mock_daily_start):
         data = {"type": GameType.DAILY}
         await self.server.on_start(self.sid, data)
-        mock_daily_start.assert_called_once_with(self.sid, data, 0, GameType.DAILY)
+        mock_daily_start.assert_called_once_with(self.sid, data, seed=0, type=GameType.DAILY)
 
     @mock.patch("PVEGame.PVEGame.start")
     @mock.patch("server.GameHandler.weekly_seed", return_value=0)
-    async def test_gametype_daily(self, mock_weekly_start):
+    async def test_gametype_weekly(self, mock_weekly_seed, mock_weekly_start):
         data = {"type": GameType.WEEKLY}
         await self.server.on_start(self.sid, data)
-        mock_weekly_start.assert_called_once_with(self.sid, data, 0, GameType.WEEKLY)
+        mock_weekly_start.assert_called_once_with(self.sid, data, seed=0, type=GameType.WEEKLY)
 
     async def test_error(self):
         await self.server.on_start(self.sid, {"type": None})
@@ -142,7 +141,7 @@ class TestOnMove(IsolatedAsyncioTestCase):
     """
 
     @mock.patch("server.GameHandler.sid2game", return_value=None)
-    async def test_game_not_found(self):
+    async def test_game_not_found(self, mock_sid2game):
         await self.server.on_move(self.sid, {"type": "some_data"})
         Game.sio.emit.assert_called_once_with(
             "error", {"cause": "Game not found", "fatal": True}, room=self.sid
@@ -212,19 +211,26 @@ class TestOnPop(IsolatedAsyncioTestCase):
 
 
 class TestDailySeed(unittest.TestCase):
-    @mock.patch('datetime.date.today', return_value=datetime.date(2023, 12, 17))
-    def test_method_returns_correctly(self):
+    @mock.patch('datetime.date')
+    def test_daily_seed(self, mock_date):
+        mock_date_obj = MagicMock()
+        mock_date_obj.year = 2023
+        mock_date_obj.month = 12
+        mock_date_obj.day = 17
+        mock_date.today.return_value = mock_date_obj
         expected_seed = 2023 * 10000 + 12 * 100 + 17
         self.assertEqual(expected_seed, GameHandler.daily_seed())
 
 
 class TestWeeklySeed(unittest.TestCase):
-    @mock.patch('datetime.date.today', return_value=datetime.date(2023, 12, 17))
-    def test_method_returns_correctly(self):
-        week_number = datetime.date(2023, 12, 17).isocalendar()[1]
-        expected_seed = 2023 * 100 + week_number
-        self.assertEqual(expected_seed, GameHandler.daily_seed())
-
+    @mock.patch('datetime.date')
+    def test_weekly_seed(self, mock_date):
+        mock_date_obj = MagicMock()
+        mock_date_obj.isocalendar.return_value = (2023, 50, 1)
+        mock_date_obj.year = 2023
+        mock_date.today.return_value = mock_date_obj
+        expected_seed = 2023 * 100 + 50
+        self.assertEqual(expected_seed, GameHandler.weekly_seed())
 
 class TestCleaner(IsolatedAsyncioTestCase):
     ...

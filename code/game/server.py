@@ -27,7 +27,7 @@ class GameHandler:
                 return None
         return None
 
-    async def on_connect(self, sid, environ):
+    async def on_connect(self, sid):
         print("connect", sid)
         await Game.sio.emit("connected", room=sid)
 
@@ -47,13 +47,10 @@ class GameHandler:
                     await Game.games[game_id].disconnect(sid)
     
     def daily_seed():
-        # Otteniamo la data corrente
         today = datetime.date.today()
-        # Estraiamo anno, mese e giorno
         year = today.year
         month = today.month
         day = today.day
-        # Combiniamo anno, mese e giorno per creare il seed
         seed = year * 10000 + month * 100 + day
         return seed
     
@@ -70,7 +67,7 @@ class GameHandler:
     async def on_start(self, sid, data): 
         daily_seed = GameHandler.daily_seed()
         weekly_seed = GameHandler.weekly_seed()
-        print("start", GameType(data["type"]).name, sid)
+        print("start", sid)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
@@ -108,7 +105,7 @@ class GameHandler:
             return
         await game.move(sid, data)
 
-    async def on_resign(self, sid, data):
+    async def on_resign(self, sid):
         print("resign", sid)
         await self.on_disconnect(sid)
 
