@@ -7,23 +7,18 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Cleanup previous DB') {
-        steps {
-            script {
-                sh '''
-                if [ $(docker ps -a -q -f name=mysql) ]; then
-                    docker stop mysql
-                    docker rm mysql
-                fi
-                '''
-            }
-        }
-    }
- stage('Setup DB') {
+     
+stage('Setup DB') {
     steps {
         script {
             sh '''
-            docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:latest
+            if [ $(docker ps -a -q -f name=mysql) ]; then
+                docker stop mysql
+                docker rm mysql
+            fi
+            '''
+            sh '''
+            docker-compose up -d
             '''
             sh '''
             echo "Waiting for mysql to be ready..."
@@ -34,9 +29,6 @@ pipeline {
                 sleep 5
                 attempt=$(( attempt + 1 ))
             done
-            '''
-            sh '''
-            docker exec -i mysql mysql -uroot -proot --execute="INSERT INTO mysql.user (Host, User) VALUES ('%', 'root'); ALTER USER 'root'@'%' IDENTIFIED BY 'root'; GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
             '''
             sh '''
             docker exec -i mysql mysql -uroot -proot --execute="CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
