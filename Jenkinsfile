@@ -25,7 +25,7 @@ pipeline {
 }
 stage('Setup DB') {
     steps {
-        dir('./db'){
+        dir('db/'){
              sh '''
             if [ $(docker ps -a -q -f name=mysql) ]; then
                 docker stop mysql
