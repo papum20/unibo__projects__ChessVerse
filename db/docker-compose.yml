@@ -4,7 +4,7 @@ services:
   mysql:
     container_name: mysql
     build:
-      context: ./code/database/
+      context: ../code/database/
       dockerfile: Dockerfile
     ports:
       - "3306:3306"
