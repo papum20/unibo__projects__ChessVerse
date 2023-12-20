@@ -11,8 +11,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker stop mysql
-                    docker rm mysql
+                    docker-compose -f docker-compose.yml down
                     '''
                 }
             }
@@ -21,17 +20,12 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql:5.7
+                    docker-compose -f docker-compose.yml up -d
                     '''
                     sh 'sleep 30'
-                    sh '''
-                    docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db; USE users_db;"
-                    '''
                 }
             }
         }
-
-        
 
         stage('Migrate DB') {
             steps {
@@ -43,24 +37,6 @@ pipeline {
             }
         }
 
-        // stage('Build and Test App') {
-		// 	when {
-		// 		anyOf {
-		// 			branch "main"
-		// 			branch "testing"
-		// 			branch "dev-app"
-		// 		}
-		// 	}
-        //     steps {
-        //         dir('code/app') {
-        //             nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-        //                 sh 'npm install'
-        //                 sh 'npm run coverage:prod'
-        //             }
-        //         }
-        //     }
-        // }
-
         stage('Build and Test api backend') {
 			when {
 				anyOf {
@@ -71,7 +47,6 @@ pipeline {
 			}
             steps {
                 dir('code/api') {
-                    // Add your Python testing commands here
                     sh 'python3.12 manage.py test'
                 }
             }
@@ -90,7 +65,6 @@ pipeline {
                     sh 'pip3 install -r requirements.txt'
                 }
                 dir('code/game/test/unit') {
-                    // to fix
                     sh 'python3.12 -m unittest unit_test.TestChessSocketIO'
                 }
             }
@@ -99,8 +73,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker stop mysql
-                    docker rm mysql
+                    docker-compose -f ./code/database/docker-compose.yml down
                     '''
                 }
             }
@@ -128,4 +101,3 @@ pipeline {
 
     }
 }
-
