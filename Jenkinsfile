@@ -8,15 +8,17 @@ pipeline {
             }
         }
         stage('Cleanup previous DB') {
-            steps {
-                script {
-                    sh '''
+        steps {
+            script {
+                sh '''
+                if [ $(docker ps -a -q -f name=mysql) ]; then
                     docker stop mysql
                     docker rm mysql
-                    '''
-                }
+                fi
+                '''
             }
         }
+    }
         stage('Setup DB') {
             steps {
                 script {
