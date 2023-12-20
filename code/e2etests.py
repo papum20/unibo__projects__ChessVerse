@@ -157,7 +157,7 @@ class ChessverseE2ETest(unittest.TestCase):
         playAsGuest_button = wait.until(EC.presence_of_element_located((By.ID, 'play-as-guest')))
         playAsGuest_button.click()
         wait.until(EC.url_changes(self.driver.current_url))
-        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
- 
+        self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')     
+        
 if __name__ == "__main__":
     unittest.main()
