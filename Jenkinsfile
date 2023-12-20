@@ -55,6 +55,15 @@ stage('Install MySQL Client') {
         }
     }
 }
+stage('Create DB') {
+    steps {
+        script {
+            sh '''
+            mysql -hmysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db;"
+            '''
+        }
+    }
+}
         stage('Migrate DB') {
 
             steps {

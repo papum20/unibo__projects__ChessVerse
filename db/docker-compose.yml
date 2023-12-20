@@ -15,7 +15,7 @@ services:
       timeout: 5s
       retries: 160
     volumes:
-       - ./initdb:/docker-entrypoint-initdb.d
+       - ./init:/docker-entrypoint-initdb.d
     networks:
       - cas-network
       - chessverse 
