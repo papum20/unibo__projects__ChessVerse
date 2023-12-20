@@ -24,8 +24,8 @@ pipeline {
 }
 stage('Setup DB') {
     steps {
-        script {
-            sh '''
+        dir('db'){
+             sh '''
             if [ $(docker ps -a -q -f name=mysql) ]; then
                 docker stop mysql
                 docker rm mysql
@@ -40,8 +40,6 @@ stage('Setup DB') {
         }
     }
 }
-
-        
 
         stage('Migrate DB') {
             steps {
