@@ -19,6 +19,15 @@ pipeline {
                 chmod +x /usr/local/bin/docker-compose
             fi
             '''
+             sh '''
+            if ! command -v mysql &> /dev/null
+            then
+                echo "mysql could not be found"
+                echo "Installing mysql-server"
+                sudo apt-get update
+                sudo apt-get install -y mysql-server
+            fi
+            '''
         }
     }
 }
@@ -31,6 +40,7 @@ stage('Setup DB') {
                 docker rm mysql
             fi
             '''
+            
             sh '''
             docker-compose up -d
             '''
