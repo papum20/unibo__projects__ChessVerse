@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase, IsolatedAsyncioTestCase
 from unittest import mock
-from unittest.mock import AsyncMock, PropertyMock, call
+from unittest.mock import AsyncMock, PropertyMock
 
 import sys
 import chess
