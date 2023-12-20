@@ -50,7 +50,7 @@ stage('Install MySQL Client') {
     steps {
         script {
             sh '''
-            mysqladmin --verbose --wait=30 -h mysql -uroot -proot ping || exit 1
+            mysqladmin --verbose --wait=30 -hmysql -uroot -proot ping || exit 1
             '''
         }
     }
