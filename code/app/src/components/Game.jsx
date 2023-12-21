@@ -289,21 +289,6 @@ function Game({
                     : "gray"
                 }`}
               />
-              {mode === RANKED && (
-                <>
-                  <p>
-                    {modalType === "gameover"
-                      ? -RANKED_SCORE_LOSS
-                      : modalType === "won"
-                      ? +RANKED_SCORE_WIN
-                      : RANKED_SCORE_TIE}
-                  </p>
-                  <FaCrown
-                    style={{ marginTop: "-8px", color: "yellow" }}
-                    size="25"
-                  />
-                </>
-              )}
             </div>
             {timerOut && (
               <p
@@ -329,15 +314,15 @@ function Game({
                 }}
               >
                 {modalType === "gameover" ? 
-                - 2
+                "- 2"
                 :
                 modalType === "won" ?
-                + 8
+                "+ 8"
                 : 
-                + 0
+                "+ 0"
                 }
                 <FaCrown
-                    style={{ marginTop: "-4px", color: "yellow", marginRight: "5px" }}
+                    style={{ marginTop: "2px", color: "yellow", marginRight: "5px", marginLeft: "5px" }}
                     size="25"
                   />
               </p>
@@ -367,35 +352,23 @@ function Game({
                     Return to menu
                   </Button>
                 </Nav.Link>
-                {mode === PVP ||
-                  (mode === PVE && (
-                    <div style={{ marginTop: "10px" }}>
-                      <Social
-                        url={import.meta.env.VITE_APP_HOST + location.pathname}
-                        modalType={modalType}
-                        enemyUser={enemyUsername}
-                        diff={`${
-                          mode === PVE
-                            ? data.depth
-                            : mode === DAILY || mode === WEEKLY
-                            ? `${Math.floor(numMoves / 2) + 1}`
-                            : `${color === "white" ? elo[0] : elo[1]}`
-                        }`}
-                        mode={mode}
-                      />
-                    </div>
-                  ))}
-                {mode === RANKED && (
-                  <div style={{ marginTop: "10px" }}>
-                    <Social
-                      url={import.meta.env.VITE_APP_HOST + location.pathname}
-                      modalType={modalType}
-                      enemyUser={enemyUsername}
-                      diff={0} /*fetch ranked points*/
-                      mode={mode}
-                    />
-                  </div>
-                )}
+                <div style={{ marginTop: "10px" }}>
+                  <Social
+                    url={import.meta.env.VITE_APP_HOST + location.pathname}
+                    modalType={modalType}
+                    enemyUser={enemyUsername}
+                    diff={`${
+                      mode === PVE
+                        ? data.depth
+                        : mode === DAILY || mode === WEEKLY
+                        ? `${Math.floor(numMoves / 2) + 1}`
+                        : mode === RANKED
+                        ? `${rank}`
+                        : `${color === "white" ? elo[0] : elo[1]}`
+                    }`}
+                    mode={mode}
+                  />
+                </div>
               </ThemeProvider>
             </div>
           </Modal.Body>

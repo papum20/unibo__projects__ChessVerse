@@ -25,13 +25,18 @@ class PVEGame(Game):
         self.type = type
 
     @staticmethod
-    def get_new_ranked(cur_ranked:int, outcome:Optional[bool]) -> Tuple[int,int]:
+    def get_new_ranked(cur_ranked:int, outcome:chess.Outcome) -> Tuple[int,int]:
+        new_rank = None
         if outcome is None:
-            return cur_ranked + MODE_RANKED_PT_DIFF[1]
-        elif outcome:
-            return cur_ranked + MODE_RANKED_PT_DIFF[0]
+            new_rank = cur_ranked + MODE_RANKED_PT_DIFF[2]
+        elif outcome.winner is None:
+            new_rank = cur_ranked + MODE_RANKED_PT_DIFF[1]
+        elif outcome.winner:
+            new_rank = cur_ranked + MODE_RANKED_PT_DIFF[0]
         else:
-            return cur_ranked + MODE_RANKED_PT_DIFF[2]
+            new_rank = cur_ranked + MODE_RANKED_PT_DIFF[2]
+        print(new_rank)
+        return min(max(new_rank, 0), 100)
 
     @classmethod
     async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
