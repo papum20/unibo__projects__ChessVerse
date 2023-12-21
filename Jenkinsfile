@@ -104,6 +104,8 @@ stage('Create DB') {
             steps {
                 dir('code/api') {
                     // Add your Python testing commands here
+                    sh 'apt-get update'
+                    sh 'apt-get install libsqlite3-dev'
                     sh 'coverage run manage.py test'
                     sh 'coverage xml -i'
                 }
