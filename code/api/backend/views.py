@@ -167,7 +167,6 @@ def get_daily_leaderboard(request):
 
 def get_weekly_leaderboard(request):
     if request.method == "GET":
-        try:
             # Get the date from the query parameter
             query_date_str = request.GET.get('date', None)
             if query_date_str is None:
@@ -184,9 +183,6 @@ def get_weekly_leaderboard(request):
             return JsonResponse(
                 {"weekly_leaderboard": list(weekly_leaderboard)}, status=200
             )
-        except Exception as e:
-            # Return an error response for any exception
-            return JsonResponse({"message": str(e)}, status=500)
     else:
         # Return an error response for invalid request methods
         return JsonResponse({"message": "Invalid request method"}, status=405)

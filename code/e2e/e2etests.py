@@ -32,6 +32,7 @@ class ChessverseE2ETest(unittest.TestCase):
         wait.until(EC.url_changes(self.driver.current_url))
         self.assertEqual(self.driver.current_url, 'https://www.chessverse.cloud/options')
     
+    
     def test_login_wrongCredentials(self):
         #checks if when the user logs in with wrong credentials he is redirected to the login page
         self.driver.get('https://www.chessverse.cloud/login') 
