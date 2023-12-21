@@ -1,4 +1,5 @@
 [run]
+source = .
 # Include only views.py and models.py
 include = 
     */views.py
