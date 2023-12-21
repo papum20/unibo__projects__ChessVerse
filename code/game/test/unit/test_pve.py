@@ -405,7 +405,57 @@ class TestDisconnectWeekly(IsolatedAsyncioTestCase):
         )
         self.mock_bot = self.game.bot = AsyncMock()
 
+    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("PVEGame.PVEGame.current_week_and_year", return_value=5)
+    @mock.patch("Game.Game.execute_query")
+    async def test_method_retrieves_user_information(self, mock_query, mock_week_and_year, mock_get_username):
+        await self.game.disconnect_weekly(self.sid, None)
+        mock_get_username.assert_called_once_with(self.sid)
+        mock_week_and_year.assert_called_once()
+        mock_query.assert_any_call(
+            "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s AND challenge_date = %s",
+            ('test_user', 5)
+        )
 
+    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("PVEGame.PVEGame.current_week_and_year", return_value=5)
+    @mock.patch("Game.Game.execute_query")
+    @mock.patch("PVEGame.PVEGame.current")
+    async def test_query_with_none_result(self, mock_current, mock_query, mock_week_and_year, mock_get_username):
+        type(mock_current).move_count = PropertyMock(
+            return_value=10
+        )
+        await self.game.disconnect_weekly(self.sid, None)
+        mock_query.assert_any_call(
+            "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
+            (
+                'test_user',
+                10,
+                5,
+                'loss'
+            )
+        )
+
+    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("PVEGame.PVEGame.current_week_and_year", return_value=5)
+    @mock.patch("Game.Game.execute_query", return_value='valid_result')
+    @mock.patch("PVEGame.PVEGame.current")
+    async def test_query_with_valid_result(self, mock_current, mock_query, mock_week_and_year, mock_get_username):
+        type(mock_current).move_count = PropertyMock(
+            return_value=10
+        )
+        await self.game.disconnect_weekly(self.sid, None)
+        mock_query.assert_called_with(
+            """
+                UPDATE backend_weeklyleaderboard
+                SET moves_count = %s, result = %s
+                WHERE username = %s AND challenge_date = %s
+                """,
+            (10,
+             "loss",
+             'test_user',
+             5)
+        )
 
 
 if __name__ == "__main__":
