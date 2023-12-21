@@ -103,6 +103,15 @@ stage('Create DB') {
 			}
             steps {
                dir('code/api') {
+                sh 'apt-get update'
+                sh 'apt-get install -y libsqlite3-dev'
+                sh 'wget https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tgz'
+                sh 'tar xzf Python-3.12.0.tgz'
+                dir('Python-3.12.0') {
+                    sh './configure'
+                    sh 'make'
+                    sh 'make install'
+                }
                     sh 'python3.12 -m coverage run manage.py test'
                     sh 'python3.12 -m coverage xml -i'
                 }
