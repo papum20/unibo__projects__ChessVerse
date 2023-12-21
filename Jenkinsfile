@@ -99,7 +99,7 @@ stage('E2E Tests') {
             if ! command -v /usr/bin/chromedriver &> /dev/null
             then
                 # Install Chrome WebDriver
-                CHROME_MAIN_VERSION=$(google-chrome-stable --version | sed -E 's/(^Google Chrome \\|\\.[0-9]+ )//g')
+                CHROME_MAIN_VERSION=$(google-chrome-stable --version | sed -E 's/Google Chrome ([0-9]+).*/\1/')
                 wget https://chromedriver.storage.googleapis.com/$CHROME_MAIN_VERSION/chromedriver_linux64.zip
                 unzip chromedriver_linux64.zip
                 mv chromedriver /usr/bin/chromedriver
