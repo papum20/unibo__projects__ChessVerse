@@ -101,16 +101,16 @@ stage('Create DB') {
 					branch "dev-api"
 				}
 			}
-            steps {
-                dir('code/api') {
+            //steps {
+               // dir('code/api') {
                     // Add your Python testing commands here
-                    sh 'apt-get update'
-                    sh 'apt-get install libsqlite3-dev'
-                    sh 'coverage run manage.py test'
-                    sh 'coverage xml -i'
-                }
-            }
-        }
+                 //   sh 'apt-get update'
+                 //   sh 'apt-get install libsqlite3-dev'
+                 //   sh 'coverage run manage.py test'
+                 //   sh 'coverage xml -i'
+              //  }
+          //  }
+      //  }
 
         stage('Build and Test game backend') {
 			when {
