@@ -101,6 +101,14 @@ stage('Create DB') {
             branch "dev-api"
         }
     }
+  stage('Build and Test api backend') {
+    when {
+        anyOf {
+            branch "main"
+            branch "testing"
+            branch "dev-api"
+        }
+    }
     steps {
         dir('code/api') {
             sh 'apt-get update'
@@ -113,6 +121,7 @@ stage('Create DB') {
                             sh 'make'
                             sh 'make altinstall'
                         }
+                        sh 'rm -rf Python-3.12.0'
                     fi
                 fi
             '''
@@ -120,6 +129,7 @@ stage('Create DB') {
             sh 'python3.12 -m coverage xml -i'
         }
     }
+}
 
         stage('Build and Test game backend') {
 			when {
