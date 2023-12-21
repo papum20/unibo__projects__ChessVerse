@@ -110,7 +110,8 @@ stage('E2E Tests') {
             cd code/e2e
 
             # Run your E2E tests
-            python e2etests.py
+            pip3 install -r requirements.txt
+            python3.12 e2etests.py
             '''
         }
     }
