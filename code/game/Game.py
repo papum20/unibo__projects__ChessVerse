@@ -188,7 +188,7 @@ class Game(ABC):
                 (current["session_id"],)
             )
         if opponent["session_id"] is not None:
-            field = "GamesLost" if outcome is not None else "GamesLost"
+            field = "GamesLost" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
                 (opponent["session_id"],)

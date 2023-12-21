@@ -7,7 +7,7 @@ pipeline {
                 checkout scm
             }
         }
-     stage('Setup') {
+stage('Setup') {
     steps {
         script {
             sh '''
@@ -74,40 +74,75 @@ stage('Create DB') {
                 }
             }
         }
-
-        // stage('Build and Test App') {
-		// 	when {
-		// 		anyOf {
-		// 			branch "main"
-		// 			branch "testing"
-		// 			branch "dev-app"
-		// 		}
-		// 	}
-        //     steps {
-        //         dir('code/app') {
-        //             nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-        //                 sh 'npm install'
-        //                 sh 'npm run coverage:prod'
-        //             }
-        //         }
-        //     }
-        // }
-
-        stage('Build and Test api backend') {
-			when {
-				anyOf {
-					branch "main"
-					branch "testing"
-					branch "dev-api"
-				}
-			}
-            steps {
-                dir('code/api') {
-                    // Add your Python testing commands here
-                    sh 'python3.12 manage.py test'
-                }
-            }
+stage('E2E Tests') {
+    when {
+        anyOf {
+            branch "main"
+            branch "testing"
+            branch "dev-game"
         }
+    }
+    steps {
+        script {
+            sh '''
+           # Check if Google Chrome is installed
+            if ! command -v google-chrome-stable &> /dev/null
+            then
+                # Install Google Chrome
+                wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+                echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+                apt-get update
+                apt-get install -y google-chrome-stable
+            fi
+
+            # Check if Chrome WebDriver is installed
+            if ! command -v /usr/bin/chromedriver &> /dev/null
+            then
+
+                # Download and install Chrome WebDriver
+                wget "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/120.0.6099.109/linux64/chromedriver-linux64.zip" -O chromedriver_linux64.zip
+                unzip chromedriver_linux64.zip
+                mv chromedriver /usr/bin/chromedriver
+                chown root:root /usr/bin/chromedriver
+                chmod +x /usr/bin/chromedriver
+            fi
+
+            # Navigate to the directory containing your E2E tests
+            cd code/e2e
+
+            # Run your E2E tests
+            pip3 install -r requirements.txt
+            python3.12 e2etests.py
+
+            '''
+        }
+    }
+}
+
+
+stage('Build and Test api backend') {
+    when {
+        anyOf {
+            branch "main"
+            branch "testing"
+            branch "dev-api"
+        }
+    }
+    steps {
+        dir('code/api') {
+            sh 'python3.12 -m coverage run manage.py test'
+            sh 'python3.12 -m coverage xml -i'
+            sh '''
+                if [ -f "coverage.xml" ]; then
+                    echo "coverage.xml file is created."
+                    echo "Path: $(pwd)/coverage.xml"
+                else
+                    echo "coverage.xml file is not created."
+                fi
+            '''
+        }
+    }
+}
 
         stage('Build and Test game backend') {
 			when {
@@ -122,8 +157,8 @@ stage('Create DB') {
                     sh 'pip3 install -r requirements.txt'
                 }
                 dir('code/game/test/unit') {
-                    // to fix
-                    sh 'python3.12 -m unittest test_*'
+                    sh 'python3.12 -m coverage run -m unittest '
+                    sh 'python3.12 -m coverage xml -i'
                 }
             }
         }
@@ -144,16 +179,16 @@ stage('Create DB') {
 					branch "testing"
 				}
 			}
-            steps {
-                nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-                    script {
-                        def scannerHome = tool 'SonarScanner4'
-                        withSonarQubeEnv("sonarqube") {
-                            sh "${scannerHome}/bin/sonar-scanner"
-                        }
+           steps {
+            nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
+                script {
+                    def scannerHome = tool 'SonarScanner4'
+                    withSonarQubeEnv("sonarqube") {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.verbose=true"
                     }
                 }
             }
+        }
         }
 
     }

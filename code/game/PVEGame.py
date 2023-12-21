@@ -25,7 +25,7 @@ class PVEGame(Game):
         self.type = type
 
     @staticmethod
-    def get_new_ranked(cur_ranked:int, outcome:chess.Outcome) -> Tuple[int,int]:
+    def get_new_ranked(cur_ranked:int, outcome:chess.Outcome) -> int:
         new_rank = None
         if outcome is None:
             new_rank = cur_ranked + MODE_RANKED_PT_DIFF[2]
