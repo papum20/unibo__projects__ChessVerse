@@ -19,9 +19,13 @@ stage('Setup') {
                 chmod +x /usr/local/bin/docker-compose
             fi
             '''
-        
-        } 
-         dir('db/'){
+           
+        }
+    }
+}
+stage('Setup DB') {
+    steps {
+        dir('db/'){
              sh '''
             if [ $(docker ps -a -q -f name=mysql) ]; then
                 docker stop mysql
@@ -32,31 +36,45 @@ stage('Setup') {
             docker-compose up -d
             '''
         }
+    }
+}
+stage('Install MySQL Client') {
+    steps {
         script {
             // Run the installation command for default-mysql-client
             sh 'apt-get update && apt-get install -y default-mysql-client'
         }
-         script {
+    }
+}
+    stage('Check MySQL') {
+    steps {
+        script {
             sh '''
             mysqladmin --verbose --wait=30 -hmysql -uroot -proot ping || exit 1
             '''
         }
+    }
+}
+stage('Create DB') {
+    steps {
         script {
             sh '''
             mysql -hmysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db;"
             '''
         }
-         steps {
+    }
+}
+        stage('Migrate DB') {
+
+            steps {
                 dir('code/api'){
                     sh 'pip3 install -r requirements.txt'
                     sh 'python3.12 manage.py makemigrations'
                     sh 'python3.12 manage.py migrate'
                 }
             }
+        }
 
-
-    }
-}
 
 stage('Build and Test api backend') {
     when {
