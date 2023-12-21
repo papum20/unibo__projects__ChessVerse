@@ -49,15 +49,26 @@ class TestInitialization(TestCase):
 class TestGetNewRanked(unittest.TestCase):
     def setUp(self):
         self.cur_ranked = 1
+        self.termination = chess.Termination.CHECKMATE
 
     def test_with_outcome_none(self):
-        self.assertEqual(self.cur_ranked + MODE_RANKED_PT_DIFF[1], PVEGame.get_new_ranked(self.cur_ranked, None))
+        expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[2], 0), 100)
+        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, None))
+
+    def test_with_outcome_winner_none(self):
+        outcome = chess.Outcome(self.termination, winner=None)
+        expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[1], 0), 100)
+        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome))
 
     def test_with_outcome_true(self):
-        self.assertEqual(self.cur_ranked + MODE_RANKED_PT_DIFF[0], PVEGame.get_new_ranked(self.cur_ranked, True))
+        outcome = chess.Outcome(self.termination, winner=True)
+        expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[0], 0), 100)
+        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome))
 
     def test_with_outcome_false(self):
-        self.assertEqual(self.cur_ranked + MODE_RANKED_PT_DIFF[2], PVEGame.get_new_ranked(self.cur_ranked, False))
+        outcome = chess.Outcome(self.termination, winner=False)
+        expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[2], 0), 100)
+        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome))
 
 
 class TestStart(IsolatedAsyncioTestCase):
@@ -374,6 +385,25 @@ class TestDisconnectDaily(IsolatedAsyncioTestCase):
             )
         )
 
+
+class TestDisconnectWeekly(IsolatedAsyncioTestCase):
+    @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
+    def setUp(self, mock_gen_start_fen):
+        self.player = "guest"
+        self.rank = 1
+        self.depth = 5
+        self.time = 100
+        self.sid = "test_sid"
+        Game.sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
+        self.mock_emit = AsyncMock()
+        Game.sio.emit = self.mock_emit
+
+        # Game instantiation
+        Game.sid_to_id[self.sid] = self.sid
+        self.game = Game.games[self.sid] = PVEGame(
+            self.sid, self.rank, self.depth, self.time, type=GameType.WEEKLY
+        )
+        self.mock_bot = self.game.bot = AsyncMock()
 
 if __name__ == "__main__":
     unittest.main()
