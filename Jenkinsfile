@@ -74,6 +74,42 @@ stage('Create DB') {
                 }
             }
         }
+stage('E2E Tests') {
+    steps {
+        script {
+            sh '''
+            # Check if Google Chrome is installed
+            if ! command -v google-chrome-stable &> /dev/null
+            then
+                # Install Google Chrome
+                wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+                echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+                apt-get update
+                apt-get install -y google-chrome-stable
+            fi
+
+            # Check if Chrome WebDriver is installed
+            if ! command -v /usr/bin/chromedriver &> /dev/null
+            then
+                # Install Chrome WebDriver
+                CHROME_MAIN_VERSION=$(google-chrome-stable --version | sed -E 's/(^Google Chrome |\.[0-9]+ )//g')
+                wget https://chromedriver.storage.googleapis.com/$CHROME_MAIN_VERSION/chromedriver_linux64.zip
+                unzip chromedriver_linux64.zip
+                mv chromedriver /usr/bin/chromedriver
+                chown root:root /usr/bin/chromedriver
+                chmod +x /usr/bin/chromedriver
+            fi
+
+            # Navigate to the directory containing your E2E tests
+            cd code/e2e
+
+            # Run your E2E tests
+            pip3 install -r requirements.txt
+            python e2etests.py
+            '''
+        }
+    }
+}
 
 
 stage('Build and Test api backend') {
