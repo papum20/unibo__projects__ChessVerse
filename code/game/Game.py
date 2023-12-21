@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from const import TIME_OPTIONS, DEFAULT_ELO
 from const import FIELDS
 
+
 def expected_score(rating_A, rating_B):
     return 1.0 / (1 + 10 ** ((rating_B - rating_A) / 400))
 
