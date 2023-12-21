@@ -96,15 +96,11 @@ stage('E2E Tests') {
             fi
 
             # Check if Chrome WebDriver is installed
-            rm /usr/bin/chromedriver
             if ! command -v /usr/bin/chromedriver &> /dev/null
             then
-                # Get the correct version of ChromeDriver
-                CHROME_VERSION=$(google-chrome-stable --version | awk '{ print $3 }' | cut -d '.' -f 1)
-                CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
 
                 # Download and install Chrome WebDriver
-                wget "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+                wget "https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip"
                 unzip chromedriver_linux64.zip
                 mv chromedriver /usr/bin/chromedriver
                 chown root:root /usr/bin/chromedriver
