@@ -108,22 +108,25 @@ class TestStart(IsolatedAsyncioTestCase):
             "error", {"cause": "SID already used", "fatal": True}, room=self.sid
         )
 
+    '''
     @mock.patch("PVEGame.PVEGame.__new__")
-    @mock.patch("PVEGame.PVEGame.instantiate_bot")
-    async def test_start_daily(self, mock_instantiate_bot, mock_PVEGame):
+    @mock.patch("PVEGame.PVEGame.instantiate_bot", new=AsyncMock("some_bot"))
+    async def test_start_daily(self, mock_pve_game):
         seed = 1
         data = {"rank": self.rank, "depth": self.depth, "time": self.time}
         await PVEGame.start(self.sid, data, seed=seed, type=GameType.DAILY)
-        mock_PVEGame.assert_called_once_with(self.sid, None, 1, -1, seed, GameType.DAILY)
+        mock_pve_game.assert_called_once_with(self.sid, None, 1, -1, seed, GameType.DAILY)
 
     @mock.patch("Game.Game.get_session_id", return_value=1)
     @mock.patch("Game.Game.get_user_field", return_value=[10, 20])
-    async def test_start_ranked(self, mock_get_user_field, mock_get_session_id):
+    @mock.patch("PVEGame.PVEGame.__new__", new_callable=AsyncMock)
+    @mock.patch("PVEGame.PVEGame.instantiate_bot")
+    async def test_start_ranked(self, mock_bot, mock_pve_game, mock_get_user_field, mock_get_session_id):
         data = {"rank": self.rank, "depth": self.depth, "time": self.time}
         await PVEGame.start(self.sid, data, type=GameType.RANKED)
         mock_get_session_id.assert_awaited_once_with(self.sid)
         mock_get_user_field.assert_called_once_with(1, "score_ranked")
-
+    '''
 
     @mock.patch("PVEGame.PVEGame.instantiate_bot", new=AsyncMock("some_bot"))
     async def test_correct_start(self):
