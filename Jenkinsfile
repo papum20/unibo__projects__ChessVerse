@@ -103,7 +103,6 @@ stage('Create DB') {
     }
     steps {
         dir('code/api') {
-            //sh 'rm -rf Python-3.12.0'
             sh 'python3.12 -m coverage run manage.py test'
             sh 'python3.12 -m coverage xml -i'
         }
@@ -123,7 +122,6 @@ stage('Create DB') {
                     sh 'pip3 install -r requirements.txt'
                 }
                 dir('code/game/test/unit') {
-                    // to fix
                     sh 'python3.12 -m coverage run -m unittest '
                     sh 'python3.12 -m coverage xml -i'
                 }
