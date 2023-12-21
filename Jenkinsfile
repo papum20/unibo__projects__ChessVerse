@@ -7,7 +7,7 @@ pipeline {
                 checkout scm
             }
         }
-     stage('Setup') {
+stage('Setup') {
     steps {
         script {
             sh '''
@@ -19,13 +19,9 @@ pipeline {
                 chmod +x /usr/local/bin/docker-compose
             fi
             '''
-           
-        }
-    }
-}
-stage('Setup DB') {
-    steps {
-        dir('db/'){
+        
+        } 
+         dir('db/'){
              sh '''
             if [ $(docker ps -a -q -f name=mysql) ]; then
                 docker stop mysql
@@ -36,62 +32,31 @@ stage('Setup DB') {
             docker-compose up -d
             '''
         }
-    }
-}
-stage('Install MySQL Client') {
-    steps {
         script {
             // Run the installation command for default-mysql-client
             sh 'apt-get update && apt-get install -y default-mysql-client'
         }
-    }
-}
-    stage('Check MySQL') {
-    steps {
-        script {
+         script {
             sh '''
             mysqladmin --verbose --wait=30 -hmysql -uroot -proot ping || exit 1
             '''
         }
-    }
-}
-stage('Create DB') {
-    steps {
         script {
             sh '''
             mysql -hmysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db;"
             '''
         }
-    }
-}
-        stage('Migrate DB') {
-
-            steps {
+         steps {
                 dir('code/api'){
                     sh 'pip3 install -r requirements.txt'
                     sh 'python3.12 manage.py makemigrations'
                     sh 'python3.12 manage.py migrate'
                 }
             }
-        }
 
-        // stage('Build and Test App') {
-		// 	when {
-		// 		anyOf {
-		// 			branch "main"
-		// 			branch "testing"
-		// 			branch "dev-app"
-		// 		}
-		// 	}
-        //     steps {
-        //         dir('code/app') {
-        //             nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
-        //                 sh 'npm install'
-        //                 sh 'npm run coverage:prod'
-        //             }
-        //         }
-        //     }
-        // }
+
+    }
+}
 
 stage('Build and Test api backend') {
     when {
