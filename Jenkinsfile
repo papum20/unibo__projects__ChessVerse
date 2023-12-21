@@ -102,7 +102,7 @@ stage('E2E Tests') {
                 # Download and install Chrome WebDriver
                 wget "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/120.0.6099.109/linux64/chromedriver-linux64.zip" -O chromedriver_linux64.zip
                 unzip chromedriver_linux64.zip
-                mv chromedriver /usr/bin/chromedriver
+                mv chromedriver-linux64/chromedriver /usr/bin/chromedriver
                 chown root:root /usr/bin/chromedriver
                 chmod +x /usr/bin/chromedriver
             fi
