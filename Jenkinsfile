@@ -144,12 +144,12 @@ stage('Create DB') {
 					branch "testing"
 				}
 			}
-            steps {
+           steps {
             nodejs(nodeJSInstallationName: 'NodeJS21_1_0') {
                 script {
                     def scannerHome = tool 'SonarScanner4'
                     withSonarQubeEnv("sonarqube") {
-                        sh "${scannerHome}/bin/sonar-scanner"
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.verbose=true"
                     }
                 }
             }
