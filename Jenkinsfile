@@ -93,7 +93,7 @@ stage('Create DB') {
         //     }
         // }
 
-   stage('Build and Test api backend') {
+stage('Build and Test api backend') {
     when {
         anyOf {
             branch "main"
@@ -105,9 +105,17 @@ stage('Create DB') {
         dir('code/api') {
             sh 'python3.12 -m coverage run manage.py test'
             sh 'python3.12 -m coverage xml -i'
+            sh '''
+                if [ -f "coverage.xml" ]; then
+                    echo "coverage.xml file is created."
+                    echo "Path: $(pwd)/coverage.xml"
+                else
+                    echo "coverage.xml file is not created."
+                fi
+            '''
         }
     }
-   }
+}
 
         stage('Build and Test game backend') {
 			when {
