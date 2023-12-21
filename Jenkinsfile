@@ -101,35 +101,13 @@ stage('Create DB') {
             branch "dev-api"
         }
     }
-  stage('Build and Test api backend') {
-    when {
-        anyOf {
-            branch "main"
-            branch "testing"
-            branch "dev-api"
-        }
-    }
     steps {
         dir('code/api') {
-            sh 'apt-get update'
-            sh '''
-                if ! dpkg -s libsqlite3-dev >/dev/null 2>&1; then
-                    apt-get install -y libsqlite3-dev
-                    if [ -d "Python-3.12.0" ]; then
-                        dir('Python-3.12.0') {
-                            sh './configure'
-                            sh 'make'
-                            sh 'make altinstall'
-                        }
-                        sh 'rm -rf Python-3.12.0'
-                    fi
-                fi
-            '''
+            sh 'rm -rf Python-3.12.0'
             sh 'python3.12 -m coverage run manage.py test'
             sh 'python3.12 -m coverage xml -i'
         }
     }
-}
 
         stage('Build and Test game backend') {
 			when {
