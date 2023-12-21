@@ -75,6 +75,13 @@ stage('Create DB') {
             }
         }
 stage('E2E Tests') {
+    when {
+        anyOf {
+            branch "main"
+            branch "testing"
+            branch "dev-game"
+        }
+    }
     steps {
         script {
             sh '''
@@ -92,7 +99,7 @@ stage('E2E Tests') {
             if ! command -v /usr/bin/chromedriver &> /dev/null
             then
                 # Install Chrome WebDriver
-                CHROME_MAIN_VERSION=$(google-chrome-stable --version | sed -E 's/(^Google Chrome |\.[0-9]+ )//g')
+                CHROME_MAIN_VERSION=$(google-chrome-stable --version | sed -E 's/(^Google Chrome \\|\\.[0-9]+ )//g')
                 wget https://chromedriver.storage.googleapis.com/$CHROME_MAIN_VERSION/chromedriver_linux64.zip
                 unzip chromedriver_linux64.zip
                 mv chromedriver /usr/bin/chromedriver
@@ -104,7 +111,6 @@ stage('E2E Tests') {
             cd code/e2e
 
             # Run your E2E tests
-            pip3 install -r requirements.txt
             python e2etests.py
             '''
         }
