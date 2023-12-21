@@ -12,7 +12,6 @@ from PVPGame import PVPGame
 from Game import Game
 from const import GameType
 from time import perf_counter
-import mysql.connector
 import datetime
 
 
@@ -158,18 +157,8 @@ async def main():
     app = aiohttp.web.Application()
     sio.attach(app)
 
-    conn = mysql.connector.connect(
-        host=os.environ.get("DATABASE_HOST"),
-        user=os.environ.get("DATABASE_USER"),
-        password=os.environ.get("DATABASE_PASSWORD"),
-        database=os.environ.get("DATABASE_NAME"),
-        port=os.environ.get("DATABASE_PORT"),
-    )
-    cursor = conn.cursor()
-
     handler = GameHandler()
     Game.sio = sio
-    Game.conn = conn
 
     # Aggiorna le chiamate a handler
     sio.on("connect", handler.on_connect)

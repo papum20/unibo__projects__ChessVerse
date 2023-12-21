@@ -5,20 +5,17 @@ function Social(props) {
   const end_string =
     props.modalType === "gameover"
       ? " e ho perso 😢"
-      : props.modalType === "victory"
+      : props.modalType === "won"
         ? " e ho vinto! 🎉"
         : " ed è finita in patta 🤝";
 
-  const pve_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
-          livello di profondità ${props.diff} ${end_string}`;
+  const pve_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con livello di profondità ${props.diff} ${end_string}`;
 
-  const pvp_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
-          elo ${props.diff} ${end_string}`;
+  const pvp_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con elo ${props.diff} ${end_string}`;
 
   const dw_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser}, ho fatto ${props.diff} mosse ${end_string}`;
 
-  const ranked_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con 
-          ranking ${props.diff} ${end_string}`;
+  const ranked_msg = `ho giocato a scacchi ♔ in modalità Really Bad Chess contro ${props.enemyUser} con ranking ${props.diff} ${end_string}`;
 
   function getText() {
     switch (props.mode) {

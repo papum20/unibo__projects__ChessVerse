@@ -5,8 +5,8 @@ import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS, DEFAULT_ELO
 from const import FIELDS
-
-
+import mysql.connector
+import os
 def expected_score(rating_A, rating_B):
     return 1.0 / (1 + 10 ** ((rating_B - rating_A) / 400))
 
@@ -36,7 +36,6 @@ class Game(ABC):
     waiting_list: dict[str, list[list[str]]] = {
         key: [[] for _ in range(6)] for key in TIME_OPTIONS
     }
-    conn = None
     __slots__ = ["fen", "board", "players", "turn", "popped"]
     
     def __init__(self, sids: [], rank: int|None, time: int, seed: int | None = None) -> None:
@@ -93,12 +92,19 @@ class Game(ABC):
     
     @classmethod
     def execute_query(cls, query, params=None):
-        with Game.conn.cursor() as cursor:
+        conn = mysql.connector.connect(
+            host=os.environ.get("DATABASE_HOST"),
+            user=os.environ.get("DATABASE_USER"),
+            password=os.environ.get("DATABASE_PASSWORD"),
+            database=os.environ.get("DATABASE_NAME"),
+            port=os.environ.get("DATABASE_PORT"),
+        )
+        with conn.cursor() as cursor:
             cursor.execute(query, params or ())
             if query.strip().upper().startswith("SELECT"):
                 return cursor.fetchall()
             else:
-                Game.conn.commit()
+                conn.commit()
                 return None
     
     @classmethod
@@ -134,7 +140,7 @@ class Game(ABC):
         return True
     
     @classmethod
-    def get_user_field(cls, session_id: str, field: str) -> int:
+    def get_user_field(cls, session_id: str, field: str) -> list[int]:
         """
 		:param session_id: session id field
 		"""
