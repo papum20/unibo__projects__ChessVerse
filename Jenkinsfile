@@ -19,9 +19,13 @@ stage('Setup') {
                 chmod +x /usr/local/bin/docker-compose
             fi
             '''
-        
-        } 
-         dir('db/'){
+           
+        }
+    }
+}
+stage('Setup DB') {
+    steps {
+        dir('db/'){
              sh '''
             if [ $(docker ps -a -q -f name=mysql) ]; then
                 docker stop mysql
@@ -32,31 +36,93 @@ stage('Setup') {
             docker-compose up -d
             '''
         }
+    }
+}
+stage('Install MySQL Client') {
+    steps {
         script {
             // Run the installation command for default-mysql-client
             sh 'apt-get update && apt-get install -y default-mysql-client'
         }
-         script {
+    }
+}
+    stage('Check MySQL') {
+    steps {
+        script {
             sh '''
             mysqladmin --verbose --wait=30 -hmysql -uroot -proot ping || exit 1
             '''
         }
+    }
+}
+stage('Create DB') {
+    steps {
         script {
             sh '''
             mysql -hmysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS users_db;"
             '''
         }
-         steps {
+    }
+}
+        stage('Migrate DB') {
+
+            steps {
                 dir('code/api'){
                     sh 'pip3 install -r requirements.txt'
                     sh 'python3.12 manage.py makemigrations'
                     sh 'python3.12 manage.py migrate'
                 }
             }
+        }
+stage('E2E Tests') {
+    when {
+        anyOf {
+            branch "main"
+            branch "testing"
+            branch "dev-game"
+        }
+    }
+    steps {
+        script {
+            sh '''
+           # Check if Google Chrome is installed
+            if ! command -v google-chrome-stable &> /dev/null
+            then
+                # Install Google Chrome
+                wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+                echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+                apt-get update
+                apt-get install -y google-chrome-stable
+            fi
 
+            # Check if Chrome WebDriver is installed
+            rm /usr/bin/chromedriver
+            if ! command -v /usr/bin/chromedriver &> /dev/null
+            then
+                # Get the correct version of ChromeDriver
+                CHROME_VERSION=$(google-chrome-stable --version | awk '{ print $3 }' | cut -d '.' -f 1)
+                CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
 
+                # Download and install Chrome WebDriver
+                wget "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+                unzip chromedriver_linux64.zip
+                mv chromedriver /usr/bin/chromedriver
+                chown root:root /usr/bin/chromedriver
+                chmod +x /usr/bin/chromedriver
+            fi
+
+            # Navigate to the directory containing your E2E tests
+            cd code/e2e
+
+            # Run your E2E tests
+            pip3 install -r requirements.txt
+            python3.12 e2etests.py
+
+            '''
+        }
     }
 }
+
 
 stage('Build and Test api backend') {
     when {
