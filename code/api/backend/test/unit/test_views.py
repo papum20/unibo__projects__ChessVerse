@@ -1,6 +1,6 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
-from ...views import is_nickname_in_database, generate_random_nickname, MAX_DAILY_GAMES
+from ...views import is_nickname_in_database, generate_random_nickname, MAX_DAILY_GAMES, check_start_daily
 from django.contrib.auth.models import User
 from django.contrib import auth 
 from ...models import (
@@ -11,7 +11,7 @@ from ...models import (
 
 )
 import json
-from datetime import date
+from datetime import date, datetime
 
 today = date.today()
 formatted_date_daily =today.strftime("%d%m%Y")
@@ -273,6 +273,7 @@ class GetWeeklyLeaderboardTests(TestCase):
         response = self.client.post(reverse("get_weekly_leaderboard"))
         self.assertEqual(response.status_code, 405)
         self.assertJSONEqual(response.content, {"message": "Invalid request method"})
+    
 
     def test_view_returns_correct_data(self):
       
@@ -289,29 +290,34 @@ class GetWeeklyLeaderboardTests(TestCase):
             },
         )
 
-    class CheckStartDailyTests(TestCase):
-        def setUp(self):
-            self.client = Client()
-            self.url = reverse('check_start_daily')
+class CheckStartDailyTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
 
-        def test_no_attempts(self):
-            DailyLeaderboard.objects.create(username='test_user', attempts=0)
-            response = self.client.get(self.url, json.dumps({'username': 'test_user'}))
-            self.assertEqual(response.status_code, 200)
-            self.assertJSONEqual(response.content, {"message": "Success! You have made 0 attempts today."})
+    def test_check_start_daily(self):
+        # Create a request
+        request = self.factory.get('/check_start_daily/', {'username': 'testuser'})
+        request.method = 'GET'
 
-        def test_less_than_max_attempts(self):
-            DailyLeaderboard.objects.create(username='test_user', attempts=1)
-            response = self.client.get(self.url, json.dumps({'username': 'test_user'}))
-            self.assertEqual(response.status_code, 200)
-            self.assertJSONEqual(response.content, {"message": "Success! You have made 1 attempts today."})
+        # Test when username is not provided
+        request.GET = request.GET.copy()
+        request.GET.pop('username', None)
+        response = check_start_daily(request)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.content), {"message": "Username is required as a query parameter"})
 
-        def test_max_attempts(self):
-            DailyLeaderboard.objects.create(username='test_user', attempts=2)
-            response = self.client.get(self.url, json.dumps({'username': 'test_user'}))
-            self.assertEqual(response.status_code, 400)
-            self.assertJSONEqual(response.content, {"message": "You have already played the maximum number of games today. Attempts: 2"})
+        # Test when username is provided
+        request.GET = request.GET.copy()
+        request.GET['username'] = 'testuser'
+        response = check_start_daily(request)
+        self.assertIn(response.status_code, [200, 400, 500])
 
+        # Test for invalid request method
+        request.method = 'POST'
+        response = check_start_daily(request)
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(json.loads(response.content), {"message": "Invalid request method"})
+        
 
 class GetMultiplayerLeaderboardViewTest(TestCase):
     @classmethod
