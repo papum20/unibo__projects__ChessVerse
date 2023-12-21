@@ -5,8 +5,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import unittest
 import random
+from selenium.webdriver.chrome.options import Options
 
 class ChessverseE2ETest(unittest.TestCase):
+
+    options = Options()
+    options.add_argument("--headless") # Ensure GUI is off. Important for running in Jenkins
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
     def setUp(self):
         self.driver = webdriver.Chrome()
