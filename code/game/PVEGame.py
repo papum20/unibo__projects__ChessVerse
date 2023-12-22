@@ -126,6 +126,13 @@ class PVEGame(Game):
         current_username = await Game.get_username(sid)
         attempts = PVEGame.get_attempts(current_username)
         date = PVEGame.current_day_month_year()
+        game_result = None
+        if outcome is None:
+            game_result = "draw"
+        elif outcome.winner:
+            game_result = "win"
+        else:
+            game_result = "loss"
         if attempts == 0:
             Game.execute_query(
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
@@ -133,7 +140,7 @@ class PVEGame(Game):
                     current_username,
                     self.current.move_count,
                     date,
-                    "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
+                    game_result,
                     attempts+1,
                 )
             )
@@ -144,7 +151,7 @@ class PVEGame(Game):
                 SET moves_count = %s, attempts = attempts + 1, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, date,)
+                (self.current.move_count, game_result, current_username, date,)
             )
 
     async def disconnect_weekly(self, sid: str, outcome: chess.Outcome) -> None:
@@ -156,6 +163,13 @@ class PVEGame(Game):
             "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s AND challenge_date = %s",
             (current_username,weekno)
         )
+        game_result = None
+        if outcome is None:
+            game_result = "draw"
+        elif outcome.winner:
+            game_result = "win"
+        else:
+            game_result = "loss"
         if result is None or len(result) == 0:
             Game.execute_query(
                 "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
@@ -163,7 +177,7 @@ class PVEGame(Game):
                     current_username,
                     self.current.move_count,
                     weekno,
-                    "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw",
+                    game_result,
                 ),
             )
         else:
@@ -173,7 +187,7 @@ class PVEGame(Game):
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, "loss" if (outcome is None or not outcome.winner) else "win" if outcome.winner else "draw", current_username, weekno),
+                (self.current.move_count, game_result, current_username, weekno),
             )
     
     async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):
