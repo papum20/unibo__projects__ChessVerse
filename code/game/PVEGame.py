@@ -127,12 +127,12 @@ class PVEGame(Game):
         attempts = PVEGame.get_attempts(current_username)
         date = PVEGame.current_day_month_year()
         game_result = None
-        if outcome is None:
-            game_result = "draw"
+        if outcome is None or not outcome.winner:
+            game_result = "loss"
         elif outcome.winner:
             game_result = "win"
         else:
-            game_result = "loss"
+            game_result = "draw"
         if attempts == 0:
             Game.execute_query(
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
@@ -164,12 +164,12 @@ class PVEGame(Game):
             (current_username,weekno)
         )
         game_result = None
-        if outcome is None:
-            game_result = "draw"
+        if outcome is None or not outcome.winner:
+            game_result = "loss"
         elif outcome.winner:
             game_result = "win"
         else:
-            game_result = "loss"
+            game_result = "draw"
         if result is None or len(result) == 0:
             Game.execute_query(
                 "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
