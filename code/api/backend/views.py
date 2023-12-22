@@ -60,7 +60,7 @@ def add_guest(requests):
     return JsonResponse({"guest_nickname": guest_nickname})
 
 
-def get_guest_name(requests):
+def get_guest_name():
     print("Guest nickname:" + guest_nickname)
     return JsonResponse({"guest_nickname": guest_nickname})
 
@@ -122,8 +122,8 @@ def user_signup(request):
             if not all([username, password, elo_really_bad_chess]):
                 return JsonResponse({"message": errors["missing_parameters"]}, status=400)
 
-            User = RegisteredUsers
-            User.objects.create_user(
+            user = RegisteredUsers
+            user.objects.create_user(
                 username=username,
                 password=password,
                 EloReallyBadChess=elo_really_bad_chess,

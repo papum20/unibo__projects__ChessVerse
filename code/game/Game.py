@@ -7,26 +7,26 @@ from const import TIME_OPTIONS, DEFAULT_ELO
 from const import FIELDS
 import mysql.connector
 import os
-def expected_score(rating_A, rating_B):
-    return 1.0 / (1 + 10 ** ((rating_B - rating_A) / 400))
+def expected_score(rating_a, rating_b):
+    return 1.0 / (1 + 10 ** ((rating_b - rating_a) / 400))
 
 
-def update_rating(rating_A, rating_B, risultato):
-    expected_a = expected_score(rating_A, rating_B)
-    expected_b = expected_score(rating_B, rating_A)
-    K = calc_K(rating_A, rating_B)
-    new_rating_a = rating_A + K * (risultato - expected_a)
-    new_rating_b = rating_B + K * (1 - risultato - expected_b)
+def update_rating(rating_a, rating_b, risultato):
+    expected_a = expected_score(rating_a, rating_b)
+    expected_b = expected_score(rating_b, rating_a)
+    K = calc_k(rating_a, rating_b)
+    new_rating_a = rating_a + K * (risultato - expected_a)
+    new_rating_b = rating_b + K * (1 - risultato - expected_b)
     return new_rating_a, new_rating_b
 
 
-def calc_K(rating_A, rating_B):
+def calc_k(rating_a, rating_b):
     # Assumo che il rating Elo sia compreso tra 0 e 3000
-    # Assumo che il valore di K sia compreso tra 10 e 60
-    # Uso una formula lineare per interpolare il valore di K
+    # Assumo che il valore di k sia compreso tra 10 e 60
+    # Uso una formula lineare per interpolare il valore di k
     # K = 60 - 0.0167 * (rating_A + rating_B) / 2
-    # Arrotondo il valore di K al numero intero piÃ¹ vicino
-    return round(60 - 0.0167 * (rating_A + rating_B) / 2)
+    # Arrotondo il valore di k al numero intero piu' vicino
+    return round(60 - 0.0167 * (rating_a + rating_b) / 2)
 
 
 class Game(ABC):
