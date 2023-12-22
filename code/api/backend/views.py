@@ -6,6 +6,14 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime, date
 import json
 
+errors = {
+    "invalid_credentials": "Invalid credentials",
+    "invalid_request_method": "Invalid request method",
+    "invalid_elo": "Invalid elo",
+    "missing_parameters":  "Missing required fields",
+    "missing_date": "Date parameter is missing",
+}
+
 from django.views.decorators.http import require_http_methods
 
 from .models import (
@@ -22,7 +30,7 @@ from datetime import date, timedelta
 
 def is_nickname_in_database(nickname):
     try:
-        guest = Guest.objects.get(Username=nickname)
+        Guest.objects.get(Username=nickname)
         return True
     except Guest.DoesNotExist:
         return False
@@ -48,7 +56,7 @@ def add_guest(requests):
         guest = Guest(Username=guest_nickname)
         guest.save()
     else:
-        return JsonResponse({"message": "Invalid request method"}, status=405)
+        return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
     return JsonResponse({"guest_nickname": guest_nickname})
 
 
@@ -71,7 +79,7 @@ def user_login(request):
             user = RegisteredUsers.objects.get(username=username)
         except RegisteredUsers.DoesNotExist:
             # Return an error response if the user does not exist
-            return JsonResponse({"message": "Invalid credentials"}, status=401)
+            return JsonResponse({"message": errors["invalid_credentials"]}, status=401)
 
         # Check if the provided password matches the stored password using bcrypt
 
@@ -93,7 +101,7 @@ def user_login(request):
 
         else:
             # If authentication fails, return an error response
-            return JsonResponse({"message": "Invalid credentials"}, status=401)
+            return JsonResponse({"message": errors["invalid_credentials"]}, status=401)
 
 
 @csrf_exempt
@@ -109,10 +117,10 @@ def user_signup(request):
 
             possible_elos = [400, 800, 1200, 1600, 2000]
             if (int(elo_really_bad_chess) not in possible_elos):
-                return JsonResponse({'message': 'Invalid elo'}, status=400)
+                return JsonResponse({'message': errors["invalid_elo"]}, status=400)
             # Check if all required fields are provided
             if not all([username, password, elo_really_bad_chess]):
-                return JsonResponse({"message": "Missing required fields"}, status=400)
+                return JsonResponse({"message": errors["missing_parameters"]}, status=400)
 
             User = RegisteredUsers
             User.objects.create_user(
@@ -128,7 +136,7 @@ def user_signup(request):
             return JsonResponse({"message": f"Error: {str(e)}"}, status=500)
     else:
         # Return an error response for invalid request methods
-        return JsonResponse({"message": "Invalid request method"}, status=405)
+        return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
 
 
 # @login_required(login_url='/backend/login/')
@@ -146,7 +154,7 @@ def get_daily_leaderboard(request):
             # Get the date from the query parameter
             query_date_str = request.GET.get('date', None)
             if query_date_str is None:
-                return JsonResponse({"message": "Date parameter is missing"}, status=400)
+                return JsonResponse({"message": errors["missing_date"]}, status=400)
             # Retrieve only the games played on the query date from the database
 
             daily_leaderboard = DailyLeaderboard.objects.filter(
@@ -170,7 +178,7 @@ def get_weekly_leaderboard(request):
             # Get the date from the query parameter
             query_date_str = request.GET.get('date', None)
             if query_date_str is None:
-                return JsonResponse({"message": "Date parameter is missing"}, status=400)
+                return JsonResponse({"message": errors["missing_date"]}, status=400)
 
 
             # Retrieve only the games played during this week from the database
@@ -185,7 +193,7 @@ def get_weekly_leaderboard(request):
             )
     else:
         # Return an error response for invalid request methods
-        return JsonResponse({"message": "Invalid request method"}, status=405)
+        return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
 
 
 
@@ -242,7 +250,7 @@ def check_start_daily(request):
                 status=500,
             )
     else:
-        return JsonResponse({"message": "Invalid request method"}, status=405)
+        return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
 
 
 # get the Multiplayer leaderboard
@@ -260,7 +268,7 @@ def get_multiplayer_leaderboard(request):
             return JsonResponse({"message": str(e)}, status=500)
     else:
         # Return an error response for invalid request methods
-        return JsonResponse({"message": "Invalid request method"}, status=405)
+        return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
 
 
 @require_http_methods(["GET"])

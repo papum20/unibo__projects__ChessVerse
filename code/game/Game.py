@@ -140,7 +140,7 @@ class Game(ABC):
         return True
     
     @classmethod
-    def get_user_field(cls, session_id: str, field: str) -> list[int]:
+    def get_user_field(cls, session_id: str, field: str) -> int|None:
         """
 		:param session_id: session id field
 		"""
