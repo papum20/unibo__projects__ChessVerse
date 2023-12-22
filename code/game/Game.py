@@ -195,7 +195,12 @@ class Game(ABC):
             )
         new_elos = [None, None]
         if current["session_id"] is not None and opponent["session_id"] is not None:
-            result = 1 if outcome is True else 0.5 if outcome is None else 0
+            if outcome is None:
+                result = 0.5
+            elif outcome == True:
+                result = 1
+            else:
+                result = 0
             new_elos = update_rating(current["elo"], opponent["elo"], result)
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[0]} WHERE session_id = %s",

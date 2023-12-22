@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-import logging
-
-logging.basicConfig(level=logging.INFO)
-import ssl
 import asyncio
 import os
 import socketio
@@ -15,10 +11,12 @@ from time import perf_counter
 import datetime
 
 
-class GameHandler:
-    def __init__(self):
-        pass
+errors = {
+    "invalid_type": {"cause": "Invalid type", "fatal": True},
+}
 
+
+class GameHandler:
     @classmethod
     def sid2game(cls, sid):
         if isinstance(Game.sid_to_id[sid], str):
@@ -75,7 +73,7 @@ class GameHandler:
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys():
             await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
+                "error", errors["invalid_type"], room=sid
             )
         elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
@@ -91,14 +89,14 @@ class GameHandler:
         # add new GameTypes Daily and Wekkly challenges
         else:
             await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
+                "error", errors["invalid_type"], room=sid
             )
 
     async def on_move(self, sid, data):
         print("move", sid)
         if "type" not in data.keys():
             await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
+                "error", errors["invalid_type"], room=sid
             )
         game = GameHandler.sid2game(sid)
         if game is None:
@@ -116,7 +114,7 @@ class GameHandler:
         print("pop", sid)
         if "type" not in data.keys():
             await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
+                "error", errors["invalid_type"], room=sid
             )
         game = GameHandler.sid2game(sid)
         if game is None:
