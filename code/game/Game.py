@@ -14,9 +14,9 @@ def expected_score(rating_a, rating_b):
 def update_rating(rating_a, rating_b, risultato):
     expected_a = expected_score(rating_a, rating_b)
     expected_b = expected_score(rating_b, rating_a)
-    K = calc_k(rating_a, rating_b)
-    new_rating_a = rating_a + K * (risultato - expected_a)
-    new_rating_b = rating_b + K * (1 - risultato - expected_b)
+    k = calc_k(rating_a, rating_b)
+    new_rating_a = rating_a + k * (risultato - expected_a)
+    new_rating_b = rating_b + k * (1 - risultato - expected_b)
     return new_rating_a, new_rating_b
 
 

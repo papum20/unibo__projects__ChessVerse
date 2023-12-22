@@ -130,10 +130,10 @@ class PVPGame(Game):
     def is_player_turn(self, sid):
         return self.current.sid == sid
 
-    async def disconnect(self, sid: str, sendToDisconnected: bool = True) -> None:
+    async def disconnect(self, sid: str, send_to_disconnected: bool = True) -> None:
         await self.update_win_database(self.opponent(sid).sid, False)
         print("Sto disconnettendo il giocatore", sid)
-        if sendToDisconnected:
+        if send_to_disconnected:
             await Game.sio.emit("end", {"winner": False}, room=sid)
         await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
         # await Game.sio.disconnect(sid=self.opponent(sid).sid)
