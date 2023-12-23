@@ -159,6 +159,7 @@ class PVPGame(Game):
     async def pop(self, sid: str) -> None:
         if sid not in Game.sid_to_id:
             await Game.emit_error("Missing id", sid)
+            return
         if not await self.game_found(sid, Game.sid_to_id[sid]):
             return
         if not self.is_player_turn(sid):

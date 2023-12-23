@@ -131,21 +131,23 @@ class TestPop(IsolatedAsyncioTestCase):
         Game.sid_to_id[self.sid] = self.sid
         self.game = Game.games[self.sid] = PVPGame(self.players, self.rank, self.time)
 
-    """
-    async def test_missing_id(self):
+    @mock.patch("Game.Game.emit_error")
+    async def test_missing_id(self, mock_emit_error):
+        del Game.sid_to_id[self.sid]
+        self.assertNotIn(self.sid, Game.sid_to_id)
         await self.game.pop(self.sid)
-        Game.sio.emit.assert_any_await(
-            "error",
-            {"cause": "Missing id", "fatal": True},
-            room=self.sid
-        )
-    """
+        mock_emit_error.assert_awaited_once_with("Missing id", self.sid)
 
-    async def test_wrong_turn(self):
+    @mock.patch("PVPGame.PVPGame.game_found", return_value=False)
+    async def test_game_not_found(self, mock_game_found):
         await self.game.pop(self.sid)
-        Game.sio.emit.assert_called_once_with(
-            "error", {"cause": "It's not your turn"}, room=self.sid
-        )
+        Game.sio.emit.assert_not_called()
+
+    @mock.patch("Game.Game.emit_error")
+    @mock.patch("PVPGame.PVPGame.is_player_turn", return_value=False)
+    async def test_wrong_turn(self, mock_is_player_turn, mock_emit_error):
+        await self.game.pop(self.sid)
+        mock_emit_error.assert_awaited_once_with("It's not your turn", self.sid, None)
 
     @mock.patch("PVPGame.PVPGame.is_player_turn", return_value=True)
     async def test_already_popped(self, mock_is_player_turn):
