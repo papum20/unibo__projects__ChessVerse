@@ -20,7 +20,7 @@ class PVPGame(Game):
         index = cls.calculate_index(rank)
 
         if sid in Game.sid_to_id:
-            await cls.emit_error("Started Matching", sid)
+            await Game.emit_error("Started Matching", sid)
             return
 
         await cls.process_matching(sid, time, rank, index)
@@ -28,15 +28,15 @@ class PVPGame(Game):
     @classmethod
     async def validate_data(cls, sid:str, data: dict[str, str]) -> bool:
         if "rank" not in data or "time" not in data:
-            await cls.emit_error("Missing fields", sid)
+            await Game.emit_error("Missing fields", sid)
             return False
 
         if not cls.check_int(data, "rank", MIN_RANK, MAX_RANK):
-            await cls.emit_error("Invalid rank", sid)
+            await Game.emit_error("Invalid rank", sid)
             return False
 
         if not cls.check_options(data, "time", TIME_OPTIONS):
-            await cls.emit_error("Invalid clocktime", sid)
+            await Game.emit_error("Invalid clocktime", sid)
             return False
         
         return True
@@ -131,122 +131,6 @@ class PVPGame(Game):
         )
         # serve per eliminarlo dalla entry
         Game.sid_to_id[sid] = {"time": time, "index": index}
-
-    @classmethod
-    async def emit_error(cls, cause, sid, fatal=True):
-        body = {"cause": cause}
-        if fatal is not None:
-            body["fatal"] = fatal
-        await Game.sio.emit("error", body, room=sid)
-
-
-    # @classmethod
-    # async def start(cls, sid: str, data: dict[str, str]) -> None:
-    #     def check_int(key, inf, sup):
-    #         try:
-    #             v = int(data[key])
-    #             return inf <= v <= sup
-    #         except (ValueError, TypeError):
-    #             return False
-
-    #     def check_options(key, options):
-    #         try:
-    #             value = int(data[key])
-    #             return value in options
-    #         except (ValueError, TypeError, KeyError):
-    #             return False
-
-    #     # Check for data validity
-    #     if "rank" not in data or "time" not in data:
-    #         await Game.sio.emit(
-    #             "error", {"cause": "Missing fields", "fatal": True}, room=sid
-    #         )
-    #         return
-    #     if not check_int("rank", MIN_RANK, MAX_RANK):
-    #         await Game.sio.emit(
-    #             "error", {"cause": "Invalid rank", "fatal": True}, room=sid
-    #         )
-    #         return
-    #     if not check_options("time", TIME_OPTIONS):
-    #         await Game.sio.emit(
-    #             "error", {"cause": "Invalid clocktime", "fatal": True}, room=sid
-    #         )
-    #         return
-
-    #     # se non loggato, se loggato devo pure vedere il database
-    #     time = data["time"]
-    #     rank = round(max(min(int(data["rank"]), 100), 0) / 10) * 10
-    #     # vedere se ci sta il complementare
-    #     index = (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
-    #     if sid in Game.sid_to_id:
-    #         await Game.sio.emit(
-    #             "error", {"cause": "Started Matching", "fatal": True}, room=sid
-    #         )
-    #     elif (
-    #         len(Game.waiting_list[time][index]) > 0
-    #         and Game.waiting_list[time][index][0]["rank"] == 100 - rank
-    #     ):
-    #         session = await Game.sio.get_session(sid)
-    #         found_guest = None
-    #         for waiting in Game.waiting_list[time][index]:
-    #             if abs(waiting["elo"] - session["elo"]) < 100:
-    #                 found_guest = waiting
-    #                 break
-    #         if found_guest is not None:
-    #             first = random.randint(0, 1)
-    #             players = (
-    #                 [sid, found_guest["sid"]] if first else [found_guest["sid"], sid]
-    #             )
-    #             game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
-    #             Game.games[game_id] = cls(
-    #                 players, rank if first else 100 - rank, data["time"]
-    #             )
-    #             Game.waiting_list[time][index].remove(found_guest)
-    #             Game.sid_to_id[players[0]] = game_id
-    #             Game.sid_to_id[players[1]] = game_id
-    #             current = await Game.sio.get_session(players[0])
-    #             opponent = await Game.sio.get_session(players[1])
-    #             usernames = [obj["username"] for obj in [current, opponent]]
-    #             elos = [obj["elo"] for obj in [current, opponent]]
-    #             await Game.sio.emit(
-    #                 "config",
-    #                 {
-    #                     "fen": Game.games[game_id].fen,
-    #                     "id": game_id,
-    #                     "color": "white",
-    #                     "elo": elos,
-    #                     "username": usernames[1]
-    #                 },
-    #                 room=players[0],
-    #             )
-    #             await Game.sio.emit(
-    #                 "config",
-    #                 {
-    #                     "fen": Game.games[game_id].fen,
-    #                     "id": game_id,
-    #                     "color": "black",
-    #                     "elo": elos,
-    #                     "username": usernames[0]
-    #                 },
-    #                 room=players[1],
-    #             )
-    #         else:
-    #             session = await Game.sio.get_session(sid)
-    #             Game.waiting_list[time][index].append(
-    #                 {"sid": sid, "rank": rank, "elo": session["elo"]}
-    #             )
-    #             # serve per eliminarlo dalla entry
-    #             Game.sid_to_id[sid] = {"time": time, "index": index}
-
-    #         # togliere l'id dal frontend
-    #     else:
-    #         session = await Game.sio.get_session(sid)
-    #         Game.waiting_list[time][index].append(
-    #             {"sid": sid, "rank": rank, "elo": session["elo"]}
-    #         )
-    #         # serve per eliminarlo dalla entry
-    #         Game.sid_to_id[sid] = {"time": time, "index": index}
-
     def __init__(self, players: [str], rank: [], timer):
         super().__init__(players, rank, timer)
         self.timer = 1
@@ -276,18 +160,17 @@ class PVPGame(Game):
 
     async def pop(self, sid: str) -> None:
         if sid not in Game.sid_to_id:
-            await PVPGame.emit_error("Missing id", sid)
+            await Game.emit_error("Missing id", sid)
         if not await self.game_found(sid, Game.sid_to_id[sid]):
             return
         if not self.is_player_turn(sid):
-            await PVPGame.emit_error("It's not your turn", sid, None)
+            await Game.emit_error("It's not your turn", sid, None)
             return
         if self.popped:
-            await PVPGame.emit_error("You have already popped", sid, None)
+            await Game.emit_error("You have already popped", sid, None)
             return
         if self.board.fullmove_number == 1:
-            await PVPGame.emit_error("No moves to undo", sid, None)
-            return
+            await Game.emit_error("No moves to undo", sid, None)
         else:
             self.board.pop()
             self.board.pop()
@@ -300,26 +183,26 @@ class PVPGame(Game):
 
     async def move(self, sid: str, data: dict[str, str]) -> None:
         if sid not in Game.sid_to_id:
-            await PVPGame.emit_error("No games found", sid)
+            await Game.emit_error("No games found", sid)
             return
         if "san" not in data:
-            await PVPGame.emit_error("Missing fields", sid)
+            await Game.emit_error("Missing fields", sid)
             return
         if data["san"] is None:
-            await PVPGame.emit_error("Encountered None value", sid, None)
+            await Game.emit_error("Encountered None value", sid, None)
             return
         if not self.is_player_turn(sid):
-            await PVPGame.emit_error("It's not your turn", sid, None)
+            await Game.emit_error("It's not your turn", sid, None)
             return
         if not self.current.has_time():
             return
         try:
             uci_move = self.board.parse_san(data["san"]).uci()
         except (chess.InvalidMoveError, chess.IllegalMoveError):
-            await PVPGame.emit_error("Invalid move", sid, None)
+            await Game.emit_error("Invalid move", sid, None)
             return
         if chess.Move.from_uci(uci_move) not in self.board.legal_moves:
-            await PVPGame.emit_error("Invalid move", sid, None)
+            await Game.emit_error("Invalid move", sid, None)
             return
         uci_move = self.board.parse_uci(self.board.parse_san(data["san"]).uci())
         san_move = self.board.san(uci_move)

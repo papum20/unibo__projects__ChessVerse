@@ -36,6 +36,7 @@ class Game(ABC):
     waiting_list: dict[str, list[list[str]]] = {
         key: [[] for _ in range(6)] for key in TIME_OPTIONS
     }
+
     __slots__ = ["fen", "board", "players", "turn", "popped"]
     
     def __init__(self, sids: [], rank: int|None, time: int, seed: int | None = None) -> None:
@@ -215,11 +216,16 @@ class Game(ABC):
 
     async def game_found(self, sid: str, game_id: str):
         if game_id not in self.games:
-            await self.sio.emit(
-                "error", {"cause": "Game not found", "fatal": True}, room=sid
-            )
+            await Game.emit_error("Game not found", sid)
             return False
         return True
 
     def get_times(self):
         return [player.remaining_time for player in self.players if player.is_timed]
+
+    @classmethod
+    async def emit_error(cls, cause, sid, fatal=True):
+        body = {"cause": cause}
+        if fatal is not None:
+            body["fatal"] = fatal
+        await cls.sio.emit("error", body, room=sid)

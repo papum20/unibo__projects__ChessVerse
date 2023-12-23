@@ -39,60 +39,118 @@ class PVEGame(Game):
         return min(max(new_rank, 0), 100)
 
     @classmethod
-    async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
-        def check_int(key, inf, sup):
-            try:
-                v = int(data[key])
-                return inf <= v <= sup
-            except (ValueError, TypeError):
+    async def start(cls, sid:str, data: dict[str, str], seed=None, type=None) -> None:
+        if not cls.validate_data(data, sid):
+            return
+        if sid not in cls.sid_to_id:
+            await cls.initialize_game(sid, data, seed, type)
+        else:
+            await Game.emit_error("SID already used", sid)
+
+    @classmethod
+    async def validate_data(cls, data, sid):
+        required_fields = ["rank", "depth", "time"]
+        if not all(field in data for field in required_fields):
+            await Game.emit_error("Missing fields", sid)
+            return False
+        for field, (min_val, max_val) in {"rank": (MIN_RANK, MAX_RANK), "depth": (MIN_DEPTH, MAX_DEPTH), "time": (MIN_TIME, MAX_TIME)}.items():
+            if not cls.check_int(data, field, min_val, max_val):
+                await Game.emit_error(f"Invalid {field}", sid)
                 return False
 
-        if "rank" not in data or "depth" not in data or "time" not in data:
-            await Game.sio.emit(
-                "error", {"cause": "Missing fields", "fatal": True}, room=sid
-            )
-            return
-        if not check_int("rank", MIN_RANK, MAX_RANK):
-            await Game.sio.emit(
-                "error", {"cause": "Invalid rank", "fatal": True}, room=sid
-            )
-            return
-        if not check_int("depth", MIN_DEPTH, MAX_DEPTH):
-            await Game.sio.emit(
-                "error", {"cause": "Invalid bot strength", "fatal": True}, room=sid
-            )
-            return
-        if not check_int("time", MIN_TIME, MAX_TIME):
-            await Game.sio.emit(
-                "error", {"cause": "Invalid clocktime", "fatal": True}, room=sid
-            )
-            return
-        if sid not in Game.sid_to_id:
-            Game.sid_to_id[sid] = sid  # solo in PVE;
-            rank = -1
-            if seed is not None:
-                if type == GameType.DAILY or type == GameType.WEEKLY:
-                    Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
-            else: # 1v1, freeplay, ranked
-                if type == GameType.RANKED:
-                    session_id = await Game.get_session_id(sid)
-                    rank = Game.get_user_field(session_id, "score_ranked")
-                    if rank is not None: 
-                        rank = rank[0]
-                    else:
-                        rank = 0
-                    print(f"score_ranked = {rank}")
-                    Game.games[sid] = PVEGame(sid, rank, 1, -1, None, type)
-                else :
-                    Game.games[sid] = PVEGame(
-                        sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
-                    )
-            await Game.games[sid].instantiate_bot()
-            await Game.sio.emit("config", {"fen": Game.games[sid].fen, "rank": rank}, room=sid)
+        return True
+
+    @staticmethod
+    def check_int(data, key, inf, sup):
+        try:
+            v = int(data[key])
+            return inf <= v <= sup
+        except (ValueError, TypeError):
+            return False
+    
+    @classmethod
+    async def initialize_game(cls, sid, data, seed, type):
+        Game.sid_to_id[sid] = sid  # solo in PVE;
+        rank = -1
+        if seed is not None:
+            Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
         else:
-            await Game.sio.emit(
-                "error", {"cause": "SID already used", "fatal": True}, room=sid
+            await cls.setup_game_without_seed(sid, data, type)
+        await Game.games[sid].instantiate_bot()
+        await Game.sio.emit("config", {"fen": Game.games[sid].fen, "rank": rank}, room=sid)
+
+
+    @classmethod
+    async def setup_games_without_seed(cls, sid, data, type):
+        if type == GameType.RANKED:
+            session_id = await Game.get_session_id(sid)
+            rank = Game.get_user_field(session_id, "score_ranked")
+            if rank is not None: 
+                rank = rank[0]
+            else:
+                rank = 0
+            print(f"score_ranked = {rank}")
+            Game.games[sid] = PVEGame(sid, rank, 1, -1, None, type)
+        else:
+            Game.games[sid] = PVEGame(
+                sid, int(data["rank"]), int(data["depth"]), int(data["time"]), None, type
             )
+
+    # @classmethod
+    # async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
+    #     def check_int(key, inf, sup):
+    #         try:
+    #             v = int(data[key])
+    #             return inf <= v <= sup
+    #         except (ValueError, TypeError):
+    #             return False
+
+    #     if "rank" not in data or "depth" not in data or "time" not in data:
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Missing fields", "fatal": True}, room=sid
+    #         )
+    #         return
+    #     if not check_int("rank", MIN_RANK, MAX_RANK):
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Invalid rank", "fatal": True}, room=sid
+    #         )
+    #         return
+    #     if not check_int("depth", MIN_DEPTH, MAX_DEPTH):
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Invalid bot strength", "fatal": True}, room=sid
+    #         )
+    #         return
+    #     if not check_int("time", MIN_TIME, MAX_TIME):
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Invalid clocktime", "fatal": True}, room=sid
+    #         )
+    #         return
+    #     if sid not in Game.sid_to_id:
+    #         Game.sid_to_id[sid] = sid  # solo in PVE;
+    #         rank = -1
+    #         if seed is not None:
+    #             if type == GameType.DAILY or type == GameType.WEEKLY:
+    #                 Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
+    #         else: # 1v1, freeplay, ranked
+    #             if type == GameType.RANKED:
+    #                 session_id = await Game.get_session_id(sid)
+    #                 rank = Game.get_user_field(session_id, "score_ranked")
+    #                 if rank is not None: 
+    #                     rank = rank[0]
+    #                 else:
+    #                     rank = 0
+    #                 print(f"score_ranked = {rank}")
+    #                 Game.games[sid] = PVEGame(sid, rank, 1, -1, None, type)
+    #             else :
+    #                 Game.games[sid] = PVEGame(
+    #                     sid, int(data["rank"]), int(data["depth"]), int(data["time"]), seed
+    #                 )
+    #         await Game.games[sid].instantiate_bot()
+    #         await Game.sio.emit("config", {"fen": Game.games[sid].fen, "rank": rank}, room=sid)
+    #     else:
+    #         await Game.sio.emit(
+    #             "error", {"cause": "SID already used", "fatal": True}, room=sid
+    #         )
 
     @classmethod
     def current_week_and_year(cls):
@@ -228,17 +286,17 @@ class PVEGame(Game):
 
     async def move(self, sid: str, data: dict[str, str]) -> None:
         if "san" not in data:
-            await Game.sio.emit("error", {"cause": "Missing fields"}, room=sid)
+            await Game.emit_error("Missing fields", sid, None)
             return
         if data["san"] is None:
-            await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
+            await Game.emit_error("Encountered None value", sid, None)
             return
         if not self.current.has_time(True):
             return
         try:
             uci_move = self.board.parse_san(data["san"]).uci()
         except (chess.InvalidMoveError, chess.IllegalMoveError):
-            await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
+            await Game.emit_error("Invalid move", sid, None)
             return
         self.current.move_count += 1
         self.board.push_uci(uci_move)
@@ -266,9 +324,9 @@ class PVEGame(Game):
 
     async def pop(self, sid: str) -> None:
         if self.popped:
-            await Game.sio.emit("error", {"cause": "You have already popped"}, room=sid)
+            await Game.emit_error("You have already popped", sid, None)
         elif self.board.fullmove_number == 1:
-            await Game.sio.emit("error", {"cause": "No moves to undo"}, room=sid)
+            await Game.emit_error("No moves to undo", sid, None)
         else:
             self.board.pop()
             self.board.pop()
