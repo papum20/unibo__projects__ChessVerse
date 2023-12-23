@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, PropertyMock
 import sys
 import random
 import chess
+from chess import Termination
 import socketio
 from datetime import datetime
 
@@ -463,6 +464,64 @@ class TestDisconnectWeekly(IsolatedAsyncioTestCase):
                 """,
             (10, "loss", "test_user", 5),
         )
+
+
+class TestDisconnectRanked(IsolatedAsyncioTestCase):
+    @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
+    def setUp(self, mock_gen_start_fen):
+        self.player = "guest"
+        self.rank = 1
+        self.depth = 5
+        self.time = 100
+        self.sid = "test_sid"
+        Game.sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
+        self.mock_emit = AsyncMock()
+        Game.sio.emit = self.mock_emit
+
+        # Game instantiation
+        Game.sid_to_id[self.sid] = self.sid
+        self.game = Game.games[self.sid] = PVEGame(
+            self.sid, self.rank, self.depth, self.time, type=GameType.RANKED
+        )
+        self.mock_bot = self.game.bot = AsyncMock()
+
+    @mock.patch("Game.Game.get_session_id", return_value=None)
+    async def test_method_awaits_session_id(self, mock_get_session_id):
+        await self.game.disconnect_ranked(self.sid, None)
+        mock_get_session_id.assert_awaited_once_with(self.sid)
+
+    @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
+    @mock.patch("PVEGame.PVEGame.get_user_field", return_value=None)
+    @mock.patch("PVEGame.PVEGame.get_new_ranked", return_value=5)
+    @mock.patch("PVEGame.PVEGame.set_user_field")
+    async def test_method_retrieves_user_score(
+            self, mock_set_user_field, mock_get_new_ranked, mock_get_user_field, mock_get_session_id
+    ):
+        outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
+        await self.game.disconnect_ranked(self.sid, outcome)
+        mock_get_user_field.assert_called_once_with('test_session_id', 'score_ranked')
+
+    @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
+    @mock.patch("PVEGame.PVEGame.get_user_field", return_value=None)
+    @mock.patch("PVEGame.PVEGame.get_new_ranked", return_value=5)
+    @mock.patch("PVEGame.PVEGame.set_user_field")
+    async def test_method_calls_get_new_ranked(
+            self, mock_set_user_field, mock_get_new_ranked, mock_get_user_field, mock_get_session_id
+    ):
+        outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
+        await self.game.disconnect_ranked(self.sid, outcome)
+        mock_get_new_ranked.assert_called_once_with(0, outcome)
+
+    @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
+    @mock.patch("PVEGame.PVEGame.get_user_field", return_value=None)
+    @mock.patch("PVEGame.PVEGame.get_new_ranked", return_value=5)
+    @mock.patch("PVEGame.PVEGame.set_user_field")
+    async def test_method_sets_new_score_for_user(
+            self, mock_set_user_field, mock_get_new_ranked, mock_get_user_field, mock_get_session_id
+    ):
+        outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
+        await self.game.disconnect_ranked(self.sid, outcome)
+        mock_set_user_field.assert_called_once_with('test_session_id', 'score_ranked', 5)
 
 
 if __name__ == "__main__":
