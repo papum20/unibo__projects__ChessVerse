@@ -94,6 +94,9 @@ class ChessverseE2ETest(unittest.TestCase):
         signup_button = self.driver.find_element(By.ID, "Sign Up")
 
         # check if with a nickname already taken the user isn't signed up
+        username = wait.until(EC.presence_of_element_located((By.NAME, "username")))
+        password = wait.until(EC.presence_of_element_located((By.NAME, "password")))
+        eloSelect = wait.until(EC.presence_of_element_located((By.ID, "elo")))
         username.send_keys("ccirone")
         password.send_keys("Ciao1234!")
         eloSelect.send_keys("400")
@@ -101,6 +104,9 @@ class ChessverseE2ETest(unittest.TestCase):
         self.assertEqual(self.driver.current_url, "https://www.chessverse.cloud/signup")
 
         # check if with a password that doesn't respect the requirements the user isn't signed up
+        username = wait.until(EC.presence_of_element_located((By.NAME, "username")))
+        password = wait.until(EC.presence_of_element_located((By.NAME, "password")))
+        eloSelect = wait.until(EC.presence_of_element_located((By.ID, "elo")))
         username.send_keys(nickname)
         password.send_keys("prova")
         eloSelect.send_keys("400")
