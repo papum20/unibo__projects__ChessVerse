@@ -122,20 +122,33 @@ class GameHandler:
     async def cleaner(self):
         while True:
             await asyncio.sleep(1)
-            for id in list(Game.games.keys()):
-                if id not in Game.games:
-                    continue
-                for player in Game.games[id].players:
-                    if player.is_timed:
-                        player_time = player.remaining_time - (
-                                perf_counter() - player.latest_timestamp
-                        )
-                        if player_time <= 0:
-                            await Game.sio.emit("timeout", {}, room=player.sid)
-                            if type(Game.games[id]).__name__ == "PVPGame":
-                                await Game.games[id].disconnect(player.sid, False)
-                            else:
-                                await Game.games[id].disconnect(player.sid)
+            await self.update_games()
+
+    async def update_games(self):
+        for id in list(Game.games.keys()):
+            if id not in Game.games:
+                continue
+            await self.update_players(Game.games[id])
+
+    async def update_players(self, game):
+        for player in game.players:
+            if player.is_timed:
+                await self.check_player_timeout(player, game)
+
+    async def check_player_timeout(self, player, game):
+        player_time = self.calculate_remaining_time(player)
+        if player_time <= 0:
+            await self.handle_timeout(player, game)
+
+    def calculate_remaining_time(self, player):
+        return player.remaining_time - (perf_counter() - player.latest_timestamp)
+    
+    async def handle_timeout(self, player, game):
+        await Game.sio.emit("timeout", {}, room=player.sid)
+        if type(game).__name__ == "PVPGame":
+            await game.disconnect(player.sid, False)
+        else:
+            await game.disconnect(player.sid)
 
 
 async def main():
