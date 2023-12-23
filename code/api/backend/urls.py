@@ -8,7 +8,7 @@ from .views import (
     get_daily_leaderboard,
     check_start_daily,
     get_multiplayer_leaderboard,
-    get_ranked_leaderboard
+    get_ranked_leaderboard,
 )
 
 urlpatterns = [
@@ -19,7 +19,9 @@ urlpatterns = [
     path(
         "get_weekly_leaderboard/", get_weekly_leaderboard, name="get_weekly_leaderboard"
     ),
-    path('get_ranked_leaderboard/', get_ranked_leaderboard, name='get_ranked_leaderboard'),
+    path(
+        "get_ranked_leaderboard/", get_ranked_leaderboard, name="get_ranked_leaderboard"
+    ),
     path("get_daily_leaderboard/", get_daily_leaderboard, name="get_daily_leaderboard"),
     path("check_start_daily/", check_start_daily, name="check_start_daily"),
     path(

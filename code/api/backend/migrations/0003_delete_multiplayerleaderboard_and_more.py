@@ -4,31 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0002_multiplayerleaderboard'),
+        ("backend", "0002_multiplayerleaderboard"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='MultiplayerLeaderboard',
+            name="MultiplayerLeaderboard",
         ),
         migrations.AlterModelOptions(
-            name='dailyleaderboard',
-            options={'ordering': ['moves_count']},
+            name="dailyleaderboard",
+            options={"ordering": ["moves_count"]},
         ),
         migrations.AlterModelOptions(
-            name='weeklyleaderboard',
-            options={'ordering': ['moves_count']},
+            name="weeklyleaderboard",
+            options={"ordering": ["moves_count"]},
         ),
         migrations.AlterField(
-            model_name='dailyleaderboard',
-            name='attempts',
+            model_name="dailyleaderboard",
+            name="attempts",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AlterField(
-            model_name='registeredusers',
-            name='EloReallyBadChess',
+            model_name="registeredusers",
+            name="EloReallyBadChess",
             field=models.IntegerField(default=400),
         ),
     ]

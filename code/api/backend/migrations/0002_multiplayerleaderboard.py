@@ -4,21 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0001_initial'),
+        ("backend", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MultiplayerLeaderboard',
+            name="MultiplayerLeaderboard",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.CharField(max_length=255)),
-                ('elo', models.PositiveIntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("username", models.CharField(max_length=255)),
+                ("elo", models.PositiveIntegerField()),
             ],
             options={
-                'ordering': ['-elo'],
+                "ordering": ["-elo"],
             },
         ),
     ]

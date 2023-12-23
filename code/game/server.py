@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-import logging
-
-logging.basicConfig(level=logging.INFO)
-import ssl
 import asyncio
 import os
 import socketio
@@ -15,10 +11,10 @@ from time import perf_counter
 import datetime
 
 
-class GameHandler:
-    def __init__(self):
-        pass
+errors = {"invalid_type": "Invalid type", "game_not_found": "Game not found"}
 
+
+class GameHandler:
     @classmethod
     def sid2game(cls, sid):
         if isinstance(Game.sid_to_id[sid], str):
@@ -73,10 +69,8 @@ class GameHandler:
         print("start", sid)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
-        if "type" not in data.keys():
-            await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
-            )
+        if "type" not in data.keys() or data["type"] not in GameType:
+            await Game.emit_error(errors["invalid_type"], sid)
         elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
         elif data["type"] == GameType.PVP:
@@ -88,23 +82,15 @@ class GameHandler:
             await PVEGame.start(sid, data, seed=weekly_seed, type=GameType.WEEKLY)
         elif data["type"] == GameType.RANKED:
             await PVEGame.start(sid, data, seed=None, type=GameType.RANKED)
-        # add new GameTypes Daily and Wekkly challenges
-        else:
-            await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
-            )
 
     async def on_move(self, sid, data):
         print("move", sid)
         if "type" not in data.keys():
-            await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
-            )
+            await Game.emit_error(errors["invalid_type"], sid)
+            return
         game = GameHandler.sid2game(sid)
         if game is None:
-            await Game.sio.emit(
-                "error", {"cause": "Game not found", "fatal": True}, room=sid
-            )
+            await Game.emit_error(errors["game_not_found"], sid)
             return
         await game.move(sid, data)
 
@@ -115,40 +101,51 @@ class GameHandler:
     async def on_pop(self, sid, data):
         print("pop", sid)
         if "type" not in data.keys():
-            await Game.sio.emit(
-                "error", {"cause": "Invalid type", "fatal": True}, room=sid
-            )
+            await Game.emit_error(errors["invalid_type"], sid)
+            return
         game = GameHandler.sid2game(sid)
         if game is None:
-            await Game.sio.emit(
-                "error", {"cause": "Game not found", "fatal": True}, room=sid
-            )
+            await Game.emit_error(errors["game_not_found"], sid)
             return
         await game.pop(sid)
 
     async def cleaner(self):
         while True:
             await asyncio.sleep(1)
-            for id in list(Game.games.keys()):
-                if id not in Game.games:
-                    continue
-                for player in Game.games[id].players:
-                    if player.is_timed:
-                        player_time = player.remaining_time - (
-                                perf_counter() - player.latest_timestamp
-                        )
-                        if player_time <= 0:
-                            await Game.sio.emit("timeout", {}, room=player.sid)
-                            if type(Game.games[id]).__name__ == "PVPGame":
-                                await Game.games[id].disconnect(player.sid, False)
-                            else:
-                                await Game.games[id].disconnect(player.sid)
+            await self.update_games()
+
+    async def update_games(self):
+        for id in list(Game.games.keys()):
+            if id not in Game.games:
+                continue
+            await self.update_players(Game.games[id])
+
+    async def update_players(self, game):
+        for player in game.players:
+            if player.is_timed:
+                await self.check_player_timeout(player, game)
+
+    async def check_player_timeout(self, player, game):
+        player_time = self.calculate_remaining_time(player)
+        if player_time <= 0:
+            await self.handle_timeout(player, game)
+
+    def calculate_remaining_time(self, player):
+        return player.remaining_time - (perf_counter() - player.latest_timestamp)
+
+    async def handle_timeout(self, player, game):
+        await Game.sio.emit("timeout", {}, room=player.sid)
+        if type(game).__name__ == "PVPGame":
+            await game.disconnect(player.sid, False)
+        else:
+            await game.disconnect(player.sid)
 
 
 async def main():
     env = os.environ.get("ENV", "development")
     if env == "development":
         from dotenv import load_dotenv
+
         env_file = f".env.{env}"
         load_dotenv(dotenv_path=env_file)
 

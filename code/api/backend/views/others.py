@@ -13,9 +13,12 @@ from .models import (
     RankedLeaderboard,
 )
 
-from backend.models import RegisteredUsers, DailyLeaderboard, MultiplayerLeaderboard, WeeklyLeaderboard
-
-
+from backend.models import (
+    RegisteredUsers,
+    DailyLeaderboard,
+    MultiplayerLeaderboard,
+    WeeklyLeaderboard,
+)
 
 
 def is_nickname_in_database(nickname):
@@ -135,4 +138,6 @@ def user_signout(request):
     logout(request)
     # Return a success response if the logout is successful
     return JsonResponse({"message": "Logout successful"})
+
+
 # ranked

@@ -58,7 +58,6 @@ function Start({
   setEnemyUsername,
   setRank,
 }) {
-
   const { width } = useWindowDimensions();
   const theme = createTheme({
     palette: {
@@ -98,8 +97,7 @@ function Start({
           setColor(config.color);
           setRoomId(config.id);
           setIsLoadingGame(false);
-          if ("rank" in config)
-            setRank(config.rank);
+          if ("rank" in config) setRank(config.rank);
         });
 
         const tmpData = {
@@ -166,8 +164,8 @@ function Start({
                       setBotDiff(
                         Math.max(
                           MIN_BOT_DIFF,
-                          Math.min(MAX_BOT_DIFF, e.target.value)
-                        )
+                          Math.min(MAX_BOT_DIFF, e.target.value),
+                        ),
                       );
                     }}
                     valueLabelDisplay="auto"
@@ -195,8 +193,8 @@ function Start({
                     setGameImb(
                       Math.max(
                         MIN_GAME_IMB,
-                        Math.min(MAX_GAME_IMB, e.target.value)
-                      )
+                        Math.min(MAX_GAME_IMB, e.target.value),
+                      ),
                     );
                   }}
                   valueLabelDisplay="auto"
@@ -289,7 +287,14 @@ function Start({
           <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : ""}` }}>
             {!getShowOptions() ? (
               <>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: `${width<600?"column":"row"}`}}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: `${width < 600 ? "column" : "row"}`,
+                  }}
+                >
                   <Image
                     src={`${ImageScacchi}`}
                     alt="immagine di scacchi"
@@ -300,12 +305,22 @@ function Start({
                       marginTop: "-5px",
                     }}
                   />
-                  <span style={{ color: "white", fontSize: `${width<600?"2rem":"5rem"}`}}>
+                  <span
+                    style={{
+                      color: "white",
+                      fontSize: `${width < 600 ? "2rem" : "5rem"}`,
+                    }}
+                  >
                     ChessVerse
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <p style={{ color: "white", fontSize: `${width<600?"1.2rem":"3rem"}`}}>
+                  <p
+                    style={{
+                      color: "white",
+                      fontSize: `${width < 600 ? "1.2rem" : "3rem"}`,
+                    }}
+                  >
                     Challenge yourself, Challenge the world
                   </p>
                 </div>
@@ -372,7 +387,12 @@ function Start({
                     marginTop: "-20px",
                   }}
                 >
-                  <p style={{ color: "white", fontSize: `${width<600?"2.5rem":"4rem"}`}}>
+                  <p
+                    style={{
+                      color: "white",
+                      fontSize: `${width < 600 ? "2.5rem" : "4rem"}`,
+                    }}
+                  >
                     Choose an option:
                   </p>
                 </div>
@@ -390,10 +410,15 @@ function Start({
                       sessionStorage.getItem("session_id") === "undefined"
                     }
                     onClick={async () => {
-                      console.log(API.checkStartDaily.endpoint)
-                      console.log(`${API.checkStartDaily.endpoint}?username=${user}`)
+                      console.log(API.checkStartDaily.endpoint);
+                      console.log(
+                        `${API.checkStartDaily.endpoint}?username=${user}`,
+                      );
                       const response = await fetch(
-                        joinPaths(SERVER_ADDR, `${API.checkStartDaily.endpoint}?username=${user}`)
+                        joinPaths(
+                          SERVER_ADDR,
+                          `${API.checkStartDaily.endpoint}?username=${user}`,
+                        ),
                       );
                       console.log("response status", response.status);
                       if (
@@ -416,7 +441,7 @@ function Start({
                       } else {
                         toast.error(
                           "unexpected error on server communication",
-                          { className: "toast-message" }
+                          { className: "toast-message" },
                         );
                       }
                     }}

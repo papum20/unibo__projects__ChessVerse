@@ -9,9 +9,10 @@ import chess
 import socketio
 
 sys.path.append("../..")
-from Game import Game, expected_score, update_rating, calc_K
+from Game import Game, expected_score, update_rating, calc_k
 
 import os
+
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 target_dir = "/".join(project_root.split("/")[:-1])
 os.chdir(target_dir)
@@ -33,11 +34,16 @@ class TestUpdateRating(TestCase):
         self.rating_b = 3
         self.risultato = 15
 
-    @mock.patch('Game.expected_score', return_value=10)
-    @mock.patch('Game.calc_K', return_value=17.5)
+    @mock.patch("Game.expected_score", return_value=10)
+    @mock.patch("Game.calc_k", return_value=17.5)
     def test_method_returns_correctly(self, mock_calc_k, mock_expected_score):
-        correct_result = (self.rating_a + 17.5 * (15 - 10), self.rating_b + 17.5 * (1 - 15 - 10))
-        self.assertEqual(update_rating(self.rating_a, self.rating_b, self.risultato), correct_result)
+        correct_result = (
+            self.rating_a + 17.5 * (15 - 10),
+            self.rating_b + 17.5 * (1 - 15 - 10),
+        )
+        self.assertEqual(
+            update_rating(self.rating_a, self.rating_b, self.risultato), correct_result
+        )
 
 
 class TestCalculateK(TestCase):
@@ -47,4 +53,4 @@ class TestCalculateK(TestCase):
 
     def test_method_returns_correctly(self):
         correct_result = round(60 - 0.0167 * (self.rating_a + self.rating_b) / 2)
-        self.assertEqual(correct_result, calc_K(self.rating_a, self.rating_b))
+        self.assertEqual(correct_result, calc_k(self.rating_a, self.rating_b))
