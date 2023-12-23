@@ -561,5 +561,23 @@ class TestGetAttempts(TestCase):
         self.assertEqual(PVEGame.get_attempts(self.username), 0)
 
 
+class TestSetupGameWithoutSeed(IsolatedAsyncioTestCase):
+    @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
+    @mock.patch("Game.Game.get_user_field", return_value=None)
+    async def test_setting_up_ranked_game(self, mock_get_user_field, mock_get_session_id):
+        sid = 'test_sid'
+        await PVEGame.setup_game_without_seed(sid, {}, GameType.RANKED)
+        mock_get_session_id.assert_called_once_with(sid)
+        mock_get_user_field.assert_called_once_with('test_session_id', 'score_ranked')
+
+    @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
+    @mock.patch("Game.Game.get_user_field", return_value=[5,4])
+    async def test_setting_up_ranked_game_with_valid_rank(self, mock_get_user_field, mock_get_session_id):
+        sid = 'test_sid'
+        await PVEGame.setup_game_without_seed(sid, {}, GameType.RANKED)
+        mock_get_user_field.assert_called_once_with('test_session_id', 'score_ranked')
+
+
+
 if __name__ == "__main__":
     unittest.main()
