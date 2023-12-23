@@ -81,8 +81,6 @@ class ChessverseE2ETest(unittest.TestCase):
         self.assertEqual(self.driver.current_url, "https://www.chessverse.cloud/login")
 
     def test_signup_wrongUsername(self):
-        # generate a random nickname to avoid conflicts with other users
-        nickname = "prova" + str(random.randint(0, 1000000))
         # checks if when the user signs up with wrong credentials he is redirected to the signup page
         self.driver.get("https://www.chessverse.cloud/signup")
 
@@ -102,25 +100,46 @@ class ChessverseE2ETest(unittest.TestCase):
         eloSelect.send_keys("400")
         signup_button.click()
         self.assertEqual(self.driver.current_url, "https://www.chessverse.cloud/signup")
-
-        # check if with a password that doesn't respect the requirements the user isn't signed up
-        '''
+    
+    def test_signup_invalidPassword(self):
+        # generate a random nickname to avoid conflicts with other users
+        nickname = "prova" + str(random.randint(0, 1000000))
+        # checks if when the user signs up with wrong credentials he is redirected to the signup page
+        self.driver.get("https://www.chessverse.cloud/signup")
+        
+        wait = WebDriverWait(self.driver, 10)
+        # check if all elements are present
         username = wait.until(EC.presence_of_element_located((By.NAME, "username")))
         password = wait.until(EC.presence_of_element_located((By.NAME, "password")))
         eloSelect = wait.until(EC.presence_of_element_located((By.ID, "elo")))
+        signup_button = self.driver.find_element(By.ID, "Sign Up")
+
         username.send_keys(nickname)
         password.send_keys("prova")
         eloSelect.send_keys("400")
         signup_button.click()
         self.assertEqual(self.driver.current_url, "https://www.chessverse.cloud/signup")
+        
+    def test_signup_invalidElo(self):
+        # generate a random nickname to avoid conflicts with other users
+        nickname = "prova" + str(random.randint(0, 1000000))
+        # checks if when the user signs up with wrong credentials he is redirected to the signup page
+        self.driver.get("https://www.chessverse.cloud/signup")
+        
+        wait = WebDriverWait(self.driver, 10)
+        # check if all elements are present
+        username = wait.until(EC.presence_of_element_located((By.NAME, "username")))
+        password = wait.until(EC.presence_of_element_located((By.NAME, "password")))
+        eloSelect = wait.until(EC.presence_of_element_located((By.ID, "elo")))
+        signup_button = self.driver.find_element(By.ID, "Sign Up")
 
-        # check if with an elo that doesn't respect the requirements the user isn't signed up
         username.send_keys(nickname)
-        password.send_keys("Prova1!")
+        password.send_keys("Ciao1234!")
         eloSelect.send_keys("1000")
         signup_button.click()
         self.assertEqual(self.driver.current_url, "https://www.chessverse.cloud/signup")
-        '''
+        
+
     def test_signout_login(self):
         # checks if when the user signs out he is redirected to the main page
         self.driver.get("https://www.chessverse.cloud/login")
