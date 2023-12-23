@@ -13,30 +13,30 @@ class PVPGame(Game):
 
     @classmethod
     async def start(cls, sid:str, data: dict[str, str]) -> None:
-        if not await cls.validate_data(data):
+        if not await cls.validate_data(sid, data):
             return
         rank = cls.calculate_rank(data["rank"])
         time = data["time"]
         index = cls.calculate_index(rank)
 
         if sid in Game.sid_to_id:
-            await cls.emit_error("Started Matching", True, sid)
+            await cls.emit_error("Started Matching", sid)
             return
 
         await cls.process_matching(sid, time, rank, index)
 
     @classmethod
-    async def validate_data(cls, data: dict[str, str]) -> bool:
+    async def validate_data(cls, sid:str, data: dict[str, str]) -> bool:
         if "rank" not in data or "time" not in data:
-            await Game.sio.emit("error", {"cause": "Missing fields", "fatal": True})
+            await cls.emit_error("Missing fields", sid)
             return False
 
         if not cls.check_int(data, "rank", MIN_RANK, MAX_RANK):
-            await Game.sio.emit("error", {"cause": "Invalid rank", "fatal": True})
+            await cls.emit_error("Invalid rank", sid)
             return False
 
-        if not cls.check_options("time", TIME_OPTIONS):
-            await Game.sio.emit("error", {"cause": "Invalid clocktime", "fatal": True})
+        if not cls.check_options(data, "time", TIME_OPTIONS):
+            await cls.emit_error("Invalid clocktime", sid)
             return False
         
         return True
@@ -273,18 +273,18 @@ class PVPGame(Game):
 
     async def pop(self, sid: str) -> None:
         if sid not in Game.sid_to_id:
-            await Game.sio.emit(
-                "error", {"cause": "Missing id", "fatal": True}, room=sid
-            )
+            await PVPGame.emit_error("Missing id", sid)
         if not await self.game_found(sid, Game.sid_to_id[sid]):
             return
         if not self.is_player_turn(sid):
-            await Game.sio.emit("error", {"cause": "It's not your turn"}, room=sid)
+            await PVPGame.emit_error("It's not your turn", sid)
             return
         if self.popped:
-            await Game.sio.emit("error", {"cause": "You have already popped"}, room=sid)
-        elif self.board.fullmove_number == 1:
-            await Game.sio.emit("error", {"cause": "No moves to undo"}, room=sid)
+            await PVPGame.emit_error("You have already popped", sid)
+            return
+        if self.board.fullmove_number == 1:
+            await PVPGame.emit_error("No moves to undo", sid)
+            return
         else:
             self.board.pop()
             self.board.pop()
