@@ -40,7 +40,7 @@ class PVEGame(Game):
 
     @classmethod
     async def start(cls, sid:str, data: dict[str, str], seed=None, type=None) -> None:
-        if not cls.validate_data(data, sid):
+        if not await cls.validate_data(data, sid):
             return
         if sid not in cls.sid_to_id:
             await cls.initialize_game(sid, data, seed, type)
