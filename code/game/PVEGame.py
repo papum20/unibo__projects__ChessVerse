@@ -53,9 +53,13 @@ class PVEGame(Game):
         if not all(field in data for field in required_fields):
             await Game.emit_error("Missing fields", sid)
             return False
-        for field, (min_val, max_val) in {"rank": (MIN_RANK, MAX_RANK), "depth": (MIN_DEPTH, MAX_DEPTH), "time": (MIN_TIME, MAX_TIME)}.items():
+        for field, (min_val, max_val, display_name) in {
+            "rank": (MIN_RANK, MAX_RANK, "rank"), 
+            "depth": (MIN_DEPTH, MAX_DEPTH, "bot strength"), 
+            "time": (MIN_TIME, MAX_TIME, "clocktime")
+            }.items():
             if not cls.check_int(data, field, min_val, max_val):
-                await Game.emit_error(f"Invalid {field}", sid)
+                await Game.emit_error(f"Invalid {display_name}", sid)
                 return False
 
         return True
