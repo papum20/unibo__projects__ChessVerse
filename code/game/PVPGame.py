@@ -12,111 +12,237 @@ class PVPGame(Game):
     }
 
     @classmethod
-    async def start(cls, sid: str, data: dict[str, str]) -> None:
-        def check_int(key, inf, sup):
-            try:
-                v = int(data[key])
-                return inf <= v <= sup
-            except (ValueError, TypeError):
-                return False
-
-        def check_options(key, options):
-            try:
-                value = int(data[key])
-                return value in options
-            except (ValueError, TypeError, KeyError):
-                return False
-
-        # Check for data validity
-        if "rank" not in data or "time" not in data:
-            await Game.sio.emit(
-                "error", {"cause": "Missing fields", "fatal": True}, room=sid
-            )
+    async def start(cls, sid:str, data: dict[str, str]) -> None:
+        if not await cls.validate_data(data):
             return
-        if not check_int("rank", MIN_RANK, MAX_RANK):
-            await Game.sio.emit(
-                "error", {"cause": "Invalid rank", "fatal": True}, room=sid
-            )
-            return
-        if not check_options("time", TIME_OPTIONS):
-            await Game.sio.emit(
-                "error", {"cause": "Invalid clocktime", "fatal": True}, room=sid
-            )
-            return
-
-        # se non loggato, se loggato devo pure vedere il database
+        rank = cls.calculate_rank(data["rank"])
         time = data["time"]
-        rank = round(max(min(int(data["rank"]), 100), 0) / 10) * 10
-        # vedere se ci sta il complementare
-        index = (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
-        if sid in Game.sid_to_id:
-            await Game.sio.emit(
-                "error", {"cause": "Started Matching", "fatal": True}, room=sid
-            )
-        elif (
-            len(Game.waiting_list[time][index]) > 0
-            and Game.waiting_list[time][index][0]["rank"] == 100 - rank
-        ):
-            session = await Game.sio.get_session(sid)
-            found_guest = None
-            for waiting in Game.waiting_list[time][index]:
-                if abs(waiting["elo"] - session["elo"]) < 100:
-                    found_guest = waiting
-                    break
-            if found_guest is not None:
-                first = random.randint(0, 1)
-                players = (
-                    [sid, found_guest["sid"]] if first else [found_guest["sid"], sid]
-                )
-                game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
-                Game.games[game_id] = cls(
-                    players, rank if first else 100 - rank, data["time"]
-                )
-                Game.waiting_list[time][index].remove(found_guest)
-                Game.sid_to_id[players[0]] = game_id
-                Game.sid_to_id[players[1]] = game_id
-                current = await Game.sio.get_session(players[0])
-                opponent = await Game.sio.get_session(players[1])
-                usernames = [obj["username"] for obj in [current, opponent]]
-                elos = [obj["elo"] for obj in [current, opponent]]
-                await Game.sio.emit(
-                    "config",
-                    {
-                        "fen": Game.games[game_id].fen,
-                        "id": game_id,
-                        "color": "white",
-                        "elo": elos,
-                        "username": usernames[1]
-                    },
-                    room=players[0],
-                )
-                await Game.sio.emit(
-                    "config",
-                    {
-                        "fen": Game.games[game_id].fen,
-                        "id": game_id,
-                        "color": "black",
-                        "elo": elos,
-                        "username": usernames[0]
-                    },
-                    room=players[1],
-                )
-            else:
-                session = await Game.sio.get_session(sid)
-                Game.waiting_list[time][index].append(
-                    {"sid": sid, "rank": rank, "elo": session["elo"]}
-                )
-                # serve per eliminarlo dalla entry
-                Game.sid_to_id[sid] = {"time": time, "index": index}
+        index = cls.calculate_index(rank)
 
-            # togliere l'id dal frontend
+        if sid in Game.sid_to_id:
+            await cls.emit_error("Started Matching", True, sid)
+            return
+
+        await cls.process_matching(sid, time, rank, index)
+
+    @classmethod
+    async def validate_data(cls, data: dict[str, str]) -> bool:
+        if "rank" not in data or "time" not in data:
+            await Game.sio.emit("error", {"cause": "Missing fields", "fatal": True})
+            return False
+
+        if not cls.check_int(data, "rank", MIN_RANK, MAX_RANK):
+            await Game.sio.emit("error", {"cause": "Invalid rank", "fatal": True})
+            return False
+
+        if not cls.check_options("time", TIME_OPTIONS):
+            await Game.sio.emit("error", {"cause": "Invalid clocktime", "fatal": True})
+            return False
+        
+        return True
+
+    @staticmethod
+    def check_int(data, key, inf, sup):
+        try:
+            v = int(data[key])
+            return inf <= v <= sup
+        except (ValueError, TypeError):
+            return False
+
+    @staticmethod
+    def check_options(data, key, options):
+        try:
+            value = int(data[key])
+            return value in options
+        except (ValueError, TypeError, KeyError):
+            return False
+
+    @staticmethod
+    def calculate_rank(rank):
+        return round(max(min(int(rank), 100), 0) / 10) * 10
+    
+    @staticmethod
+    def calculate_index(rank):
+        return (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
+
+    @classmethod
+    async def process_matching(cls, sid, time, rank, index):
+        if (
+            len(cls.waiting_list[time][index]) > 0
+            and cls.waiting_list[time][index][0]["rank"] == 100 - rank
+        ):
+            # se c'è un match
+            await cls.setup_game_with_existing_player(sid, time, rank, index)
         else:
-            session = await Game.sio.get_session(sid)
-            Game.waiting_list[time][index].append(
-                {"sid": sid, "rank": rank, "elo": session["elo"]}
-            )
-            # serve per eliminarlo dalla entry
-            Game.sid_to_id[sid] = {"time": time, "index": index}
+            await cls.add_player_to_waiting_list(sid, time, rank, index)
+
+    @classmethod
+    async def setup_game_with_existing_player(cls, sid, time, rank, index):
+        session = await Game.sio.get_session(sid)
+        found_guest = None
+        for waiting in cls.waiting_list[time][index]:
+            if abs(waiting["elo"] - session["elo"]) < 100:
+                found_guest = waiting
+                break
+        if found_guest is None:
+            await cls.add_player_to_waiting_list(sid, time, rank, index)
+            return
+        first = random.randint(0, 1)
+        players = [sid, found_guest["sid"]] if first else [found_guest["sid"], sid]
+        game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
+        cls.games[game_id] = cls(
+            players, rank if first else 100 - rank, time
+        )
+        cls.waiting_list[time][index].remove(found_guest)
+        cls.sid_to_id[players[0]] = game_id
+        cls.sid_to_id[players[1]] = game_id
+        current = await Game.sio.get_session(players[0])
+        opponent = await Game.sio.get_session(players[1])
+        usernames = [obj["username"] for obj in [current, opponent]]
+        elos = [obj["elo"] for obj in [current, opponent]]
+        await Game.sio.emit(
+            "config",
+            {
+                "fen": cls.games[game_id].fen,
+                "id": game_id,
+                "color": "white",
+                "elo": elos,
+                "username": usernames[1]
+            },
+            room=players[0],
+        )
+        await Game.sio.emit(
+            "config",
+            {
+                "fen": cls.games[game_id].fen,
+                "id": game_id,
+                "color": "black",
+                "elo": elos,
+                "username": usernames[0]
+            },
+            room=players[1],
+        )
+
+    @classmethod
+    async def add_player_to_waiting_list(cls, sid, time, rank, index):
+        session = await Game.sio.get_session(sid)
+        cls.waiting_list[time][index].append(
+            {"sid": sid, "rank": rank, "elo": session["elo"]}
+        )
+        # serve per eliminarlo dalla entry
+        Game.sid_to_id[sid] = {"time": time, "index": index}
+
+    @classmethod
+    async def emit_error(cls, cause, sid, fatal=True):
+        await Game.sio.emit("error", {"cause": cause, "fatal": fatal}, room=sid)
+
+
+    # @classmethod
+    # async def start(cls, sid: str, data: dict[str, str]) -> None:
+    #     def check_int(key, inf, sup):
+    #         try:
+    #             v = int(data[key])
+    #             return inf <= v <= sup
+    #         except (ValueError, TypeError):
+    #             return False
+
+    #     def check_options(key, options):
+    #         try:
+    #             value = int(data[key])
+    #             return value in options
+    #         except (ValueError, TypeError, KeyError):
+    #             return False
+
+    #     # Check for data validity
+    #     if "rank" not in data or "time" not in data:
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Missing fields", "fatal": True}, room=sid
+    #         )
+    #         return
+    #     if not check_int("rank", MIN_RANK, MAX_RANK):
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Invalid rank", "fatal": True}, room=sid
+    #         )
+    #         return
+    #     if not check_options("time", TIME_OPTIONS):
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Invalid clocktime", "fatal": True}, room=sid
+    #         )
+    #         return
+
+    #     # se non loggato, se loggato devo pure vedere il database
+    #     time = data["time"]
+    #     rank = round(max(min(int(data["rank"]), 100), 0) / 10) * 10
+    #     # vedere se ci sta il complementare
+    #     index = (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
+    #     if sid in Game.sid_to_id:
+    #         await Game.sio.emit(
+    #             "error", {"cause": "Started Matching", "fatal": True}, room=sid
+    #         )
+    #     elif (
+    #         len(Game.waiting_list[time][index]) > 0
+    #         and Game.waiting_list[time][index][0]["rank"] == 100 - rank
+    #     ):
+    #         session = await Game.sio.get_session(sid)
+    #         found_guest = None
+    #         for waiting in Game.waiting_list[time][index]:
+    #             if abs(waiting["elo"] - session["elo"]) < 100:
+    #                 found_guest = waiting
+    #                 break
+    #         if found_guest is not None:
+    #             first = random.randint(0, 1)
+    #             players = (
+    #                 [sid, found_guest["sid"]] if first else [found_guest["sid"], sid]
+    #             )
+    #             game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
+    #             Game.games[game_id] = cls(
+    #                 players, rank if first else 100 - rank, data["time"]
+    #             )
+    #             Game.waiting_list[time][index].remove(found_guest)
+    #             Game.sid_to_id[players[0]] = game_id
+    #             Game.sid_to_id[players[1]] = game_id
+    #             current = await Game.sio.get_session(players[0])
+    #             opponent = await Game.sio.get_session(players[1])
+    #             usernames = [obj["username"] for obj in [current, opponent]]
+    #             elos = [obj["elo"] for obj in [current, opponent]]
+    #             await Game.sio.emit(
+    #                 "config",
+    #                 {
+    #                     "fen": Game.games[game_id].fen,
+    #                     "id": game_id,
+    #                     "color": "white",
+    #                     "elo": elos,
+    #                     "username": usernames[1]
+    #                 },
+    #                 room=players[0],
+    #             )
+    #             await Game.sio.emit(
+    #                 "config",
+    #                 {
+    #                     "fen": Game.games[game_id].fen,
+    #                     "id": game_id,
+    #                     "color": "black",
+    #                     "elo": elos,
+    #                     "username": usernames[0]
+    #                 },
+    #                 room=players[1],
+    #             )
+    #         else:
+    #             session = await Game.sio.get_session(sid)
+    #             Game.waiting_list[time][index].append(
+    #                 {"sid": sid, "rank": rank, "elo": session["elo"]}
+    #             )
+    #             # serve per eliminarlo dalla entry
+    #             Game.sid_to_id[sid] = {"time": time, "index": index}
+
+    #         # togliere l'id dal frontend
+    #     else:
+    #         session = await Game.sio.get_session(sid)
+    #         Game.waiting_list[time][index].append(
+    #             {"sid": sid, "rank": rank, "elo": session["elo"]}
+    #         )
+    #         # serve per eliminarlo dalla entry
+    #         Game.sid_to_id[sid] = {"time": time, "index": index}
 
     def __init__(self, players: [str], rank: [], timer):
         super().__init__(players, rank, timer)
