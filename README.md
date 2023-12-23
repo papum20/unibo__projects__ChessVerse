@@ -34,8 +34,8 @@ Here are the main points ant paths about it:
 
 **Membri del Team:**
 - Giuseppe Spathis (PO) - 0001043077
-- Luca Gabellini (Dev) - 001020370
-- Nico Wu (SM) - 0001028979
+- Luca Gabellini (SM) - 001020370
+- Nico Wu (Dev) - 0001028979
 - Francesco Licchelli (Dev) - 0001041426
 - Daniele D'Ugo (Dev) - 0001027741
 - Cono Cirone (Dev) - 0001029785
