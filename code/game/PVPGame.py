@@ -134,7 +134,10 @@ class PVPGame(Game):
 
     @classmethod
     async def emit_error(cls, cause, sid, fatal=True):
-        await Game.sio.emit("error", {"cause": cause, "fatal": fatal}, room=sid)
+        body = {"cause": cause}
+        if fatal is not None:
+            body["fatal"] = fatal
+        await Game.sio.emit("error", body, room=sid)
 
 
     # @classmethod
@@ -297,25 +300,26 @@ class PVPGame(Game):
 
     async def move(self, sid: str, data: dict[str, str]) -> None:
         if sid not in Game.sid_to_id:
-            await Game.sio.emit("error", {"cause": "No games found"}, room=sid)
+            await PVPGame.emit_error("No games found", sid)
+            return
         if "san" not in data:
-            await Game.sio.emit("error", {"cause": "Missing fields"}, room=sid)
+            await PVPGame.emit_error("Missing fields", sid)
             return
         if data["san"] is None:
-            await Game.sio.emit("error", {"cause": "Encountered None value"}, room=sid)
+            await PVPGame.emit_error("Encountered None value", sid, None)
             return
         if not self.is_player_turn(sid):
-            await Game.sio.emit("error", {"cause": "It's not your turn"}, room=sid)
+            await PVPGame.emit_error("It's not your turn", sid, None)
             return
         if not self.current.has_time():
             return
         try:
             uci_move = self.board.parse_san(data["san"]).uci()
         except (chess.InvalidMoveError, chess.IllegalMoveError):
-            await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
+            await PVPGame.emit_error("Invalid move", sid, None)
             return
         if chess.Move.from_uci(uci_move) not in self.board.legal_moves:
-            await Game.sio.emit("error", {"cause": "Invalid move"}, room=sid)
+            await PVPGame.emit_error("Invalid move", sid, None)
             return
         uci_move = self.board.parse_uci(self.board.parse_san(data["san"]).uci())
         san_move = self.board.san(uci_move)

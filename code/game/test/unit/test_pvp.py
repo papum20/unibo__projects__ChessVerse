@@ -205,7 +205,7 @@ class TestMove(IsolatedAsyncioTestCase):
     async def test_san_not_in_data(self):
         await self.game.move(self.sid, {})
         Game.sio.emit.assert_called_once_with(
-            "error", {"cause": "Missing fields"}, room=self.sid
+            "error", {"cause": "Missing fields", "fatal": True}, room=self.sid
         )
 
     async def test_san_value_is_none(self):
