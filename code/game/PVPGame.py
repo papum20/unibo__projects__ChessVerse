@@ -280,13 +280,13 @@ class PVPGame(Game):
         if not await self.game_found(sid, Game.sid_to_id[sid]):
             return
         if not self.is_player_turn(sid):
-            await PVPGame.emit_error("It's not your turn", sid)
+            await PVPGame.emit_error("It's not your turn", sid, None)
             return
         if self.popped:
-            await PVPGame.emit_error("You have already popped", sid)
+            await PVPGame.emit_error("You have already popped", sid, None)
             return
         if self.board.fullmove_number == 1:
-            await PVPGame.emit_error("No moves to undo", sid)
+            await PVPGame.emit_error("No moves to undo", sid, None)
             return
         else:
             self.board.pop()
