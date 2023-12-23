@@ -81,7 +81,7 @@ class PVEGame(Game):
 
 
     @classmethod
-    async def setup_games_without_seed(cls, sid, data, type):
+    async def setup_game_without_seed(cls, sid, data, type):
         if type == GameType.RANKED:
             session_id = await Game.get_session_id(sid)
             rank = Game.get_user_field(session_id, "score_ranked")
