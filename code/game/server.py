@@ -12,7 +12,8 @@ import datetime
 
 
 errors = {
-    "invalid_type": {"cause": "Invalid type", "fatal": True},
+    "invalid_type": "Invalid type",
+    "game_not_found": "Game not found"
 }
 
 
@@ -72,9 +73,7 @@ class GameHandler:
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys() or data["type"] not in GameType:
-            await Game.sio.emit(
-                "error", errors["invalid_type"], room=sid
-            )
+            await Game.emit_error(errors["invalid_type"], sid)
         elif data["type"] == GameType.PVE:
             await PVEGame.start(sid, data)
         elif data["type"] == GameType.PVP:
@@ -90,14 +89,11 @@ class GameHandler:
     async def on_move(self, sid, data):
         print("move", sid)
         if "type" not in data.keys():
-            await Game.sio.emit(
-                "error", errors["invalid_type"], room=sid
-            )
+            await Game.emit_error(errors["invalid_type"], sid)
+            return
         game = GameHandler.sid2game(sid)
         if game is None:
-            await Game.sio.emit(
-                "error", {"cause": "Game not found", "fatal": True}, room=sid
-            )
+            await Game.emit_error(errors["invalid_type"], sid)
             return
         await game.move(sid, data)
 
@@ -108,14 +104,11 @@ class GameHandler:
     async def on_pop(self, sid, data):
         print("pop", sid)
         if "type" not in data.keys():
-            await Game.sio.emit(
-                "error", errors["invalid_type"], room=sid
-            )
+            await Game.emit_error(errors["invalid_type"], sid)
+            return
         game = GameHandler.sid2game(sid)
         if game is None:
-            await Game.sio.emit(
-                "error", {"cause": "Game not found", "fatal": True}, room=sid
-            )
+            await Game.emit_error(errors["game_not_found"], sid)
             return
         await game.pop(sid)
 
