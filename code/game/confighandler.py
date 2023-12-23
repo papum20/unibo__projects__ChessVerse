@@ -1,7 +1,7 @@
 import random
 
 
-def gen_start_fen(rank: int|None = 50, seed=None):
+def gen_start_fen(rank: int | None = 50, seed=None):
     if seed is not None:
         random.seed(seed)
 

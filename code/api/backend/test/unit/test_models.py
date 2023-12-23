@@ -10,8 +10,9 @@ from datetime import date
 
 
 today = date.today()
-formatted_date_daily =today.strftime("%d%m%Y")
-formatted_date_weekly = today.strftime('%U%Y')
+formatted_date_daily = today.strftime("%d%m%Y")
+formatted_date_weekly = today.strftime("%U%Y")
+
 
 class GuestModelTest(TestCase):
     @classmethod
@@ -159,11 +160,14 @@ class GamesModelTest(TestCase):
 
 
 class DailyLeaderboardTests(TestCase):
-    
     @classmethod
     def setUpTestData(cls):
         DailyLeaderboard.objects.create(
-            username="test_user", challenge_date=formatted_date_daily, moves_count=1, result="win", attempts=1
+            username="test_user",
+            challenge_date=formatted_date_daily,
+            moves_count=1,
+            result="win",
+            attempts=1,
         )
 
     def test_username_label(self):
@@ -181,12 +185,18 @@ class DailyLeaderboardTests(TestCase):
         self.assertEqual(max_length, 255)
 
     def test_challenge_date_label(self):
-        lb = DailyLeaderboard.objects.get(username="test_user", challenge_date=formatted_date_daily)
+        lb = DailyLeaderboard.objects.get(
+            username="test_user", challenge_date=formatted_date_daily
+        )
         field_label = lb._meta.get_field("challenge_date").verbose_name
-        self.assertEqual(field_label, "challenge date")  # Use space instead of underscore
+        self.assertEqual(
+            field_label, "challenge date"
+        )  # Use space instead of underscore
 
     def test_moves_count_label(self):
-        lb = DailyLeaderboard.objects.get(username="test_user", challenge_date=formatted_date_daily)
+        lb = DailyLeaderboard.objects.get(
+            username="test_user", challenge_date=formatted_date_daily
+        )
         field_label = lb._meta.get_field("moves_count").verbose_name
         self.assertEqual(field_label, "moves count")  # Use space instead of underscore
 
@@ -213,11 +223,13 @@ class DailyLeaderboardTests(TestCase):
 
 
 class WeeklyLeaderboardTests(TestCase):
-    
     @classmethod
     def setUpTestData(cls):
         WeeklyLeaderboard.objects.create(
-            username="test_user", challenge_date=formatted_date_weekly, moves_count=1, result="win"
+            username="test_user",
+            challenge_date=formatted_date_weekly,
+            moves_count=1,
+            result="win",
         )
 
     def test_username_label(self):
@@ -261,5 +273,3 @@ class WeeklyLeaderboardTests(TestCase):
         )
         max_length = lb._meta.get_field("result").max_length
         self.assertEqual(max_length, 10)
-
-

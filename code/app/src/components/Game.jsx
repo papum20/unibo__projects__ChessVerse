@@ -43,7 +43,7 @@ function Game({
   rank,
 }) {
   const { width, height } = useWindowDimensions();
-  
+
   const [fontSize, setFontSize] = useState("20px");
 
   useLayoutEffect(() => {
@@ -79,11 +79,9 @@ function Game({
             updatedTime[Number(game.turn() === "b")] -= interval / 1000;
             return updatedTime;
           });
-        }, interval)
+        }, interval),
       );
     }
-
-    
 
     return () => {
       clearInterval(timerInterval);
@@ -138,117 +136,121 @@ function Game({
 
   return (
     <div data-testid="game">
-
-      <Offcanvas style={{backgroundColor: "#b6884e",}} show={showCanvas} onHide={()=>setShowCanvas(false)}>
-      <ThemeProvider theme={theme}>
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title style={{fontWeight: "bold"}}>Moves History</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body ref={width < MOBILEWIDTH ? movesRef : null} style={{
-                        overflow: "auto",
-                        height: `calc(${height}px / 2)`,
-                        marginLeft: "20px",
-                        overflowY: "auto",
-                      }}>
-                      <Row>
-                        <Col xs={2} sm={2}>
-                          {moves.map((el, i) => {
-                            if (el.index % 2 === 0) {
-                              return (
-                                <span
-                                  style={{
-                                    fontWeight: "bold",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    paddingTop: "8px",
-                                    paddingBottom: "8px",
-                                    marginBottom: "10px",
-                                  }}
-                                  key={i}
-                                >
-                                  {Math.floor(el.index / 2) + 1}.
-                                </span>
-                              );
-                            }
-                          })}
-                        </Col>
-                        <Col xs={5} sm={5}>
-                          {moves.map((el, i) => {
-                            if (el.index % 2 === 0) {
-                              return (
-                                <Card
-                                  style={{
-                                    marginBottom: "10px",
-                                    backgroundColor: "#9f7a48",
-                                    border: `${
-                                      el.isUndo
-                                        ? "3px solid red"
-                                        : "3px solid white"
-                                    }`,
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                  key={i}
-                                >
-                                  <span
-                                    style={{
-                                      paddingTop: "5px",
-                                      paddingBottom: "5px",
-                                    }}
-                                  >
-                                    {el.move}
-                                  </span>
-                                </Card>
-                              );
-                            }
-                          })}
-                        </Col>
-                        <Col xs={5} sm={5}>
-                          {moves.map((el, i) => {
-                            if (el.index % 2 === 1) {
-                              return (
-                                <Card
-                                  style={{
-                                    marginBottom: "10px",
-                                    backgroundColor: "#9f7a48",
-                                    border: `${
-                                      el.isUndo
-                                        ? "3px solid red"
-                                        : "3px solid black"
-                                    }`,
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                  key={i}
-                                >
-                                  <span
-                                    style={{
-                                      paddingTop: "5px",
-                                      paddingBottom: "5px",
-                                    }}
-                                  >
-                                    {el.move}
-                                  </span>
-                                </Card>
-                              );
-                            }
-                          })}
-                        </Col>
-                      </Row>
-                      <Row>
-                        <div style={{ paddingTop: "20px" }}>
-                          <Button
-                            disabled={moves.length === 0}
-                            color="brown"
-                            style={{ width: "100%", fontSize: `${fontSize}` }}
-                            onClick={handleUndo}
-                            variant="contained"
-                          >
-                            Undo
-                          </Button>
-                        </div>
-                      </Row>
-        </Offcanvas.Body>
+      <Offcanvas
+        style={{ backgroundColor: "#b6884e" }}
+        show={showCanvas}
+        onHide={() => setShowCanvas(false)}
+      >
+        <ThemeProvider theme={theme}>
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title style={{ fontWeight: "bold" }}>
+              Moves History
+            </Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body
+            ref={width < MOBILEWIDTH ? movesRef : null}
+            style={{
+              overflow: "auto",
+              height: `calc(${height}px / 2)`,
+              marginLeft: "20px",
+              overflowY: "auto",
+            }}
+          >
+            <Row>
+              <Col xs={2} sm={2}>
+                {moves.map((el, i) => {
+                  if (el.index % 2 === 0) {
+                    return (
+                      <span
+                        style={{
+                          fontWeight: "bold",
+                          display: "flex",
+                          alignItems: "center",
+                          paddingTop: "8px",
+                          paddingBottom: "8px",
+                          marginBottom: "10px",
+                        }}
+                        key={i}
+                      >
+                        {Math.floor(el.index / 2) + 1}.
+                      </span>
+                    );
+                  }
+                })}
+              </Col>
+              <Col xs={5} sm={5}>
+                {moves.map((el, i) => {
+                  if (el.index % 2 === 0) {
+                    return (
+                      <Card
+                        style={{
+                          marginBottom: "10px",
+                          backgroundColor: "#9f7a48",
+                          border: `${
+                            el.isUndo ? "3px solid red" : "3px solid white"
+                          }`,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                        key={i}
+                      >
+                        <span
+                          style={{
+                            paddingTop: "5px",
+                            paddingBottom: "5px",
+                          }}
+                        >
+                          {el.move}
+                        </span>
+                      </Card>
+                    );
+                  }
+                })}
+              </Col>
+              <Col xs={5} sm={5}>
+                {moves.map((el, i) => {
+                  if (el.index % 2 === 1) {
+                    return (
+                      <Card
+                        style={{
+                          marginBottom: "10px",
+                          backgroundColor: "#9f7a48",
+                          border: `${
+                            el.isUndo ? "3px solid red" : "3px solid black"
+                          }`,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                        key={i}
+                      >
+                        <span
+                          style={{
+                            paddingTop: "5px",
+                            paddingBottom: "5px",
+                          }}
+                        >
+                          {el.move}
+                        </span>
+                      </Card>
+                    );
+                  }
+                })}
+              </Col>
+            </Row>
+            <Row>
+              <div style={{ paddingTop: "20px" }}>
+                <Button
+                  disabled={moves.length === 0}
+                  color="brown"
+                  style={{ width: "100%", fontSize: `${fontSize}` }}
+                  onClick={handleUndo}
+                  variant="contained"
+                >
+                  Undo
+                </Button>
+              </div>
+            </Row>
+          </Offcanvas.Body>
         </ThemeProvider>
       </Offcanvas>
 
@@ -259,8 +261,8 @@ function Game({
               modalType === "gameover"
                 ? "4px solid red"
                 : modalType === "won"
-                ? "4px solid green"
-                : "4px solid gray"
+                  ? "4px solid green"
+                  : "4px solid gray"
             }`,
           }}
         >
@@ -276,8 +278,8 @@ function Game({
                 modalType === "gameover"
                   ? "Game Over"
                   : modalType === "won"
-                  ? "You won!"
-                  : "It's a tie!"
+                    ? "You won!"
+                    : "It's a tie!"
               }`}</span>
               <ExclamationDiamond
                 size={40}
@@ -285,8 +287,8 @@ function Game({
                   modalType === "gameover"
                     ? "red"
                     : modalType === "won"
-                    ? "green"
-                    : "gray"
+                      ? "green"
+                      : "gray"
                 }`}
               />
             </div>
@@ -303,7 +305,7 @@ function Game({
                 Time has run out!
               </p>
             )}
-            {mode===RANKED && (
+            {mode === RANKED && (
               <p
                 style={{
                   display: "flex",
@@ -313,18 +315,20 @@ function Game({
                   fontSize: "22px",
                 }}
               >
-                {modalType === "gameover" ? 
-                "- 2"
-                :
-                modalType === "won" ?
-                "+ 8"
-                : 
-                "+ 0"
-                }
+                {modalType === "gameover"
+                  ? "- 2"
+                  : modalType === "won"
+                    ? "+ 8"
+                    : "+ 0"}
                 <FaCrown
-                    style={{ marginTop: "2px", color: "yellow", marginRight: "5px", marginLeft: "5px" }}
-                    size="25"
-                  />
+                  style={{
+                    marginTop: "2px",
+                    color: "yellow",
+                    marginRight: "5px",
+                    marginLeft: "5px",
+                  }}
+                  size="25"
+                />
               </p>
             )}
             <div
@@ -361,10 +365,10 @@ function Game({
                       mode === PVE
                         ? data.depth
                         : mode === DAILY || mode === WEEKLY
-                        ? `${Math.floor(numMoves / 2) + 1}`
-                        : mode === RANKED
-                        ? `${rank}`
-                        : `${color === "white" ? elo[0] : elo[1]}`
+                          ? `${Math.floor(numMoves / 2) + 1}`
+                          : mode === RANKED
+                            ? `${rank}`
+                            : `${color === "white" ? elo[0] : elo[1]}`
                     }`}
                     mode={mode}
                   />
@@ -442,11 +446,12 @@ function Game({
             <Row>
               <Col>
                 <Row style={{ marginBottom: "20px" }}>
-                  
                   <Col
                     style={{
                       display: "flex",
-                      justifyContent: `${width < MOBILEWIDTH ? "center" : "flex-end"}`,
+                      justifyContent: `${
+                        width < MOBILEWIDTH ? "center" : "flex-end"
+                      }`,
                     }}
                   >
                     <Image
@@ -454,7 +459,12 @@ function Game({
                       style={{ width: "50px", height: "50px", opacity: 0.8 }}
                       alt="immagine di scacchi"
                     />
-                    <span style={{ color: "white", fontSize: `${width < MOBILEWIDTH ? "2rem" : "2.7rem"}` }}>
+                    <span
+                      style={{
+                        color: "white",
+                        fontSize: `${width < MOBILEWIDTH ? "2rem" : "2.7rem"}`,
+                      }}
+                    >
                       ChessVerse
                     </span>
                   </Col>
@@ -463,7 +473,9 @@ function Game({
               <Col
                 style={{
                   display: "flex",
-                  justifyContent: `${width < MOBILEWIDTH ? "space-between" : "flex-end"}`,
+                  justifyContent: `${
+                    width < MOBILEWIDTH ? "space-between" : "flex-end"
+                  }`,
                   marginRight: "40px",
                 }}
               >
@@ -474,75 +486,79 @@ function Game({
                 >
                   <Gear size={30} />
                 </Button>
-                {width < MOBILEWIDTH && 
-                <Button
-                  color="brown"
-                  onClick={() => setShowCanvas(true)}
-                  variant="contained"
-                >
-                  <Clipboard size={30} />
-                </Button>
-                }
+                {width < MOBILEWIDTH && (
+                  <Button
+                    color="brown"
+                    onClick={() => setShowCanvas(true)}
+                    variant="contained"
+                  >
+                    <Clipboard size={30} />
+                  </Button>
+                )}
               </Col>
             </Row>
           </div>
           <Row>
-            {!isLoadingGame &&
-            <Col>
-              <div style={{ marginTop: "40px", marginLeft: "150px", marginBottom: "10px" }}>
-                <span style={{ fontWeight: "bold" }}>
-                  {mode === PVE ? "Stockfish" : enemyUsername}
-                </span>
-                {mode === PVP && (
+            {!isLoadingGame && (
+              <Col>
+                <div
+                  style={{
+                    marginTop: "40px",
+                    marginLeft: "150px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <span style={{ fontWeight: "bold" }}>
+                    {mode === PVE ? "Stockfish" : enemyUsername}
+                  </span>
+                  {mode === PVP && (
                     <>
-                  <span
-                    style={{ fontWeight: "bold", marginLeft: "3px" }}
-                  >{`(${
-                    color === "white"
-                      ? elo[0]
-                      : color === "black"
-                      ? elo[1]
-                      : ""
-                  })`}</span>
-                
-                  
-                    <img
-                      src={`${
-                        color === "black"
-                          ? ImageWhiteTime
-                          : ImageBlackTime
-                      }`}
-                      alt={`${
-                        color === "black" ? "clock white" : "clock black"
-                      }`}
-                      style={{
-                        maxWidth: "30px",
-                        maxHeight: "30px",
-                        marginTop: "-6px",
-                        marginLeft: "10px",
-                      }}
-                    />
-                    <span>{`${String(
-                      Math.floor(timers[Number(color === "white")] / 60)
-                    ).padStart(2, "0")}:${String(
-                      Math.floor(timers[Number(color === "white")] % 60)
-                    ).padStart(2, "0")}`}</span>
-                  </>
-                )}
-              </div>
-            </Col>
-            }
+                      <span
+                        style={{ fontWeight: "bold", marginLeft: "3px" }}
+                      >{`(${
+                        color === "white"
+                          ? elo[0]
+                          : color === "black"
+                            ? elo[1]
+                            : ""
+                      })`}</span>
+
+                      <img
+                        src={`${
+                          color === "black" ? ImageWhiteTime : ImageBlackTime
+                        }`}
+                        alt={`${
+                          color === "black" ? "clock white" : "clock black"
+                        }`}
+                        style={{
+                          maxWidth: "30px",
+                          maxHeight: "30px",
+                          marginTop: "-6px",
+                          marginLeft: "10px",
+                        }}
+                      />
+                      <span>{`${String(
+                        Math.floor(timers[Number(color === "white")] / 60),
+                      ).padStart(2, "0")}:${String(
+                        Math.floor(timers[Number(color === "white")] % 60),
+                      ).padStart(2, "0")}`}</span>
+                    </>
+                  )}
+                </div>
+              </Col>
+            )}
           </Row>
           <Row>
             <Col>
               <div
                 style={{
                   display: "flex",
-                  justifyContent: `${width < MOBILEWIDTH ? "center" : "flex-start"}`,
+                  justifyContent: `${
+                    width < MOBILEWIDTH ? "center" : "flex-start"
+                  }`,
                   marginLeft: `${width < MOBILEWIDTH ? "0px" : "150px"}`,
                 }}
               >
-                
                 <div>
                   <Board
                     navigator={navigator}
@@ -572,211 +588,215 @@ function Game({
                 </div>
               </div>
             </Col>
-            {width >= MOBILEWIDTH && 
-            <Col style={{ maxWidth: "30vw" }}>
-              <Row>
-                <Col>
-                  <Card
-                    style={{
-                      backgroundColor: "#b6884e",
-                      marginTop: "4vh",
-                      marginRight: "80px",
-                      marginLeft: "-50px",
-                    }}
-                  >
-                    <Card.Title
-                      style={{ display: "flex", justifyContent: "center" }}
-                    >
-                      <p
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: `${fontSize}`,
-                          marginTop: "5px",
-                        }}
-                      >
-                        Moves History
-                      </p>
-                    </Card.Title>
-                    <Card.Body
-                      ref={width >= MOBILEWIDTH ? movesRef : null}
+            {width >= MOBILEWIDTH && (
+              <Col style={{ maxWidth: "30vw" }}>
+                <Row>
+                  <Col>
+                    <Card
                       style={{
-                        overflow: "auto",
-                        height: `calc(${height}px / 2)`,
-                        marginLeft: "20px",
-                        marginBottom: "20px",
-                        overflowY: "auto",
+                        backgroundColor: "#b6884e",
+                        marginTop: "4vh",
+                        marginRight: "80px",
+                        marginLeft: "-50px",
                       }}
                     >
-                      <Row>
-                        <Col sm={2}>
-                          {moves.map((el, i) => {
-                            if (el.index % 2 === 0) {
-                              return (
-                                <span
-                                  style={{
-                                    fontWeight: "bold",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    paddingTop: "8px",
-                                    paddingBottom: "8px",
-                                    marginBottom: "10px",
-                                  }}
-                                  key={i}
-                                >
-                                  {Math.floor(el.index / 2) + 1}.
-                                </span>
-                              );
-                            }
-                          })}
-                        </Col>
-                        <Col sm={5}>
-                          {moves.map((el, i) => {
-                            if (el.index % 2 === 0) {
-                              return (
-                                <Card
-                                  style={{
-                                    marginBottom: "10px",
-                                    backgroundColor: "#9f7a48",
-                                    border: `${
-                                      el.isUndo
-                                        ? "3px solid red"
-                                        : "3px solid white"
-                                    }`,
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                  key={i}
-                                >
+                      <Card.Title
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <p
+                          style={{
+                            fontWeight: "bold",
+                            fontSize: `${fontSize}`,
+                            marginTop: "5px",
+                          }}
+                        >
+                          Moves History
+                        </p>
+                      </Card.Title>
+                      <Card.Body
+                        ref={width >= MOBILEWIDTH ? movesRef : null}
+                        style={{
+                          overflow: "auto",
+                          height: `calc(${height}px / 2)`,
+                          marginLeft: "20px",
+                          marginBottom: "20px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        <Row>
+                          <Col sm={2}>
+                            {moves.map((el, i) => {
+                              if (el.index % 2 === 0) {
+                                return (
                                   <span
                                     style={{
-                                      paddingTop: "5px",
-                                      paddingBottom: "5px",
+                                      fontWeight: "bold",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      paddingTop: "8px",
+                                      paddingBottom: "8px",
+                                      marginBottom: "10px",
                                     }}
+                                    key={i}
                                   >
-                                    {el.move}
+                                    {Math.floor(el.index / 2) + 1}.
                                   </span>
-                                </Card>
-                              );
-                            }
-                          })}
-                        </Col>
-                        <Col sm={5}>
-                          {moves.map((el, i) => {
-                            if (el.index % 2 === 1) {
-                              return (
-                                <Card
-                                  style={{
-                                    marginBottom: "10px",
-                                    backgroundColor: "#9f7a48",
-                                    border: `${
-                                      el.isUndo
-                                        ? "3px solid red"
-                                        : "3px solid black"
-                                    }`,
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                  key={i}
-                                >
-                                  <span
+                                );
+                              }
+                            })}
+                          </Col>
+                          <Col sm={5}>
+                            {moves.map((el, i) => {
+                              if (el.index % 2 === 0) {
+                                return (
+                                  <Card
                                     style={{
-                                      paddingTop: "5px",
-                                      paddingBottom: "5px",
+                                      marginBottom: "10px",
+                                      backgroundColor: "#9f7a48",
+                                      border: `${
+                                        el.isUndo
+                                          ? "3px solid red"
+                                          : "3px solid white"
+                                      }`,
+                                      display: "flex",
+                                      alignItems: "center",
                                     }}
+                                    key={i}
                                   >
-                                    {el.move}
-                                  </span>
-                                </Card>
-                              );
-                            }
-                          })}
-                        </Col>
-                      </Row>
-                      <Row>
-                        <div style={{ paddingTop: "20px" }}>
-                          <Button
-                            disabled={moves.length === 0}
-                            color="brown"
-                            style={{ width: "100%", fontSize: `${fontSize}` }}
-                            onClick={handleUndo}
-                            variant="contained"
-                          >
-                            Undo
-                          </Button>
-                        </div>
-                      </Row>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-            </Col>
-            }
+                                    <span
+                                      style={{
+                                        paddingTop: "5px",
+                                        paddingBottom: "5px",
+                                      }}
+                                    >
+                                      {el.move}
+                                    </span>
+                                  </Card>
+                                );
+                              }
+                            })}
+                          </Col>
+                          <Col sm={5}>
+                            {moves.map((el, i) => {
+                              if (el.index % 2 === 1) {
+                                return (
+                                  <Card
+                                    style={{
+                                      marginBottom: "10px",
+                                      backgroundColor: "#9f7a48",
+                                      border: `${
+                                        el.isUndo
+                                          ? "3px solid red"
+                                          : "3px solid black"
+                                      }`,
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                    key={i}
+                                  >
+                                    <span
+                                      style={{
+                                        paddingTop: "5px",
+                                        paddingBottom: "5px",
+                                      }}
+                                    >
+                                      {el.move}
+                                    </span>
+                                  </Card>
+                                );
+                              }
+                            })}
+                          </Col>
+                        </Row>
+                        <Row>
+                          <div style={{ paddingTop: "20px" }}>
+                            <Button
+                              disabled={moves.length === 0}
+                              color="brown"
+                              style={{ width: "100%", fontSize: `${fontSize}` }}
+                              onClick={handleUndo}
+                              variant="contained"
+                            >
+                              Undo
+                            </Button>
+                          </div>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                </Row>
+              </Col>
+            )}
           </Row>
           <Row>
-            {!isLoadingGame &&
-            <Col
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: "10px",
-                marginRight: `${width < MOBILEWIDTH ? "" : "25vw"}`,
-              }}
-            >
-              <span style={{ marginRight: "15px", fontWeight: "bold" }}>
-                {user}
-              </span>
-              {mode === PVP && (
-                <span
-                  style={{
-                    fontWeight: "bold",
-                    marginLeft: "3px",
-                    marginRight: "3px",
-                  }}
-                >
-                  {`(${
-                    color === "white" ? elo[1] : color === "black" ? elo[0] : ""
-                  })`}
+            {!isLoadingGame && (
+              <Col
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "10px",
+                  marginRight: `${width < MOBILEWIDTH ? "" : "25vw"}`,
+                }}
+              >
+                <span style={{ marginRight: "15px", fontWeight: "bold" }}>
+                  {user}
                 </span>
-              )}
-              {(mode === PVE || mode === PVP) && (
-                <>
-                  <img
-                    src={`${
-                      color === "white" || color === undefined
-                        ? ImageWhiteTime
-                        : ImageBlackTime
-                    }`}
-                    alt={`${
-                      color === "white" || color === undefined
-                        ? "clock white"
-                        : "clock black"
-                    }`}
+                {mode === PVP && (
+                  <span
                     style={{
-                      maxWidth: "30px",
-                      maxHeight: "30px",
-                      marginTop: "-6px",
+                      fontWeight: "bold",
+                      marginLeft: "3px",
+                      marginRight: "3px",
                     }}
-                  />
-                  <span>
-                    {`${String(
-                      Math.floor(timers[Number(color === "black")] / 60)
-                    ).padStart(2, "0")}:${String(
-                      Math.floor(timers[Number(color === "black")] % 60)
-                    ).padStart(2, "0")}`}
+                  >
+                    {`(${
+                      color === "white"
+                        ? elo[1]
+                        : color === "black"
+                          ? elo[0]
+                          : ""
+                    })`}
                   </span>
-                </>
-              )}
-              {mode === RANKED && (
-                <>
-                  <FaCrown
-                    style={{ marginTop: "-4px", color: "yellow" }}
-                    size="25"
-                  />
-                  <span style={{marginLeft: "5px"}}>{rank}</span>
-                </>
-              )}
-            </Col>
-            }
+                )}
+                {(mode === PVE || mode === PVP) && (
+                  <>
+                    <img
+                      src={`${
+                        color === "white" || color === undefined
+                          ? ImageWhiteTime
+                          : ImageBlackTime
+                      }`}
+                      alt={`${
+                        color === "white" || color === undefined
+                          ? "clock white"
+                          : "clock black"
+                      }`}
+                      style={{
+                        maxWidth: "30px",
+                        maxHeight: "30px",
+                        marginTop: "-6px",
+                      }}
+                    />
+                    <span>
+                      {`${String(
+                        Math.floor(timers[Number(color === "black")] / 60),
+                      ).padStart(2, "0")}:${String(
+                        Math.floor(timers[Number(color === "black")] % 60),
+                      ).padStart(2, "0")}`}
+                    </span>
+                  </>
+                )}
+                {mode === RANKED && (
+                  <>
+                    <FaCrown
+                      style={{ marginTop: "-4px", color: "yellow" }}
+                      size="25"
+                    />
+                    <span style={{ marginLeft: "5px" }}>{rank}</span>
+                  </>
+                )}
+              </Col>
+            )}
           </Row>
         </ThemeProvider>
       </div>

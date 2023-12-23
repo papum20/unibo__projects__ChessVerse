@@ -11,10 +11,7 @@ from time import perf_counter
 import datetime
 
 
-errors = {
-    "invalid_type": "Invalid type",
-    "game_not_found": "Game not found"
-}
+errors = {"invalid_type": "Invalid type", "game_not_found": "Game not found"}
 
 
 class GameHandler:
@@ -135,7 +132,7 @@ class GameHandler:
 
     def calculate_remaining_time(self, player):
         return player.remaining_time - (perf_counter() - player.latest_timestamp)
-    
+
     async def handle_timeout(self, player, game):
         await Game.sio.emit("timeout", {}, room=player.sid)
         if type(game).__name__ == "PVPGame":
@@ -148,6 +145,7 @@ async def main():
     env = os.environ.get("ENV", "development")
     if env == "development":
         from dotenv import load_dotenv
+
         env_file = f".env.{env}"
         load_dotenv(dotenv_path=env_file)
 

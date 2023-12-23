@@ -15,6 +15,7 @@ from Game import Game
 from const import MODE_RANKED_PT_DIFF, GameType
 
 import os
+
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 target_dir = "/".join(project_root.split("/")[:-1])
 os.chdir(target_dir)
@@ -58,17 +59,23 @@ class TestGetNewRanked(unittest.TestCase):
     def test_with_outcome_winner_none(self):
         outcome = chess.Outcome(self.termination, winner=None)
         expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[1], 0), 100)
-        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome))
+        self.assertEqual(
+            expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome)
+        )
 
     def test_with_outcome_true(self):
         outcome = chess.Outcome(self.termination, winner=True)
         expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[0], 0), 100)
-        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome))
+        self.assertEqual(
+            expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome)
+        )
 
     def test_with_outcome_false(self):
         outcome = chess.Outcome(self.termination, winner=False)
         expected_value = min(max(self.cur_ranked + MODE_RANKED_PT_DIFF[2], 0), 100)
-        self.assertEqual(expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome))
+        self.assertEqual(
+            expected_value, PVEGame.get_new_ranked(self.cur_ranked, outcome)
+        )
 
 
 class TestStart(IsolatedAsyncioTestCase):
@@ -119,7 +126,7 @@ class TestStart(IsolatedAsyncioTestCase):
             "error", {"cause": "SID already used", "fatal": True}, room=self.sid
         )
 
-    '''
+    """
     @mock.patch("PVEGame.PVEGame.__new__")
     @mock.patch("PVEGame.PVEGame.instantiate_bot", new=AsyncMock("some_bot"))
     async def test_start_daily(self, mock_pve_game):
@@ -137,7 +144,7 @@ class TestStart(IsolatedAsyncioTestCase):
         await PVEGame.start(self.sid, data, type=GameType.RANKED)
         mock_get_session_id.assert_awaited_once_with(self.sid)
         mock_get_user_field.assert_called_once_with(1, "score_ranked")
-    '''
+    """
 
     @mock.patch("PVEGame.PVEGame.instantiate_bot", new=AsyncMock("some_bot"))
     async def test_correct_start(self):
@@ -195,12 +202,12 @@ class TestInstantiateBot(IsolatedAsyncioTestCase):
             self.sid, self.rank, self.depth, self.time
         )
 
-    '''
+    """
     @mock.patch('chess.engine.popen_uci')
     async def test(self, mock_popen):
         await self.game.instantiate_bot()([call(1, 2, 3))
         mock_popen.assert_called_once_with('./stockfish')
-    '''
+    """
 
 
 class TestMove(IsolatedAsyncioTestCase):
@@ -330,59 +337,65 @@ class TestDisconnectDaily(IsolatedAsyncioTestCase):
         )
         self.mock_bot = self.game.bot = AsyncMock()
 
-    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("Game.Game.get_username", return_value="test_user")
     @mock.patch("PVEGame.PVEGame.get_attempts", return_value=1)
     @mock.patch("PVEGame.PVEGame.current_day_month_year")
     @mock.patch("Game.Game.execute_query")
-    async def test_method_retrieves_user_information(self, mock_query, mock_day_month_year, mock_get_attempts, mock_get_username):
+    async def test_method_retrieves_user_information(
+        self, mock_query, mock_day_month_year, mock_get_attempts, mock_get_username
+    ):
         await self.game.disconnect_daily(self.sid, None)
         mock_get_username.assert_called_once_with(self.sid)
-        mock_get_attempts.assert_called_once_with('test_user')
+        mock_get_attempts.assert_called_once_with("test_user")
         mock_day_month_year.assert_called_once()
 
-    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("Game.Game.get_username", return_value="test_user")
     @mock.patch("PVEGame.PVEGame.get_attempts", return_value=0)
     @mock.patch("PVEGame.PVEGame.current_day_month_year", return_value=(2023, 12, 21))
     @mock.patch("Game.Game.execute_query")
     @mock.patch("PVEGame.PVEGame.current")
-    async def test_query_with_0_attempts(self, mock_current, mock_query, mock_day_month_year, mock_get_attempts, mock_get_username):
-        type(mock_current).move_count = PropertyMock(
-            return_value=10
-        )
+    async def test_query_with_0_attempts(
+        self,
+        mock_current,
+        mock_query,
+        mock_day_month_year,
+        mock_get_attempts,
+        mock_get_username,
+    ):
+        type(mock_current).move_count = PropertyMock(return_value=10)
         await self.game.disconnect_daily(self.sid, None)
         mock_query.assert_called_once_with(
             "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
-            (
-                'test_user',
-                10,
-                (2023, 12, 21),
-                'loss',
-                1
-            )
+            ("test_user", 10, (2023, 12, 21), "loss", 1),
         )
 
-    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("Game.Game.get_username", return_value="test_user")
     @mock.patch("PVEGame.PVEGame.get_attempts", return_value=1)
     @mock.patch("PVEGame.PVEGame.current_day_month_year", return_value=(2023, 12, 21))
     @mock.patch("Game.Game.execute_query")
     @mock.patch("PVEGame.PVEGame.current")
-    async def test_query_with_1_or_more_attempts(self, mock_current, mock_query, mock_day_month_year, mock_get_attempts, mock_get_username):
-        type(mock_current).move_count = PropertyMock(
-            return_value=10
-        )
+    async def test_query_with_1_or_more_attempts(
+        self,
+        mock_current,
+        mock_query,
+        mock_day_month_year,
+        mock_get_attempts,
+        mock_get_username,
+    ):
+        type(mock_current).move_count = PropertyMock(return_value=10)
         await self.game.disconnect_daily(self.sid, None)
         mock_query.assert_called_once_with(
-                """
+            """
                 UPDATE backend_dailyleaderboard
                 SET moves_count = %s, attempts = attempts + 1, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
             (
                 10,
-                'loss',
-                'test_user',
+                "loss",
+                "test_user",
                 (2023, 12, 21),
-            )
+            ),
         )
 
 
@@ -405,45 +418,42 @@ class TestDisconnectWeekly(IsolatedAsyncioTestCase):
         )
         self.mock_bot = self.game.bot = AsyncMock()
 
-    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("Game.Game.get_username", return_value="test_user")
     @mock.patch("PVEGame.PVEGame.current_week_and_year", return_value=5)
     @mock.patch("Game.Game.execute_query")
-    async def test_method_retrieves_user_information(self, mock_query, mock_week_and_year, mock_get_username):
+    async def test_method_retrieves_user_information(
+        self, mock_query, mock_week_and_year, mock_get_username
+    ):
         await self.game.disconnect_weekly(self.sid, None)
         mock_get_username.assert_called_once_with(self.sid)
         mock_week_and_year.assert_called_once()
         mock_query.assert_any_call(
             "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s AND challenge_date = %s",
-            ('test_user', 5)
+            ("test_user", 5),
         )
 
-    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("Game.Game.get_username", return_value="test_user")
     @mock.patch("PVEGame.PVEGame.current_week_and_year", return_value=5)
     @mock.patch("Game.Game.execute_query")
     @mock.patch("PVEGame.PVEGame.current")
-    async def test_query_with_none_result(self, mock_current, mock_query, mock_week_and_year, mock_get_username):
-        type(mock_current).move_count = PropertyMock(
-            return_value=10
-        )
+    async def test_query_with_none_result(
+        self, mock_current, mock_query, mock_week_and_year, mock_get_username
+    ):
+        type(mock_current).move_count = PropertyMock(return_value=10)
         await self.game.disconnect_weekly(self.sid, None)
         mock_query.assert_any_call(
             "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
-            (
-                'test_user',
-                10,
-                5,
-                'loss'
-            )
+            ("test_user", 10, 5, "loss"),
         )
 
-    @mock.patch("Game.Game.get_username", return_value='test_user')
+    @mock.patch("Game.Game.get_username", return_value="test_user")
     @mock.patch("PVEGame.PVEGame.current_week_and_year", return_value=5)
-    @mock.patch("Game.Game.execute_query", return_value='valid_result')
+    @mock.patch("Game.Game.execute_query", return_value="valid_result")
     @mock.patch("PVEGame.PVEGame.current")
-    async def test_query_with_valid_result(self, mock_current, mock_query, mock_week_and_year, mock_get_username):
-        type(mock_current).move_count = PropertyMock(
-            return_value=10
-        )
+    async def test_query_with_valid_result(
+        self, mock_current, mock_query, mock_week_and_year, mock_get_username
+    ):
+        type(mock_current).move_count = PropertyMock(return_value=10)
         await self.game.disconnect_weekly(self.sid, None)
         mock_query.assert_called_with(
             """
@@ -451,10 +461,7 @@ class TestDisconnectWeekly(IsolatedAsyncioTestCase):
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-            (10,
-             "loss",
-             'test_user',
-             5)
+            (10, "loss", "test_user", 5),
         )
 
 

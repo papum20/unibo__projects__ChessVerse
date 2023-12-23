@@ -1,4 +1,3 @@
-from typing import Optional
 import chess
 import Player
 import confighandler
@@ -7,6 +6,8 @@ from const import TIME_OPTIONS, DEFAULT_ELO
 from const import FIELDS
 import mysql.connector
 import os
+
+
 def expected_score(rating_a, rating_b):
     return 1.0 / (1 + 10 ** ((rating_b - rating_a) / 400))
 
@@ -38,8 +39,10 @@ class Game(ABC):
     }
 
     __slots__ = ["fen", "board", "players", "turn", "popped"]
-    
-    def __init__(self, sids: [], rank: int|None, time: int, seed: int | None = None) -> None:
+
+    def __init__(
+        self, sids: [], rank: int | None, time: int, seed: int | None = None
+    ) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
         self.board = chess.Board(self.fen)
         self.players = []
@@ -80,17 +83,17 @@ class Game(ABC):
     async def get_username(cls, sid):
         session = await Game.sio.get_session(sid)
         return session["username"]
-    
+
     @classmethod
     async def get_session_id(cls, sid):
         session = await Game.sio.get_session(sid)
         return session["session_id"]
-    
+
     @classmethod
     async def get_session_field(cls, sid, field):
         session = await Game.sio.get_session(sid)
         return session[field]
-    
+
     @classmethod
     def execute_query(cls, query, params=None):
         conn = mysql.connector.connect(
@@ -107,15 +110,15 @@ class Game(ABC):
             else:
                 conn.commit()
                 return None
-    
+
     @classmethod
     def set_user_field(cls, session_id: str, field: str, new_value: int) -> bool:
         """
-		:param session_id: session id field
-		:param rank_type: game type, form const.RANKS
-		:param new_rank: new_rank
-		:return: True if success, False otherwise
-		"""
+        :param session_id: session id field
+        :param rank_type: game type, form const.RANKS
+        :param new_rank: new_rank
+        :return: True if success, False otherwise
+        """
 
         if field not in FIELDS:
             # print("[err][db] Invalid rank type")
@@ -131,20 +134,17 @@ class Game(ABC):
 			SET {field} = %(new_value)s
 			WHERE session_id = %(session_id)s
 			""",
-            {
-                'new_value': new_value,
-                'session_id': session_id
-            }
+            {"new_value": new_value, "session_id": session_id},
         )
 
         print(f"[db] set rank to:{new_value}")
         return True
-    
+
     @classmethod
-    def get_user_field(cls, session_id: str, field: str) -> int|None:
+    def get_user_field(cls, session_id: str, field: str) -> int | None:
         """
-		:param session_id: session id field
-		"""
+        :param session_id: session id field
+        """
 
         if session_id is None:
             # print("[err][db] Invalid session id")
@@ -155,15 +155,17 @@ class Game(ABC):
 			FROM backend_registeredusers
 			WHERE session_id = %s
 			""",
-            (session_id,)
+            (session_id,),
         )
         return field[0] if field is not None and len(field) > 0 else None
-
 
     @classmethod
     async def login(cls, session_id: str, sid: str) -> None:
         print(f"faccio login {session_id, sid}")
-        users_info = Game.execute_query("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",(session_id,))
+        users_info = Game.execute_query(
+            "SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",
+            (session_id,),
+        )
         if len(users_info) > 0:
             user_info = users_info[0]
             await Game.sio.save_session(
@@ -186,13 +188,13 @@ class Game(ABC):
             field = "GamesWon" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-                (current["session_id"],)
+                (current["session_id"],),
             )
         if opponent["session_id"] is not None:
             field = "GamesLost" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-                (opponent["session_id"],)
+                (opponent["session_id"],),
             )
         new_elos = [None, None]
         if current["session_id"] is not None and opponent["session_id"] is not None:
@@ -205,14 +207,13 @@ class Game(ABC):
             new_elos = update_rating(current["elo"], opponent["elo"], result)
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[0]} WHERE session_id = %s",
-                (current["session_id"],)
+                (current["session_id"],),
             )
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[1]} WHERE session_id = %s",
-                (opponent["session_id"],)
+                (opponent["session_id"],),
             )
         return new_elos
-
 
     async def game_found(self, sid: str, game_id: str):
         if game_id not in self.games:

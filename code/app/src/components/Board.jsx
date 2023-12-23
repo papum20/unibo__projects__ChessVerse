@@ -66,7 +66,7 @@ function Board(props) {
         const updatedGame = new Chess();
         updatedGame.load(props.game.fen()); // Carica la posizione attuale della scacchiera
         const move = updatedGame.move(oppMoveSan);
-        
+
         if (move) {
           // Ritarda l'esecuzione per un breve periodo per visualizzare l'animazione
           await new Promise((resolve) => setTimeout(resolve, 300));
@@ -86,7 +86,7 @@ function Board(props) {
   async function onSquareClick(square) {
     if (awaitingOppMove) return;
     if (props.mode === PVP && props.game.turn() !== props.color[0]) return;
-    else if (props.mode !== PVP && props.game.turn() !== 'w') return;
+    else if (props.mode !== PVP && props.game.turn() !== "w") return;
 
     // from square
     if (!moveFrom) {
@@ -103,7 +103,7 @@ function Board(props) {
         verbose: true,
       });
       const foundMove = moves.find(
-        (m) => m.from === moveFrom && m.to === square
+        (m) => m.from === moveFrom && m.to === square,
       );
       // not a valid move
       if (!foundMove) {
@@ -194,7 +194,7 @@ function Board(props) {
   useEffect(() => {
     if (!moveSan) return;
 
-    console.log("mando emit di mia mossa")
+    console.log("mando emit di mia mossa");
     props.socket.emit("move", {
       san: moveSan,
       type: props.mode,
@@ -223,7 +223,7 @@ function Board(props) {
       props.setTimers(res.time);
     });
     props.socket?.on("move", (res) => {
-      console.log("ricevo mossa dal backend")
+      console.log("ricevo mossa dal backend");
       props.setMoves((prevValue) => [
         ...prevValue,
         {
@@ -273,10 +273,8 @@ function Board(props) {
     });
   }, []);
 
-
-
   useEffect(() => {
-    if (!!props.game && props.moves.length>1) {
+    if (!!props.game && props.moves.length > 1) {
       const currentMoves = [...props.moves];
       currentMoves[currentMoves.length - 1].isUndo = true;
       currentMoves[currentMoves.length - 2].isUndo = true;
@@ -372,9 +370,7 @@ function Board(props) {
             promotionToSquare={moveTo}
             showPromotionDialog={showPromotionDialog}
             boardWidth={`${
-              props.width < 600
-                ? props.width/10*9
-                : props.width / 2.7
+              props.width < 600 ? (props.width / 10) * 9 : props.width / 2.7
             }`}
             boardOrientation={props.mode === PVE ? "white" : props.color}
           />

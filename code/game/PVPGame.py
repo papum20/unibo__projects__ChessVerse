@@ -1,6 +1,5 @@
 from Game import Game
 from time import perf_counter
-import json
 import random
 from const import TIME_OPTIONS, MIN_RANK, MAX_RANK
 import chess
@@ -12,7 +11,7 @@ class PVPGame(Game):
     }
 
     @classmethod
-    async def start(cls, sid:str, data: dict[str, str]) -> None:
+    async def start(cls, sid: str, data: dict[str, str]) -> None:
         if not await cls.validate_data(sid, data):
             return
         rank = cls.calculate_rank(data["rank"])
@@ -26,7 +25,7 @@ class PVPGame(Game):
         await cls.process_matching(sid, time, rank, index)
 
     @classmethod
-    async def validate_data(cls, sid:str, data: dict[str, str]) -> bool:
+    async def validate_data(cls, sid: str, data: dict[str, str]) -> bool:
         if "rank" not in data or "time" not in data:
             await Game.emit_error("Missing fields", sid)
             return False
@@ -38,7 +37,7 @@ class PVPGame(Game):
         if not cls.check_options(data, "time", TIME_OPTIONS):
             await Game.emit_error("Invalid clocktime", sid)
             return False
-        
+
         return True
 
     @staticmethod
@@ -60,7 +59,7 @@ class PVPGame(Game):
     @staticmethod
     def calculate_rank(rank):
         return round(max(min(int(rank), 100), 0) / 10) * 10
-    
+
     @staticmethod
     def calculate_index(rank):
         return (10 - (rank // 10)) % 6 if rank // 10 > 5 else (rank // 10) % 6
@@ -90,9 +89,7 @@ class PVPGame(Game):
         first = random.randint(0, 1)
         players = [sid, found_guest["sid"]] if first else [found_guest["sid"], sid]
         game_id = "".join(random.choice("0123456789abcdef") for _ in range(16))
-        cls.games[game_id] = cls(
-            players, rank if first else 100 - rank, time
-        )
+        cls.games[game_id] = cls(players, rank if first else 100 - rank, time)
         cls.waiting_list[time][index].remove(found_guest)
         cls.sid_to_id[players[0]] = game_id
         cls.sid_to_id[players[1]] = game_id
@@ -107,7 +104,7 @@ class PVPGame(Game):
                 "id": game_id,
                 "color": "white",
                 "elo": elos,
-                "username": usernames[1]
+                "username": usernames[1],
             },
             room=players[0],
         )
@@ -118,7 +115,7 @@ class PVPGame(Game):
                 "id": game_id,
                 "color": "black",
                 "elo": elos,
-                "username": usernames[0]
+                "username": usernames[0],
             },
             room=players[1],
         )
@@ -131,6 +128,7 @@ class PVPGame(Game):
         )
         # serve per eliminarlo dalla entry
         Game.sid_to_id[sid] = {"time": time, "index": index}
+
     def __init__(self, players: [str], rank: [], timer):
         super().__init__(players, rank, timer)
         self.timer = 1

@@ -84,7 +84,9 @@ class TestDisconnect(IsolatedAsyncioTestCase):
 
     @mock.patch("Game.Game.update_win_database")
     @mock.patch("Game.Game.opponent")
-    async def test_update_win_database_is_called(self, mock_opponent, mock_update_win_db):
+    async def test_update_win_database_is_called(
+        self, mock_opponent, mock_update_win_db
+    ):
         type(mock_opponent.return_value).sid = PropertyMock(
             return_value=self.opponent_sid
         )
@@ -167,7 +169,9 @@ class TestPop(IsolatedAsyncioTestCase):
         self.game.board.push_uci("e2e4")
         self.game.board.push_uci("e7e5")
         await self.game.pop(self.sid)
-        Game.sio.emit.assert_called_once_with("pop", {"time": [0, 1, 2]}, room=self.game.players)
+        Game.sio.emit.assert_called_once_with(
+            "pop", {"time": [0, 1, 2]}, room=self.game.players
+        )
         self.assertTrue(self.game.popped)
 
 
@@ -239,10 +243,18 @@ class TestMove(IsolatedAsyncioTestCase):
         )
         await self.game.move(self.sid, self.data)
 
-        Game.sio.emit.assert_any_call("move", {"san": "e4", "time": [1, 2, 3]}, room=self.sid)
-        Game.sio.emit.assert_any_call("move", {"san": "e4", "time": [1, 2, 3]}, room=self.opponent_sid)
-        Game.sio.emit.assert_any_call("end", {"winner": True, "elo": 1000}, room=self.sid)
-        Game.sio.emit.assert_any_call("end", {"winner": False, "elo": 1200}, room=self.opponent_sid)
+        Game.sio.emit.assert_any_call(
+            "move", {"san": "e4", "time": [1, 2, 3]}, room=self.sid
+        )
+        Game.sio.emit.assert_any_call(
+            "move", {"san": "e4", "time": [1, 2, 3]}, room=self.opponent_sid
+        )
+        Game.sio.emit.assert_any_call(
+            "end", {"winner": True, "elo": 1000}, room=self.sid
+        )
+        Game.sio.emit.assert_any_call(
+            "end", {"winner": False, "elo": 1200}, room=self.opponent_sid
+        )
         mock_disconnect.assert_called_once_with(self.opponent_sid)
 
     @mock.patch("PVPGame.PVPGame.swap")
@@ -251,8 +263,11 @@ class TestMove(IsolatedAsyncioTestCase):
         await self.game.move(self.sid, self.data)
         self.assertFalse(self.game.popped)
         mock_swap.assert_called_once()
-        Game.sio.emit.assert_any_call("move", {"san": "e4", "time": [1, 2, 3]}, room=self.sid)
+        Game.sio.emit.assert_any_call(
+            "move", {"san": "e4", "time": [1, 2, 3]}, room=self.sid
+        )
         Game.sio.emit.assert_any_call("ack", {"time": [1, 2, 3]}, room=self.sid)
+
 
 class TestStart(IsolatedAsyncioTestCase):
     @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)

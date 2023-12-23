@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Button, Card, Form, CloseButton, FloatingLabel } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Form,
+  CloseButton,
+  FloatingLabel,
+} from "react-bootstrap";
 import { EyeFill, EyeSlashFill } from "react-bootstrap-icons";
 import { useForm } from "react-hook-form";
 import {
@@ -10,7 +16,7 @@ import * as users_api from "../../network/users_api";
 import "../../styles/LoginOrSignupPage.css";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import {ELO_LEVEL} from "../../const/const.js";
+import { ELO_LEVEL } from "../../const/const.js";
 /**
  *
  * A card component for login or signup.
@@ -117,19 +123,26 @@ function LoginOrSignupCard(props) {
 
           {!isLogin && (
             <>
-                <FloatingLabel style={{marginTop: "20px"}} controlId="elo" label="Elo ReallyBadChess">
-                  <Form.Select  aria-label="elo" {...register("eloReallyBadChess", { required: true })}>
-                    <option disabled>choose your chess level</option>
-                    <option value={ELO_LEVEL[0]} defaultValue >new to chess</option>
-                    <option value={ELO_LEVEL[1]}>beginner</option>
-                    <option value={ELO_LEVEL[2]}>intermediate</option>
-                    <option value={ELO_LEVEL[3]}>advanced</option>
-                    <option value={ELO_LEVEL[4]}>expert</option>
-                  </Form.Select>
-                </FloatingLabel>
-                {errors.eloReallyBadChess && (
-                  <span>This field is required</span>
-                )}
+              <FloatingLabel
+                style={{ marginTop: "20px" }}
+                controlId="elo"
+                label="Elo ReallyBadChess"
+              >
+                <Form.Select
+                  aria-label="elo"
+                  {...register("eloReallyBadChess", { required: true })}
+                >
+                  <option disabled>choose your chess level</option>
+                  <option value={ELO_LEVEL[0]} defaultValue>
+                    new to chess
+                  </option>
+                  <option value={ELO_LEVEL[1]}>beginner</option>
+                  <option value={ELO_LEVEL[2]}>intermediate</option>
+                  <option value={ELO_LEVEL[3]}>advanced</option>
+                  <option value={ELO_LEVEL[4]}>expert</option>
+                </Form.Select>
+              </FloatingLabel>
+              {errors.eloReallyBadChess && <span>This field is required</span>}
             </>
           )}
 
@@ -153,9 +166,11 @@ function LoginOrSignupCard(props) {
         </Form>
 
         <span
-          id={isLogin
-            ? "don't-have-an-account?-sign-up"
-            : "already-have-an-account?-login"}
+          id={
+            isLogin
+              ? "don't-have-an-account?-sign-up"
+              : "already-have-an-account?-login"
+          }
           size="lg"
           type="submit"
           onClick={() => {

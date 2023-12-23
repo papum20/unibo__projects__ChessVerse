@@ -16,6 +16,7 @@ import os
 env = os.environ.get("ENV", "development")
 if env == "development":
     from dotenv import load_dotenv
+
     env_file = f".env.{env}"
     load_dotenv(dotenv_path=env_file)
 
@@ -32,7 +33,7 @@ DATABASES = {
         "NAME": DATABASE_NAME,
         "USER": DATABASE_USER,
         "PASSWORD": DATABASE_PASSWORD,
-        "HOST": 'mysql',
+        "HOST": "mysql",
         "PORT": DATABASE_PORT,
     }
 }

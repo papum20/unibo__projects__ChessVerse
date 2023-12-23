@@ -54,11 +54,9 @@ export const API = {
     },
   },
   rankedLeaderboard: {
-      endpoint: "get_ranked_leaderboard/",
-      method: "GET",
-      codes: {
-
-      }
+    endpoint: "get_ranked_leaderboard/",
+    method: "GET",
+    codes: {},
   },
   checkStartDaily: {
     endpoint: "check_start_daily/",

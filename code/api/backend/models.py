@@ -72,4 +72,3 @@ class WeeklyLeaderboard(models.Model):
 
     class Meta:
         ordering = ["moves_count"]
-

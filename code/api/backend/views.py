@@ -1,16 +1,14 @@
 import random
 from django.contrib.auth import login, logout
-from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from datetime import datetime, date
+from datetime import datetime
 import json
 
 errors = {
     "invalid_credentials": "Invalid credentials",
     "invalid_request_method": "Invalid request method",
     "invalid_elo": "Invalid elo",
-    "missing_parameters":  "Missing required fields",
+    "missing_parameters": "Missing required fields",
     "missing_date": "Date parameter is missing",
 }
 
@@ -116,11 +114,13 @@ def user_signup(request):
             elo_really_bad_chess = data.get("eloReallyBadChess")
 
             possible_elos = [400, 800, 1200, 1600, 2000]
-            if (int(elo_really_bad_chess) not in possible_elos):
-                return JsonResponse({'message': errors["invalid_elo"]}, status=400)
+            if int(elo_really_bad_chess) not in possible_elos:
+                return JsonResponse({"message": errors["invalid_elo"]}, status=400)
             # Check if all required fields are provided
             if not all([username, password, elo_really_bad_chess]):
-                return JsonResponse({"message": errors["missing_parameters"]}, status=400)
+                return JsonResponse(
+                    {"message": errors["missing_parameters"]}, status=400
+                )
 
             user = RegisteredUsers
             user.objects.create_user(
@@ -139,7 +139,6 @@ def user_signup(request):
         return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
 
 
-# @login_required(login_url='/backend/login/')
 def user_signout(request):
     # Handle user signout (logout)
     logout(request)
@@ -147,19 +146,22 @@ def user_signout(request):
     return JsonResponse({"message": "Logout successful"})
 
 
-
 def get_daily_leaderboard(request):
     if request.method == "GET":
         try:
             # Get the date from the query parameter
-            query_date_str = request.GET.get('date', None)
+            query_date_str = request.GET.get("date", None)
             if query_date_str is None:
                 return JsonResponse({"message": errors["missing_date"]}, status=400)
             # Retrieve only the games played on the query date from the database
 
-            daily_leaderboard = DailyLeaderboard.objects.filter(
-                challenge_date=query_date_str, result="win"
-            ).values("username", "moves_count").order_by("moves_count")
+            daily_leaderboard = (
+                DailyLeaderboard.objects.filter(
+                    challenge_date=query_date_str, result="win"
+                )
+                .values("username", "moves_count")
+                .order_by("moves_count")
+            )
 
             # Return the daily leaderboard as a JSON response
             return JsonResponse(
@@ -175,27 +177,28 @@ def get_daily_leaderboard(request):
 
 def get_weekly_leaderboard(request):
     if request.method == "GET":
-            # Get the date from the query parameter
-            query_date_str = request.GET.get('date', None)
-            if query_date_str is None:
-                return JsonResponse({"message": errors["missing_date"]}, status=400)
+        # Get the date from the query parameter
+        query_date_str = request.GET.get("date", None)
+        if query_date_str is None:
+            return JsonResponse({"message": errors["missing_date"]}, status=400)
 
-
-            # Retrieve only the games played during this week from the database
-            weekly_leaderboard = WeeklyLeaderboard.objects.filter(
+        # Retrieve only the games played during this week from the database
+        weekly_leaderboard = (
+            WeeklyLeaderboard.objects.filter(
                 result="win",
                 challenge_date=query_date_str,
-            ).values("username", "moves_count").order_by("moves_count")
-
-            # Return the weekly leaderboard as a JSON response
-            return JsonResponse(
-                {"weekly_leaderboard": list(weekly_leaderboard)}, status=200
             )
+            .values("username", "moves_count")
+            .order_by("moves_count")
+        )
+
+        # Return the weekly leaderboard as a JSON response
+        return JsonResponse(
+            {"weekly_leaderboard": list(weekly_leaderboard)}, status=200
+        )
     else:
         # Return an error response for invalid request methods
         return JsonResponse({"message": errors["invalid_request_method"]}, status=405)
-
-
 
 
 MAX_DAILY_GAMES = 2
@@ -232,7 +235,10 @@ def check_start_daily(request):
 
             if daily_leaderboard:
                 print(daily_leaderboard[0]["attempts"])
-            if daily_leaderboard and daily_leaderboard[0]["attempts"] >= MAX_DAILY_GAMES:
+            if (
+                daily_leaderboard
+                and daily_leaderboard[0]["attempts"] >= MAX_DAILY_GAMES
+            ):
                 return JsonResponse(
                     {
                         "message": "You have already played the maximum number of games today"
@@ -257,9 +263,11 @@ def check_start_daily(request):
 def get_multiplayer_leaderboard(request):
     if request.method == "GET":
         try:
-            multiplayer_leaderboard = RegisteredUsers.objects.all().values(
-                "username", "EloReallyBadChess"
-            ).order_by("-EloReallyBadChess")
+            multiplayer_leaderboard = (
+                RegisteredUsers.objects.all()
+                .values("username", "EloReallyBadChess")
+                .order_by("-EloReallyBadChess")
+            )
             return JsonResponse(
                 {"multiplayer_leaderboard": list(multiplayer_leaderboard)}, status=200
             )
@@ -275,10 +283,14 @@ def get_multiplayer_leaderboard(request):
 def get_ranked_leaderboard(request):
     try:
         # Retrieve all users ordered by score_ranked in descending order
-        ranked_leaderboard = RegisteredUsers.objects.all().values('username', 'score_ranked').order_by('-score_ranked')
+        ranked_leaderboard = (
+            RegisteredUsers.objects.all()
+            .values("username", "score_ranked")
+            .order_by("-score_ranked")
+        )
         return JsonResponse(
-                {"ranked_leaderboard": list(ranked_leaderboard)}, status=200
-            )
+            {"ranked_leaderboard": list(ranked_leaderboard)}, status=200
+        )
     except Exception as e:
         # Return an error response for any exception
         return JsonResponse({"message": str(e)}, status=500)
