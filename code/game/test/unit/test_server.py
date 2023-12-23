@@ -16,7 +16,22 @@ from const import GameType
 
 
 class TestSid2Game(TestCase):
-    ...
+    def setUp(self):
+        self.sid = 'test_sid'
+        self.server = GameHandler()
+
+    def test_game_id_is_not_a_string(self):
+        Game.sid_to_id[self.sid] = 10
+        self.assertIsNone(GameHandler.sid2game(self.sid))
+
+    def test_with_invalid_key(self):
+        Game.sid_to_id[self.sid] = 'test_id'
+        self.assertIsNone(GameHandler.sid2game(self.sid))
+
+    def test_with_valid_key(self):
+        Game.sid_to_id[self.sid] = 'test_id'
+        Game.games['id'] = 'test_game'
+        self.assertIsNone(GameHandler.sid2game(self.sid), 'test_game')
 
 
 class TestOnConnect(IsolatedAsyncioTestCase):
