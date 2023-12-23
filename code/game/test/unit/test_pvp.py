@@ -333,5 +333,24 @@ class TestProcessMatching(IsolatedAsyncioTestCase):
         mock_add_player_to_waiting_list(self.sid, self.time, self.rank, self.index)
 
 
+class TestSetupGameWithExistingPlayer(IsolatedAsyncioTestCase):
+    @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
+    def setUp(self, mock_gen_start_fen):
+        self.sid = "test_sid"
+        self.opponent_sid = "test_opponent_sid"
+        self.players = ["player1", "player2"]
+        self.rank = 1
+        self.time = 300
+        self.index = 0
+        Game.sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
+        self.mock_emit = AsyncMock()
+        Game.sio.emit = self.mock_emit
+
+    @mock.patch("socketio.AsyncServer.get_session", return_value={"elo": 150})
+    async def test_session_is_fetched(self, mock_get_session):
+        await PVPGame.setup_game_with_existing_player(self.sid, self.time, self.rank, self.index)
+        mock_get_session.assert_awaited_with(self.sid)
+
+
 if __name__ == "__main__":
     unittest.main()
