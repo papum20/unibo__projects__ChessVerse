@@ -93,7 +93,7 @@ class GameHandler:
             return
         game = GameHandler.sid2game(sid)
         if game is None:
-            await Game.emit_error(errors["invalid_type"], sid)
+            await Game.emit_error(errors["game_not_found"], sid)
             return
         await game.move(sid, data)
 
