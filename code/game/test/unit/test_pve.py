@@ -184,6 +184,24 @@ class TestDisconnect(IsolatedAsyncioTestCase):
         self.assertNotIn(self.sid, Game.games.keys())
         self.assertNotIn(self.sid, Game.sid_to_id.keys())
 
+    @mock.patch("PVEGame.PVEGame.disconnect_daily")
+    async def test_daily_disconnect_is_called(self, mock_disconnect_daily):
+        self.game.type = GameType.DAILY
+        await self.game.disconnect(self.sid)
+        mock_disconnect_daily.assert_called_once()
+
+    @mock.patch("PVEGame.PVEGame.disconnect_weekly")
+    async def test_weekly_disconnect_is_called(self, mock_disconnect_weekly):
+        self.game.type = GameType.WEEKLY
+        await self.game.disconnect(self.sid)
+        mock_disconnect_weekly.assert_called_once()
+
+    @mock.patch("PVEGame.PVEGame.disconnect_ranked")
+    async def test_ranked_disconnect_is_called(self, mock_disconnect_ranked):
+        self.game.type = GameType.RANKED
+        await self.game.disconnect(self.sid)
+        mock_disconnect_ranked.assert_called_once()
+
 
 class TestInstantiateBot(IsolatedAsyncioTestCase):
     @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
@@ -522,6 +540,25 @@ class TestDisconnectRanked(IsolatedAsyncioTestCase):
         outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
         await self.game.disconnect_ranked(self.sid, outcome)
         mock_set_user_field.assert_called_once_with('test_session_id', 'score_ranked', 5)
+
+
+class TestGetAttempts(TestCase):
+    def setUp(self):
+        self.username = 'test_username'
+
+    @mock.patch("Game.Game.execute_query")
+    @mock.patch("PVEGame.PVEGame.current_day_month_year", return_value=(2023, 12, 23))
+    def test_method_queries_attempts_correctly(self, mock_current_day_month_year, mock_query):
+        PVEGame.get_attempts(self.username)
+        mock_query.assert_called_once_with(
+            "SELECT attempts FROM backend_dailyleaderboard WHERE username = %s AND challenge_date = %s",
+            (self.username, (2023, 12, 23))
+        )
+
+    @mock.patch("Game.Game.execute_query", return_value=None)
+    @mock.patch("PVEGame.PVEGame.current_day_month_year", return_value=(2023, 12, 23))
+    def test_method_returns_correctly(self, mock_current_day_month_year, mock_query):
+        self.assertEqual(PVEGame.get_attempts(self.username), 0)
 
 
 if __name__ == "__main__":
