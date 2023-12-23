@@ -6,7 +6,7 @@ from Game import Game
 from const import MIN_RANK, MAX_RANK, MIN_DEPTH, MAX_DEPTH, MIN_TIME, MAX_TIME, MODE_RANKED_PT_DIFF
 from time import perf_counter
 from const import GameType
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 class PVEGame(Game):
     __slots__ = ["bot", "depth", "type"]
 
@@ -71,9 +71,7 @@ class PVEGame(Game):
             Game.sid_to_id[sid] = sid  # solo in PVE;
             rank = -1
             if seed is not None:
-                if type == GameType.DAILY:
-                    Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
-                elif type == GameType.WEEKLY:
+                if type == GameType.DAILY or type == GameType.WEEKLY:
                     Game.games[sid] = PVEGame(sid, None, 1, -1, seed, type)
             else: # 1v1, freeplay, ranked
                 if type == GameType.RANKED:

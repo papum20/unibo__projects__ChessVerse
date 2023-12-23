@@ -71,7 +71,7 @@ class GameHandler:
         print("start", sid)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
-        if "type" not in data.keys():
+        if "type" not in data.keys() or data["type"] not in GameType:
             await Game.sio.emit(
                 "error", errors["invalid_type"], room=sid
             )
@@ -86,11 +86,6 @@ class GameHandler:
             await PVEGame.start(sid, data, seed=weekly_seed, type=GameType.WEEKLY)
         elif data["type"] == GameType.RANKED:
             await PVEGame.start(sid, data, seed=None, type=GameType.RANKED)
-        # add new GameTypes Daily and Wekkly challenges
-        else:
-            await Game.sio.emit(
-                "error", errors["invalid_type"], room=sid
-            )
 
     async def on_move(self, sid, data):
         print("move", sid)
