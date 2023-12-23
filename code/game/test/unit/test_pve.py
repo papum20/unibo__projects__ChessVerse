@@ -382,10 +382,11 @@ class TestDisconnectDaily(IsolatedAsyncioTestCase):
         mock_get_username,
     ):
         type(mock_current).move_count = PropertyMock(return_value=10)
-        await self.game.disconnect_daily(self.sid, None)
+        outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
+        await self.game.disconnect_daily(self.sid, outcome)
         mock_query.assert_called_once_with(
             "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
-            ("test_user", 10, (2023, 12, 21), "loss", 1),
+            ("test_user", 10, (2023, 12, 21), "win", 1),
         )
 
     @mock.patch("Game.Game.get_username", return_value="test_user")
@@ -402,6 +403,7 @@ class TestDisconnectDaily(IsolatedAsyncioTestCase):
         mock_get_username,
     ):
         type(mock_current).move_count = PropertyMock(return_value=10)
+        outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=None)
         await self.game.disconnect_daily(self.sid, None)
         mock_query.assert_called_once_with(
             """
@@ -473,14 +475,15 @@ class TestDisconnectWeekly(IsolatedAsyncioTestCase):
         self, mock_current, mock_query, mock_week_and_year, mock_get_username
     ):
         type(mock_current).move_count = PropertyMock(return_value=10)
-        await self.game.disconnect_weekly(self.sid, None)
+        outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
+        await self.game.disconnect_weekly(self.sid, outcome)
         mock_query.assert_called_with(
             """
                 UPDATE backend_weeklyleaderboard
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-            (10, "loss", "test_user", 5),
+            (10, "win", "test_user", 5),
         )
 
 
@@ -520,7 +523,7 @@ class TestDisconnectRanked(IsolatedAsyncioTestCase):
         mock_get_user_field.assert_called_once_with('test_session_id', 'score_ranked')
 
     @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
-    @mock.patch("PVEGame.PVEGame.get_user_field", return_value=None)
+    @mock.patch("PVEGame.PVEGame.get_user_field", return_value=[5, 6])
     @mock.patch("PVEGame.PVEGame.get_new_ranked", return_value=5)
     @mock.patch("PVEGame.PVEGame.set_user_field")
     async def test_method_calls_get_new_ranked(
@@ -528,7 +531,7 @@ class TestDisconnectRanked(IsolatedAsyncioTestCase):
     ):
         outcome = chess.Outcome(termination=Termination.CHECKMATE, winner=True)
         await self.game.disconnect_ranked(self.sid, outcome)
-        mock_get_new_ranked.assert_called_once_with(0, outcome)
+        mock_get_new_ranked.assert_called_once_with(5, outcome)
 
     @mock.patch("Game.Game.get_session_id", return_value='test_session_id')
     @mock.patch("PVEGame.PVEGame.get_user_field", return_value=None)
