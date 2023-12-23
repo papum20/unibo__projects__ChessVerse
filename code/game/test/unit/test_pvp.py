@@ -195,16 +195,11 @@ class TestMove(IsolatedAsyncioTestCase):
 
         self.data = {"san": "e2e4"}
 
-    """
-    async def test_no_games_found(self):
+    @mock.patch("Game.Game.emit_error")
+    async def test_no_games_found(self, mock_emit_error):
         del Game.sid_to_id[self.sid]
         await self.game.move(self.sid, {})
-        Game.sio.emit.assert_called_once_with(
-            "error",
-            {"cause": "No games found"},
-            room=self.sid
-        )
-    """
+        mock_emit_error.assert_awaited_once_with("No games found", self.sid)
 
     async def test_san_not_in_data(self):
         await self.game.move(self.sid, {})
@@ -308,7 +303,34 @@ class TestStart(IsolatedAsyncioTestCase):
             "error", {"cause": "Started Matching", "fatal": True}, room=self.sid
         )
 
-    ...
+    @mock.patch("PVPGame.PVPGame.calculate_index", return_value=15)
+    @mock.patch("PVPGame.PVPGame.calculate_rank", return_value=0)
+    @mock.patch("PVPGame.PVPGame.process_matching")
+    async def test_call_to_process_matching(self, mock_process_matching, mock_calculate_rank, mock_calculate_index):
+        del Game.sid_to_id[self.sid]
+        self.assertNotIn(self.sid, Game.sid_to_id)
+        await PVPGame.start(self.sid, self.data)
+        mock_process_matching.assert_awaited_once_with(self.sid, 600, 0, 15)
+
+
+class TestProcessMatching(IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.sid = 'test_sid'
+        self.time = 300
+        self.rank = 5
+        self.index = 0
+
+    @mock.patch("PVPGame.PVPGame.add_player_to_waiting_list")
+    async def test_no_match_found(self, mock_add_player_to_waiting_list):
+        PVPGame.waiting_list[300, 0] = []
+        await PVPGame.process_matching(self.sid, self.time, self.rank, self.index)
+        mock_add_player_to_waiting_list.assert_awaited_once_with(self.sid, self.time, self.rank, self.index)
+
+    @mock.patch("PVPGame.PVPGame.add_player_to_waiting_list")
+    async def test_match_found(self, mock_add_player_to_waiting_list):
+        PVPGame.waiting_list[300, 0] = [[{"rank": 95}]]
+        await PVPGame.process_matching(self.sid, self.time, self.rank, self.index)
+        mock_add_player_to_waiting_list(self.sid, self.time, self.rank, self.index)
 
 
 if __name__ == "__main__":
