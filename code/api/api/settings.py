@@ -33,7 +33,7 @@ DATABASES = {
         "NAME": DATABASE_NAME,
         "USER": DATABASE_USER,
         "PASSWORD": DATABASE_PASSWORD,
-        "HOST": "mysql",
+        "HOST": DATABASE_HOST,
         "PORT": DATABASE_PORT,
     }
 }

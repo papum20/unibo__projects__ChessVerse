@@ -91,7 +91,8 @@ function Start({
       socket.connect();
       socket.on("connect", () => {
         socket.on("config", (config) => {
-          setElo(config?.elo);
+          if (config?.elo !== undefined)
+            setElo(config?.elo);
           setEnemyUsername(config?.username || "Stockfish");
           setStartFen(config.fen);
           setColor(config.color);

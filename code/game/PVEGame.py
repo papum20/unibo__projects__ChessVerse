@@ -215,7 +215,6 @@ class PVEGame(Game):
 
     async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):
         session_id = await Game.get_session_id(sid)
-        print(session_id)
         if session_id is not None:
             score_ranked = PVEGame.get_user_field(session_id, "score_ranked")
             if score_ranked is not None:
@@ -223,11 +222,11 @@ class PVEGame(Game):
             else:
                 score_ranked = 0
             new_ranked = PVEGame.get_new_ranked(score_ranked, outcome)
-            print(f"new_ranked = {new_ranked}")
             PVEGame.set_user_field(session_id, "score_ranked", new_ranked)
 
-    async def disconnect(self, sid: str) -> None:
-        outcome = self.board.outcome()
+    async def disconnect(self, sid: str, outcome: chess.Outcome = None) -> None:
+        if not outcome: 
+            outcome = self.board.outcome()
         print(f"mi sto disconnetendo {sid}")
         if self.type == GameType.DAILY:
             await self.disconnect_daily(sid, outcome)

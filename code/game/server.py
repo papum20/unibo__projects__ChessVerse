@@ -8,6 +8,7 @@ from PVPGame import PVPGame
 from Game import Game
 from const import GameType
 from time import perf_counter
+import chess
 import datetime
 
 
@@ -64,8 +65,8 @@ class GameHandler:
         return seed
 
     async def on_start(self, sid, data):
-        daily_seed = GameHandler.daily_seed()
-        weekly_seed = GameHandler.weekly_seed()
+        print("1")
+        print("2")
         print("start", sid)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
@@ -75,11 +76,10 @@ class GameHandler:
             await PVEGame.start(sid, data)
         elif data["type"] == GameType.PVP:
             await PVPGame.start(sid, data)
-        # add new GameTypes Daily and Wekkly challenges
         elif data["type"] == GameType.DAILY:
-            await PVEGame.start(sid, data, seed=daily_seed, type=GameType.DAILY)
+            await PVEGame.start(sid, data, seed=GameHandler.daily_seed(), type=GameType.DAILY)
         elif data["type"] == GameType.WEEKLY:
-            await PVEGame.start(sid, data, seed=weekly_seed, type=GameType.WEEKLY)
+            await PVEGame.start(sid, data, seed=GameHandler.weekly_seed(), type=GameType.WEEKLY)
         elif data["type"] == GameType.RANKED:
             await PVEGame.start(sid, data, seed=None, type=GameType.RANKED)
 
@@ -134,11 +134,15 @@ class GameHandler:
         return player.remaining_time - (perf_counter() - player.latest_timestamp)
 
     async def handle_timeout(self, player, game):
+        print("timeout", player.sid)
+        outcome = None
+        if game.has_insufficient_material(game.opponent(player.sid).color):
+            outcome = chess.Outcome(termination=chess.Termination(3), winner=None)
         await Game.sio.emit("timeout", {}, room=player.sid)
         if type(game).__name__ == "PVPGame":
-            await game.disconnect(player.sid, False)
+            await game.disconnect(player.sid, False, outcome)
         else:
-            await game.disconnect(player.sid)
+            await game.disconnect(player.sid, outcome)
 
 
 async def main():

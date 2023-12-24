@@ -70,7 +70,7 @@ class PVPGame(Game):
             len(cls.waiting_list[time][index]) > 0
             and cls.waiting_list[time][index][0]["rank"] == 100 - rank
         ):
-            # se c'è un match
+            #match trovato
             await cls.setup_game_with_existing_player(sid, time, rank, index)
         else:
             await cls.add_player_to_waiting_list(sid, time, rank, index)
@@ -141,12 +141,11 @@ class PVPGame(Game):
     def is_player_turn(self, sid):
         return self.current.sid == sid
 
-    async def disconnect(self, sid: str, send_to_disconnected: bool = True) -> None:
+    async def disconnect(self, sid: str, send_to_disconnected: bool = True, outcome: chess.Outcome = None) -> None:
         await self.update_win_database(self.opponent(sid).sid, False)
-        print("Sto disconnettendo il giocatore", sid)
         if send_to_disconnected:
-            await Game.sio.emit("end", {"winner": False}, room=sid)
-        await Game.sio.emit("end", {"winner": True}, room=self.opponent(sid).sid)
+            await Game.sio.emit("end", {"winner": False if outcome is None else outcome.winner}, room=sid)
+        await Game.sio.emit("end", {"winner": True if outcome is None else outcome.winner}, room=self.opponent(sid).sid)
         # await Game.sio.disconnect(sid=self.opponent(sid).sid)
         if sid not in Game.sid_to_id:
             return

@@ -74,12 +74,13 @@ function Game({
       if (timerInterval !== null) clearInterval(timerInterval);
       setTimerInterval(
         setInterval(() => {
-          setTimers((prevTime) => {
-            const updatedTime = [...prevTime];
-            updatedTime[Number(game.turn() === "b")] -= interval / 1000;
-            return updatedTime;
-          });
-        }, interval),
+          if (timers)
+            setTimers((prevTime) => {
+              const updatedTime = [...prevTime];
+              updatedTime[Number(game.turn() === "b")] -= interval / 1000;
+              return updatedTime;
+            });
+          }, interval),
       );
     }
 
@@ -92,7 +93,7 @@ function Game({
   var location = useLocation();
 
   useEffect(() => {
-    if (timers[0] <= 1 || timers[1] <= 1) {
+    if (timers && (timers[0] <= 1 || timers[1] <= 1)) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
@@ -778,11 +779,11 @@ function Game({
                       }}
                     />
                     <span>
-                      {`${String(
+                      {`${timers?String(
                         Math.floor(timers[Number(color === "black")] / 60),
-                      ).padStart(2, "0")}:${String(
+                      ).padStart(2, "0"):""}:${timers?String(
                         Math.floor(timers[Number(color === "black")] % 60),
-                      ).padStart(2, "0")}`}
+                      ).padStart(2, "0"):""}`}
                     </span>
                   </>
                 )}
