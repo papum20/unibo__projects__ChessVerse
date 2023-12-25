@@ -44,6 +44,7 @@ class Game(ABC):
         self, sids: [], rank: int | None, time: int, seed: int | None = None
     ) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
+        print("h2")
         self.board = chess.Board(self.fen)
         self.players = []
         for i, sid in enumerate(sids):
@@ -60,7 +61,10 @@ class Game(ABC):
         return self.players[1 - self.turn]
 
     def opponent(self, sid: str) -> Player:
-        return self.players[1 - self.players.index(sid)]
+        if len(self.players) > 1:
+            return self.players[1 - self.players.index(sid)]
+        else:
+            return self.players[0]
 
     @abstractmethod
     async def disconnect(self, sid: str) -> None:
@@ -68,7 +72,7 @@ class Game(ABC):
 
     @classmethod
     @abstractmethod
-    async def start(cls, sid: str) -> None:
+    async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
         pass
 
     @abstractmethod

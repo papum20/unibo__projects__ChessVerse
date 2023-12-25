@@ -1,14 +1,14 @@
 import random
 
 
-def gen_start_fen(rank: int | None = 50, seed=None):
+def gen_start_fen(rank: int|None = 50, seed=None):
     if seed is not None:
         random.seed(seed)
 
     def calc_imb(x):
         first_val = 30
         second_val = -30
-        return ((first_val - second_val) / 100) * x + first_val
+        return ((second_val - first_val) / 100) * x + first_val
 
     pieces = ["p", "n", "b", "r", "q"]
     pieces_weight = {"k": 0, "p": 1, "n": 3, "b": 3, "r": 5, "q": 9}

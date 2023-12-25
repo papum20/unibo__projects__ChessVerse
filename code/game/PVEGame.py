@@ -14,6 +14,14 @@ from time import perf_counter
 from const import GameType
 from datetime import datetime, date
 
+def calculate_result(outcome: chess.Outcome):
+    if outcome is None or outcome.winner is False:
+        return "loss"
+    elif outcome.winner:
+        return "win"
+    else:
+        return "draw"
+
 
 class PVEGame(Game):
     __slots__ = ["bot", "depth", "type"]
@@ -21,7 +29,7 @@ class PVEGame(Game):
     def __init__(
         self,
         player: str,
-        rank: int,
+        rank: int | None,
         depth: int,
         time: int,
         seed: int | None = None,
@@ -43,15 +51,14 @@ class PVEGame(Game):
             new_rank = cur_ranked + MODE_RANKED_PT_DIFF[0]
         else:
             new_rank = cur_ranked + MODE_RANKED_PT_DIFF[2]
-        print(new_rank)
         return min(max(new_rank, 0), 100)
 
     @classmethod
     async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
-        if not await cls.validate_data(data, sid):
+        if not await PVEGame.validate_data(data, sid):
             return
-        if sid not in cls.sid_to_id:
-            await cls.initialize_game(sid, data, seed, type)
+        if sid not in Game.sid_to_id:
+            await PVEGame.initialize_game(sid, data, seed, type)
         else:
             await Game.emit_error("SID already used", sid)
 
@@ -144,13 +151,6 @@ class PVEGame(Game):
         current_username = await Game.get_username(sid)
         attempts = PVEGame.get_attempts(current_username)
         date = PVEGame.current_day_month_year()
-        game_result = None
-        if outcome is None or not outcome.winner:
-            game_result = "loss"
-        elif outcome.winner:
-            game_result = "win"
-        else:
-            game_result = "draw"
         if attempts == 0:
             Game.execute_query(
                 "INSERT INTO backend_dailyleaderboard (username, moves_count, challenge_date, result, attempts) VALUES (%s, %s, %s, %s, %s)",
@@ -158,7 +158,7 @@ class PVEGame(Game):
                     current_username,
                     self.current.move_count,
                     date,
-                    game_result,
+                    calculate_result(outcome),
                     attempts + 1,
                 ),
             )
@@ -171,7 +171,7 @@ class PVEGame(Game):
                 """,
                 (
                     self.current.move_count,
-                    game_result,
+                    calculate_result(outcome),
                     current_username,
                     date,
                 ),
@@ -186,13 +186,6 @@ class PVEGame(Game):
             "SELECT moves_count, challenge_date FROM backend_weeklyleaderboard WHERE username = %s AND challenge_date = %s",
             (current_username, weekno),
         )
-        game_result = None
-        if outcome is None or not outcome.winner:
-            game_result = "loss"
-        elif outcome.winner:
-            game_result = "win"
-        else:
-            game_result = "draw"
         if result is None or len(result) == 0:
             Game.execute_query(
                 "INSERT INTO backend_weeklyleaderboard (username, moves_count, challenge_date, result) VALUES (%s, %s, %s, %s)",
@@ -200,7 +193,7 @@ class PVEGame(Game):
                     current_username,
                     self.current.move_count,
                     weekno,
-                    game_result,
+                    calculate_result(outcome),
                 ),
             )
         else:
@@ -210,7 +203,7 @@ class PVEGame(Game):
                 SET moves_count = %s, result = %s
                 WHERE username = %s AND challenge_date = %s
                 """,
-                (self.current.move_count, game_result, current_username, weekno),
+                (self.current.move_count, calculate_result(outcome), current_username, weekno),
             )
 
     async def disconnect_ranked(self, sid: str, outcome: chess.Outcome):
@@ -225,7 +218,7 @@ class PVEGame(Game):
             PVEGame.set_user_field(session_id, "score_ranked", new_ranked)
 
     async def disconnect(self, sid: str, outcome: chess.Outcome = None) -> None:
-        if not outcome: 
+        if not outcome:
             outcome = self.board.outcome()
         print(f"mi sto disconnetendo {sid}")
         if self.type == GameType.DAILY:

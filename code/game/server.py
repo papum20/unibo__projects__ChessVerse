@@ -65,9 +65,7 @@ class GameHandler:
         return seed
 
     async def on_start(self, sid, data):
-        print("1")
-        print("2")
-        print("start", sid)
+        print("start", sid, data)
         if "session_id" in data.keys():
             await Game.login(data["session_id"], sid)
         if "type" not in data.keys() or data["type"] not in GameType:
@@ -136,7 +134,7 @@ class GameHandler:
     async def handle_timeout(self, player, game):
         print("timeout", player.sid)
         outcome = None
-        if game.has_insufficient_material(game.opponent(player.sid).color):
+        if game.board.has_insufficient_material(game.opponent(player.sid).color):
             outcome = chess.Outcome(termination=chess.Termination(3), winner=None)
         await Game.sio.emit("timeout", {}, room=player.sid)
         if type(game).__name__ == "PVPGame":

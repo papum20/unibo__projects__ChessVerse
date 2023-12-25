@@ -11,7 +11,7 @@ class PVPGame(Game):
     }
 
     @classmethod
-    async def start(cls, sid: str, data: dict[str, str]) -> None:
+    async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
         if not await cls.validate_data(sid, data):
             return
         rank = cls.calculate_rank(data["rank"])
