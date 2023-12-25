@@ -308,14 +308,14 @@ class TestCheckPlayerTimeout(IsolatedAsyncioTestCase):
     @mock.patch("server.GameHandler.calculate_remaining_time", return_value=3000)
     @mock.patch("server.GameHandler.handle_timeout")
     async def test_method_behaviour_with_remaining_time(self, mock_timeout, mock_calc_remaining_time):
-        await self.server.check_player_timeout(self.player, self.game)
+        await self.server.check_player(self.player, self.game)
         mock_calc_remaining_time.assert_called_once_with(self.player)
         mock_timeout.assert_not_called()
 
     @mock.patch("server.GameHandler.calculate_remaining_time", return_value=0)
     @mock.patch("server.GameHandler.handle_timeout")
     async def test_method_behaviour_on_timeout(self, mock_timeout, mock_calc_remaining_time):
-        await self.server.check_player_timeout(self.player, self.game)
+        await self.server.check_player(self.player, self.game)
         mock_calc_remaining_time.assert_called_once_with(self.player)
         mock_timeout.assert_called_once()
 

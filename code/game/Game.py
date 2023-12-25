@@ -44,7 +44,6 @@ class Game(ABC):
         self, sids: [], rank: int | None, time: int, seed: int | None = None
     ) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
-        print("h2")
         self.board = chess.Board(self.fen)
         self.players = []
         for i, sid in enumerate(sids):
@@ -188,13 +187,13 @@ class Game(ABC):
     async def update_win_database(self, sid: str, outcome: bool | None) -> None:
         current = await Game.sio.get_session(sid)
         opponent = await Game.sio.get_session(self.opponent(sid).sid)
-        if current["session_id"] is not None:
+        if current is not None and current["session_id"] is not None:
             field = "GamesWon" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
                 (current["session_id"],),
             )
-        if opponent["session_id"] is not None:
+        if opponent is not None and opponent["session_id"] is not None:
             field = "GamesLost" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",

@@ -11,7 +11,6 @@ from time import perf_counter
 import chess
 import datetime
 
-
 errors = {"invalid_type": "Invalid type", "game_not_found": "Game not found"}
 
 
@@ -116,27 +115,32 @@ class GameHandler:
         for id in list(Game.games.keys()):
             if id not in Game.games:
                 continue
-            await self.update_players(Game.games[id])
+            await self.update_current_player(Game.games[id])
 
-    async def update_players(self, game):
-        for player in game.players:
-            if player.is_timed:
-                await self.check_player_timeout(player, game)
+    async def update_current_player(self, game):
+        if game.current.is_timed:
+            if type(game).__name__ == "PVPGame":
+                await self.check_player(game.next, game)
+            await self.check_player(game.current, game)
 
-    async def check_player_timeout(self, player, game):
-        player_time = self.calculate_remaining_time(player)
+    async def check_player(self, player, game):
+        player_time = self.calculate_remaining_time(player, player == game.current)
         if player_time <= 0:
             await self.handle_timeout(player, game)
 
-    def calculate_remaining_time(self, player):
-        return player.remaining_time - (perf_counter() - player.latest_timestamp)
+    def calculate_remaining_time(self, player, current_turn):
+        if current_turn:
+            return player.remaining_time - (perf_counter() - player.latest_timestamp)
+        else:
+            return player.remaining_time
 
     async def handle_timeout(self, player, game):
-        print("timeout", player.sid)
         outcome = None
-        if game.board.has_insufficient_material(game.opponent(player.sid).color):
+        if game.board.has_insufficient_material(not player.color):
             outcome = chess.Outcome(termination=chess.Termination(3), winner=None)
-        await Game.sio.emit("timeout", {}, room=player.sid)
+            await Game.sio.emit("end", {"winner": None}, room=player.sid)
+        else:
+            await Game.sio.emit("timeout", {}, room=player.sid)
         if type(game).__name__ == "PVPGame":
             await game.disconnect(player.sid, False, outcome)
         else:
