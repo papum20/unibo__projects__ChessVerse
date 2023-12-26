@@ -169,7 +169,7 @@ class Game(ABC):
             "SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",
             (session_id,),
         )
-        if len(users_info) > 0:
+        if users_info is not None and len(users_info) > 0:
             user_info = users_info[0]
             await Game.sio.save_session(
                 sid,

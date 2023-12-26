@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase, IsolatedAsyncioTestCase
 from unittest import mock
-from unittest.mock import AsyncMock, PropertyMock
+from unittest.mock import AsyncMock, PropertyMock, call
 
 import sys
 import random
@@ -10,12 +10,95 @@ import socketio
 
 sys.path.append("../..")
 from Game import Game, expected_score, update_rating, calc_k
-
+from PVPGame import PVPGame
+from server import GameHandler
+from const import DEFAULT_ELO
 import os
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 target_dir = "/".join(project_root.split("/")[:-1])
 os.chdir(target_dir)
+
+class TestLogin(IsolatedAsyncioTestCase):
+    @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
+    def setUp(self, mock_gen_start_fen):
+        self.sid = "test_sid"
+        self.opponent_sid = "test_opponent_sid"
+        self.players = ["player1", "player2"]
+        self.rank = 1
+        self.time = 100
+        Game.sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
+        self.mock_emit = AsyncMock()
+        Game.sio.emit = self.mock_emit
+        Game.sio.save_session = AsyncMock()
+        self.server = GameHandler()
+
+        self.data = {"rank": 1, "time": 600, "session_id": "a"*16}
+
+    @mock.patch("Game.Game.execute_query", return_value=None)
+    async def test_login_not_found(self, mock_query):
+        await self.server.on_start(self.sid, self.data)
+        Game.sio.save_session.assert_called_once_with(
+            self.sid, {"elo": DEFAULT_ELO, "session_id": "a"*16, "username": "Guest"}
+        )
+
+    @mock.patch("Game.Game.execute_query", return_value=[(10, "a")])
+    async def test_login_found(self, mock_query):
+        await self.server.on_start(self.sid, self.data)
+        Game.sio.save_session.assert_called_once_with(
+            self.sid, {"elo": 10, "session_id": "a"*16, "username": "a"}
+        )
+
+class TestDisconnect(IsolatedAsyncioTestCase):
+    @mock.patch("Game.confighandler.gen_start_fen", return_value=chess.STARTING_FEN)
+    def setUp(self, mock_gen_start_fen):
+        self.sid = "test_sid"
+        self.opponent_sid = "test_opponent_sid"
+        self.players = ["player1", "player2"]
+        self.rank = 1
+        self.time = 100
+        Game.sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
+        self.mock_emit = AsyncMock()
+        Game.sio.emit = self.mock_emit
+        Game.sio.disconnect = AsyncMock()
+
+        # Game instantiation
+        Game.sid_to_id[self.sid] = self.sid
+        self.game = Game.games[self.sid] = PVPGame(self.players, self.rank, self.time)
+
+    @mock.patch("Game.Game.execute_query")
+    @mock.patch("Game.Game.opponent")
+    async def test_update_win_database_correct(
+        self, mock_opponent, mock_query
+    ):
+        type(mock_opponent.return_value).sid = PropertyMock(
+            return_value=self.opponent_sid
+        )
+        dc = AsyncMock()
+        dc.return_value = {"session_id": "a"*16, "elo": 10}
+        Game.sio.get_session = dc
+        await self.game.disconnect(self.sid)
+
+        calls = [call('UPDATE backend_registeredusers SET GamesWon = GamesWon + 1 WHERE session_id = %s', ("a"*16,)),
+                 call('UPDATE backend_registeredusers SET GamesLost = GamesLost + 1 WHERE session_id = %s', ("a"*16,)),
+                 call('UPDATE backend_registeredusers SET EloReallyBadChess = -20.0 WHERE session_id = %s', ("a"*16,)),
+                 call('UPDATE backend_registeredusers SET EloReallyBadChess = 40.0 WHERE session_id = %s', ("a"*16,))]
+
+        mock_query.assert_has_calls(calls)
+
+    @mock.patch("Game.Game.execute_query")
+    @mock.patch("Game.Game.opponent")
+    async def test_update_win_database_correct(
+        self, mock_opponent, mock_query
+    ):
+        type(mock_opponent.return_value).sid = PropertyMock(
+            return_value=self.opponent_sid
+        )
+        dc = AsyncMock()
+        dc.return_value = None
+        Game.sio.get_session = dc
+        await self.game.disconnect(self.sid)
+        mock_query.assert_not_called()
 
 
 class TestExpectedScore(TestCase):
