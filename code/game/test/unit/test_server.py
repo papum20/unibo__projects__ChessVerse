@@ -259,13 +259,13 @@ class TestUpdateGames(IsolatedAsyncioTestCase):
         Game.sid_to_id[self.sid] = self.sid
         Game.games[self.sid] = self.game = AsyncMock()
 
-    @mock.patch("server.GameHandler.update_players")
-    async def test_method_updates_players(self, mock_update_players):
+    @mock.patch("server.GameHandler.update_current_player")
+    async def test_method_updates_players(self, mock_update_current_player):
         await self.server.update_games()
-        mock_update_players.assert_awaited()
+        mock_update_current_player.assert_awaited()
 
 
-class TestUpdatePlayers(IsolatedAsyncioTestCase):
+class TestUpdateCurrentPlayer(IsolatedAsyncioTestCase):
     def setUp(self):
         self.sid = "test_sid"
 
@@ -282,13 +282,13 @@ class TestUpdatePlayers(IsolatedAsyncioTestCase):
             return_value=[self.player]
         )
 
-    @mock.patch("server.GameHandler.check_player_timeout")
-    async def test_method_checks_player_timeout(self, mock_check_player_timeout):
-        await self.server.update_players(self.game)
-        mock_check_player_timeout.assert_awaited_with(self.player, self.game)
+    @mock.patch("server.GameHandler.check_player")
+    async def test_method_checks_player_timeout(self, mock_check_player):
+        await self.server.update_current_player(self.game)
+        mock_check_player.assert_awaited()
 
 
-class TestCheckPlayerTimeout(IsolatedAsyncioTestCase):
+class TestCheckPlayer(IsolatedAsyncioTestCase):
     def setUp(self):
         self.sid = "test_sid"
 
@@ -309,14 +309,14 @@ class TestCheckPlayerTimeout(IsolatedAsyncioTestCase):
     @mock.patch("server.GameHandler.handle_timeout")
     async def test_method_behaviour_with_remaining_time(self, mock_timeout, mock_calc_remaining_time):
         await self.server.check_player(self.player, self.game)
-        mock_calc_remaining_time.assert_called_once_with(self.player)
+        mock_calc_remaining_time.assert_called_once_with(self.player, False)
         mock_timeout.assert_not_called()
 
     @mock.patch("server.GameHandler.calculate_remaining_time", return_value=0)
     @mock.patch("server.GameHandler.handle_timeout")
     async def test_method_behaviour_on_timeout(self, mock_timeout, mock_calc_remaining_time):
         await self.server.check_player(self.player, self.game)
-        mock_calc_remaining_time.assert_called_once_with(self.player)
+        mock_calc_remaining_time.assert_called_once_with(self.player, False)
         mock_timeout.assert_called_once()
 
 
@@ -339,7 +339,7 @@ class TestHandleTimeOut(IsolatedAsyncioTestCase):
 
     async def test_method_emits_correctly(self):
         await self.server.handle_timeout(self.player, self.game)
-        self.mock_emit.assert_called_once_with("timeout", {}, room=self.sid)
+        self.mock_emit.assert_called_once_with("end", {'winner': None}, room=self.sid)
 
 
 if __name__ == "__main__":
