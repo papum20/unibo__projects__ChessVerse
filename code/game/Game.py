@@ -47,7 +47,7 @@ class Game(ABC):
         self.board = chess.Board(self.fen)
         self.players = []
         for i, sid in enumerate(sids):
-            self.players.append(Player.Player(sid, not bool(i), -2))
+            self.players.append(Player.Player(sid, not bool(i), time))
         self.turn = 0
         self.popped = False
 
