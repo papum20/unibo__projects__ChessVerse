@@ -47,7 +47,7 @@ class Game(ABC):
         self.board = chess.Board(self.fen)
         self.players = []
         for i, sid in enumerate(sids):
-            self.players.append(Player.Player(sid, not bool(i), time))
+            self.players.append(Player.Player(sid, not bool(i), -2))
         self.turn = 0
         self.popped = False
 
@@ -185,8 +185,13 @@ class Game(ABC):
             )
 
     async def update_win_database(self, sid: str, outcome: bool | None) -> None:
-        current = await Game.sio.get_session(sid)
-        opponent = await Game.sio.get_session(self.opponent(sid).sid)
+        current = None
+        opponent = None
+        try:
+            current = await Game.sio.get_session(sid)
+            opponent = await Game.sio.get_session(self.opponent(sid).sid)
+        except KeyError:
+            print("la sessione non e' stata trovata")
         if current is not None and current["session_id"] is not None:
             field = "GamesWon" if outcome is not None else "GamesDrawn"
             Game.execute_query(
@@ -200,7 +205,7 @@ class Game(ABC):
                 (opponent["session_id"],),
             )
         new_elos = [None, None]
-        if current["session_id"] is not None and opponent["session_id"] is not None:
+        if current is not None and opponent is not None and current["session_id"] is not None and opponent["session_id"] is not None:
             if outcome is None:
                 result = 0.5
             elif outcome == True:

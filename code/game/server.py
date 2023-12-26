@@ -125,6 +125,7 @@ class GameHandler:
 
     async def check_player(self, player, game):
         player_time = self.calculate_remaining_time(player, player == game.current)
+        print(player_time)
         if player_time <= 0:
             await self.handle_timeout(player, game)
 
