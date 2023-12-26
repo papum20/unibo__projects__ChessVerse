@@ -2,6 +2,7 @@
 source = .
 
 omit = ../../Game.py
+debug = false
 
 
 # [report]
