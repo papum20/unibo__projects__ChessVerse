@@ -40,3 +40,4 @@ t4-chessverse/
 
 code/game/.env.development
 code/api/.env.development
+code/game/test/unit/.coverage
