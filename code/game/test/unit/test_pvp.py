@@ -332,7 +332,7 @@ class TestProcessMatching(IsolatedAsyncioTestCase):
     async def test_match_found(self, mock_add_player_to_waiting_list):
         PVPGame.waiting_list[300, 0] = [[{"rank": 95}]]
         await PVPGame.process_matching(self.sid, self.time, self.rank, self.index)
-        mock_add_player_to_waiting_list(self.sid, self.time, self.rank, self.index)
+        mock_add_player_to_waiting_list.assert_awaited_once_with(self.sid, self.time, self.rank, self.index)
 
 
 class TestSetupGameWithExistingPlayer(IsolatedAsyncioTestCase):

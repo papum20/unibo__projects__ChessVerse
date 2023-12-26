@@ -336,8 +336,10 @@ class TestHandleTimeOut(IsolatedAsyncioTestCase):
         type(self.game).players = PropertyMock(
             return_value=[self.player]
         )
+        type(self.game).board = PropertyMock()
 
-    async def test_method_emits_correctly(self):
+    @mock.patch("chess.Board.has_insufficient_material", return_value=True)
+    async def test_method_emits_correctly(self, mock_board_has_insufficient_material):
         await self.server.handle_timeout(self.player, self.game)
         self.mock_emit.assert_called_once_with("end", {'winner': None}, room=self.sid)
 
