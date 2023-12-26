@@ -159,6 +159,14 @@ stage('Build and Test api backend') {
                 dir('code/game/test/unit') {
                     sh 'python3.12 -m coverage run -m unittest '
                     sh 'python3.12 -m coverage xml -i'
+                    sh '''
+                        if [ -f "coverage.xml" ]; then
+                            echo "coverage.xml file is created."
+                            echo "Path: $(pwd)/coverage.xml"
+                        else
+                            echo "coverage.xml file is not created."
+                        fi
+                    '''
                 }
             }
         }
