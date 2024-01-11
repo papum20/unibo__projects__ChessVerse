@@ -9,6 +9,11 @@ from ...models import (
 from datetime import date
 
 
+today = date.today()
+formatted_date_daily = today.strftime("%d%m%Y")
+formatted_date_weekly = today.strftime("%U%Y")
+
+
 class GuestModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -61,12 +66,12 @@ class RegisteredUsersModelTest(TestCase):
 
     def test_game_draw_label(self):
         user = RegisteredUsers.objects.get(username="test_user")
-        field_label = user._meta.get_field("GameDraw").verbose_name
-        self.assertEqual(field_label, "GameDraw")
+        field_label = user._meta.get_field("GamesDrawn").verbose_name
+        self.assertEqual(field_label, "GamesDrawn")
 
     def test_game_draw_default(self):
         user = RegisteredUsers.objects.get(username="test_user")
-        default = user._meta.get_field("GameDraw").default
+        default = user._meta.get_field("GamesDrawn").default
         self.assertEqual(default, 0)
 
     """test_games_lost"""
@@ -158,50 +163,60 @@ class DailyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         DailyLeaderboard.objects.create(
-            username="test_user", challenge_date=date.today(), moves_count=1, result="win", attempts=1
+            username="test_user",
+            challenge_date=formatted_date_daily,
+            moves_count=1,
+            result="win",
+            attempts=1,
         )
 
     def test_username_label(self):
         lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_daily
         )
         field_label = lb._meta.get_field("username").verbose_name
         self.assertEqual(field_label, "username")
 
     def test_username_max_length(self):
         lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_daily
         )
         max_length = lb._meta.get_field("username").max_length
         self.assertEqual(max_length, 255)
 
     def test_challenge_date_label(self):
-        lb = DailyLeaderboard.objects.get(username="test_user", challenge_date=date.today())
+        lb = DailyLeaderboard.objects.get(
+            username="test_user", challenge_date=formatted_date_daily
+        )
         field_label = lb._meta.get_field("challenge_date").verbose_name
-        self.assertEqual(field_label, "challenge date")  # Use space instead of underscore
+        self.assertEqual(
+            field_label, "challenge date"
+        )  # Use space instead of underscore
 
     def test_moves_count_label(self):
-        lb = DailyLeaderboard.objects.get(username="test_user", challenge_date=date.today())
+        lb = DailyLeaderboard.objects.get(
+            username="test_user", challenge_date=formatted_date_daily
+        )
         field_label = lb._meta.get_field("moves_count").verbose_name
         self.assertEqual(field_label, "moves count")  # Use space instead of underscore
 
     def test_result_label(self):
         lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_daily
         )
         field_label = lb._meta.get_field("result").verbose_name
         self.assertEqual(field_label, "result")
 
     def test_result_max_length(self):
         lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_daily
         )
         max_length = lb._meta.get_field("result").max_length
         self.assertEqual(max_length, 10)
 
     def test_attemps_label(self):
         lb = DailyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_daily
         )
         field_label = lb._meta.get_field("attempts").verbose_name
         self.assertEqual(field_label, "attempts")
@@ -211,49 +226,50 @@ class WeeklyLeaderboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         WeeklyLeaderboard.objects.create(
-            username="test_user", challenge_date=date.today(), moves_count=1, result="win"
+            username="test_user",
+            challenge_date=formatted_date_weekly,
+            moves_count=1,
+            result="win",
         )
 
     def test_username_label(self):
         lb = WeeklyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_weekly
         )
         field_label = lb._meta.get_field("username").verbose_name
         self.assertEqual(field_label, "username")
 
     def test_username_max_length(self):
         lb = WeeklyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_weekly
         )
         max_length = lb._meta.get_field("username").max_length
         self.assertEqual(max_length, 255)
 
     def test_moves_count_label(self):
         lb = WeeklyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_weekly
         )
         field_label = lb._meta.get_field("moves_count").verbose_name
         self.assertEqual(field_label, "moves count")
 
     def test_challenge_date_label(self):
         lb = WeeklyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_weekly
         )
         field_label = lb._meta.get_field("challenge_date").verbose_name
         self.assertEqual(field_label, "challenge date")
 
     def test_result_label(self):
         lb = WeeklyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_weekly
         )
         field_label = lb._meta.get_field("result").verbose_name
         self.assertEqual(field_label, "result")
 
     def test_result_max_length(self):
         lb = WeeklyLeaderboard.objects.get(
-            username="test_user", challenge_date=date.today()
+            username="test_user", challenge_date=formatted_date_weekly
         )
         max_length = lb._meta.get_field("result").max_length
         self.assertEqual(max_length, 10)
-
-

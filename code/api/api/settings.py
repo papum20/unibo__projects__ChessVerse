@@ -16,6 +16,7 @@ import os
 env = os.environ.get("ENV", "development")
 if env == "development":
     from dotenv import load_dotenv
+
     env_file = f".env.{env}"
     load_dotenv(dotenv_path=env_file)
 
@@ -25,16 +26,18 @@ DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": DATABASE_NAME,
         "USER": DATABASE_USER,
         "PASSWORD": DATABASE_PASSWORD,
-        "HOST": DATABASE_HOST,
+        "HOST": 'mysql',
         "PORT": DATABASE_PORT,
     }
 }
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

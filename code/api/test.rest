@@ -11,13 +11,13 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:8000/backend/signup/
+POST http://localhost:8000/signup/
 Content-Type: application/json
 
 {
     
-    "username": "adminerff",
-    "password": "admin",
+    "username": "test1",
+    "password": "test1",
     "eloReallyBadChess": 1600
 }
 

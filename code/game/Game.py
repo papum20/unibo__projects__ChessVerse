@@ -1,31 +1,33 @@
-from typing import Optional
 import chess
 import Player
 import confighandler
 from abc import ABC, abstractmethod
 from const import TIME_OPTIONS, DEFAULT_ELO
 from const import FIELDS
+import mysql.connector
+import os
 
-def expected_score(rating_A, rating_B):
-    return 1.0 / (1 + 10 ** ((rating_B - rating_A) / 400))
+
+def expected_score(rating_a, rating_b):
+    return 1.0 / (1 + 10 ** ((rating_b - rating_a) / 400))
 
 
-def update_rating(rating_A, rating_B, risultato):
-    expected_a = expected_score(rating_A, rating_B)
-    expected_b = expected_score(rating_B, rating_A)
-    K = calc_K(rating_A, rating_B)
-    new_rating_a = rating_A + K * (risultato - expected_a)
-    new_rating_b = rating_B + K * (1 - risultato - expected_b)
+def update_rating(rating_a, rating_b, risultato):
+    expected_a = expected_score(rating_a, rating_b)
+    expected_b = expected_score(rating_b, rating_a)
+    k = calc_k(rating_a, rating_b)
+    new_rating_a = rating_a + k * (risultato - expected_a)
+    new_rating_b = rating_b + k * (1 - risultato - expected_b)
     return new_rating_a, new_rating_b
 
 
-def calc_K(rating_A, rating_B):
+def calc_k(rating_a, rating_b):
     # Assumo che il rating Elo sia compreso tra 0 e 3000
-    # Assumo che il valore di K sia compreso tra 10 e 60
-    # Uso una formula lineare per interpolare il valore di K
+    # Assumo che il valore di k sia compreso tra 10 e 60
+    # Uso una formula lineare per interpolare il valore di k
     # K = 60 - 0.0167 * (rating_A + rating_B) / 2
-    # Arrotondo il valore di K al numero intero piÃ¹ vicino
-    return round(60 - 0.0167 * (rating_A + rating_B) / 2)
+    # Arrotondo il valore di k al numero intero piu' vicino
+    return round(60 - 0.0167 * (rating_a + rating_b) / 2)
 
 
 class Game(ABC):
@@ -35,10 +37,12 @@ class Game(ABC):
     waiting_list: dict[str, list[list[str]]] = {
         key: [[] for _ in range(6)] for key in TIME_OPTIONS
     }
-    conn = None
+
     __slots__ = ["fen", "board", "players", "turn", "popped"]
-    
-    def __init__(self, sids: [], rank: int|None, time: int, seed: int | None = None) -> None:
+
+    def __init__(
+        self, sids: [], rank: int | None, time: int, seed: int | None = None
+    ) -> None:
         self.fen = confighandler.gen_start_fen(rank, seed)
         self.board = chess.Board(self.fen)
         self.players = []
@@ -56,7 +60,10 @@ class Game(ABC):
         return self.players[1 - self.turn]
 
     def opponent(self, sid: str) -> Player:
-        return self.players[1 - self.players.index(sid)]
+        if len(self.players) > 1:
+            return self.players[1 - self.players.index(sid)]
+        else:
+            return self.players[0]
 
     @abstractmethod
     async def disconnect(self, sid: str) -> None:
@@ -64,7 +71,7 @@ class Game(ABC):
 
     @classmethod
     @abstractmethod
-    async def start(cls, sid: str) -> None:
+    async def start(cls, sid: str, data: dict[str, str], seed=None, type=None) -> None:
         pass
 
     @abstractmethod
@@ -79,36 +86,42 @@ class Game(ABC):
     async def get_username(cls, sid):
         session = await Game.sio.get_session(sid)
         return session["username"]
-    
+
     @classmethod
     async def get_session_id(cls, sid):
         session = await Game.sio.get_session(sid)
         return session["session_id"]
-    
+
     @classmethod
     async def get_session_field(cls, sid, field):
         session = await Game.sio.get_session(sid)
         return session[field]
-    
+
     @classmethod
     def execute_query(cls, query, params=None):
-        with Game.conn.cursor() as cursor:
+        conn = mysql.connector.connect(
+            host=os.environ.get("DATABASE_HOST"),
+            user=os.environ.get("DATABASE_USER"),
+            password=os.environ.get("DATABASE_PASSWORD"),
+            database=os.environ.get("DATABASE_NAME"),
+            port=os.environ.get("DATABASE_PORT"),
+        )
+        with conn.cursor() as cursor:
             cursor.execute(query, params or ())
             if query.strip().upper().startswith("SELECT"):
                 return cursor.fetchall()
             else:
-                Game.conn.commit()
+                conn.commit()
                 return None
-    
+
     @classmethod
     def set_user_field(cls, session_id: str, field: str, new_value: int) -> bool:
         """
-		:param session_id: session id field
-		:param rank_type: game type, form const.RANKS
-		:param new_rank: new_rank
-		
-		:return: True if success, False otherwise
-		"""
+        :param session_id: session id field
+        :param rank_type: game type, form const.RANKS
+        :param new_rank: new_rank
+        :return: True if success, False otherwise
+        """
 
         if field not in FIELDS:
             # print("[err][db] Invalid rank type")
@@ -124,20 +137,17 @@ class Game(ABC):
 			SET {field} = %(new_value)s
 			WHERE session_id = %(session_id)s
 			""",
-            {
-                'new_value': new_value,
-                'session_id': session_id
-            }
+            {"new_value": new_value, "session_id": session_id},
         )
 
         print(f"[db] set rank to:{new_value}")
         return True
-    
+
     @classmethod
-    def get_user_field(cls, session_id: str, field: str) -> int:
+    def get_user_field(cls, session_id: str, field: str) -> int | None:
         """
-		:param session_id: session id field
-		"""
+        :param session_id: session id field
+        """
 
         if session_id is None:
             # print("[err][db] Invalid session id")
@@ -148,16 +158,18 @@ class Game(ABC):
 			FROM backend_registeredusers
 			WHERE session_id = %s
 			""",
-            (session_id,)
+            (session_id,),
         )
         return field[0] if field is not None and len(field) > 0 else None
-
 
     @classmethod
     async def login(cls, session_id: str, sid: str) -> None:
         print(f"faccio login {session_id, sid}")
-        users_info = Game.execute_query("SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",(session_id,))
-        if len(users_info) > 0:
+        users_info = Game.execute_query(
+            "SELECT EloReallyBadChess, Username FROM backend_registeredusers WHERE session_id = %s",
+            (session_id,),
+        )
+        if users_info is not None and len(users_info) > 0:
             user_info = users_info[0]
             await Game.sio.save_session(
                 sid,
@@ -173,42 +185,56 @@ class Game(ABC):
             )
 
     async def update_win_database(self, sid: str, outcome: bool | None) -> None:
-        current = await Game.sio.get_session(sid)
-        opponent = await Game.sio.get_session(self.opponent(sid).sid)
-        if current["session_id"] is not None:
+        current = None
+        opponent = None
+        try:
+            current = await Game.sio.get_session(sid)
+            opponent = await Game.sio.get_session(self.opponent(sid).sid)
+        except KeyError:
+            print("la sessione non e' stata trovata")
+        if current is not None and current["session_id"] is not None:
             field = "GamesWon" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-                (current["session_id"],)
+                (current["session_id"],),
             )
-        if opponent["session_id"] is not None:
-            field = "GamesLost" if outcome is not None else "GamesLost"
+        if opponent is not None and opponent["session_id"] is not None:
+            field = "GamesLost" if outcome is not None else "GamesDrawn"
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET {field} = {field} + 1 WHERE session_id = %s",
-                (opponent["session_id"],)
+                (opponent["session_id"],),
             )
         new_elos = [None, None]
-        if current["session_id"] is not None and opponent["session_id"] is not None:
-            result = 1 if outcome is True else 0.5 if outcome is None else 0
+        if current is not None and opponent is not None and current["session_id"] is not None and opponent["session_id"] is not None:
+            if outcome is None:
+                result = 0.5
+            elif outcome == True:
+                result = 1
+            else:
+                result = 0
             new_elos = update_rating(current["elo"], opponent["elo"], result)
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[0]} WHERE session_id = %s",
-                (current["session_id"],)
+                (current["session_id"],),
             )
             Game.execute_query(
                 f"UPDATE backend_registeredusers SET EloReallyBadChess = {new_elos[1]} WHERE session_id = %s",
-                (opponent["session_id"],)
+                (opponent["session_id"],),
             )
         return new_elos
 
-
     async def game_found(self, sid: str, game_id: str):
         if game_id not in self.games:
-            await self.sio.emit(
-                "error", {"cause": "Game not found", "fatal": True}, room=sid
-            )
+            await Game.emit_error("Game not found", sid)
             return False
         return True
 
     def get_times(self):
         return [player.remaining_time for player in self.players if player.is_timed]
+
+    @classmethod
+    async def emit_error(cls, cause, sid, fatal=True):
+        body = {"cause": cause}
+        if fatal is not None:
+            body["fatal"] = fatal
+        await cls.sio.emit("error", body, room=sid)

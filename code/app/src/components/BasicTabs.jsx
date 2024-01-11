@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { CloseButton, Row, Col } from "react-bootstrap";
+import { CloseButton, Row, Col, Form, Modal } from "react-bootstrap";
 import { Tabs, Tab, Box } from "@mui/material";
 import "../styles/BasicTabs.css";
+import { MOBILEWIDTH } from "../const/const.js";
+import useWindowDimensions from "./useWindowDimensions.jsx";
+import { Calendar } from "react-bootstrap-icons";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -40,6 +43,12 @@ export default function BasicTabs(props) {
     setValue(newValue);
   };
 
+  const { width, height } = useWindowDimensions();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const [showMDate, setShowMDate] = useState(false);
+  const [isDaily, setIsDaily] = useState(false);
+
   return (
     <Box sx={{ flexGrow: 1, display: "flex", height: "80vh" }}>
       <Tabs
@@ -76,27 +85,75 @@ export default function BasicTabs(props) {
         />
       </Tabs>
 
+      <Modal show={showMDate} centered>
+        <div style={{ backgroundColor: "rgb(81, 57, 23)" }}>
+          <Modal.Title style={{ display: "flex", justifyContent: "flex-end" }}>
+            <CloseButton
+              style={{ marginTop: "5px", marginRight: "5px" }}
+              onClick={() => setShowMDate(false)}
+            />
+          </Modal.Title>
+          <Modal.Body style={{ marginTop: "20px", marginBottom: "30px" }}>
+            <Form.Control
+              onChange={(e) => {
+                props.setDateArr(
+                  e.target.value
+                    .split("-")
+                    .reverse()
+                    .map((obj) => parseInt(obj)) /* [GG,MM,YYYY] */,
+                );
+              }}
+              type="date"
+              style={{ fontSize: "25px" }}
+            />
+          </Modal.Body>
+        </div>
+      </Modal>
+
       <div style={{ backgroundColor: "rgb(150, 111, 51)", width: "95vw" }}>
-        
-          <>
-            <TabPanel value={value} index={0}>
-              <Row style={{ marginBottom: "20px" }}>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Username
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Turni Minimi
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <CloseButton onClick={() => props.setShowModal(false)} />
-                </Col>
-              </Row>
-              <div style={{overflow: "auto", overflowX: "hidden"}}>
-              {props.data.map((el, i) => 
+        <>
+          <TabPanel value={value} index={0}>
+            <Row style={{ marginBottom: "20px" }}>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  Username
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  mosse
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "space-between" }}>
+                <Calendar
+                  onClick={() => {
+                    setShowMDate(true);
+                    setIsDaily(true);
+                  }}
+                  size={25}
+                  style={{ cursor: "pointer", marginTop: "5px" }}
+                />
+                <CloseButton onClick={() => props.setShowModal(false)} />
+              </Col>
+            </Row>
+            <div
+              style={{
+                overflow: "auto",
+                overflowX: "hidden",
+                maxHeight: "80vh",
+              }}
+            >
+              {props.data.map((el, i) => (
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
@@ -108,27 +165,51 @@ export default function BasicTabs(props) {
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              )}
-              </div>
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-              <Row style={{ marginBottom: "20px" }}>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Username
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Turni Minimi
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <CloseButton onClick={() => props.setShowModal(false)} />
-                </Col>
-              </Row>
-              <div style={{overflow: "auto", overflowX: "hidden"}}>
-              {props.data.map((el, i) => 
+              ))}
+            </div>
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <Row style={{ marginBottom: "20px" }}>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  Username
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  mosse
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "space-between" }}>
+                <Calendar
+                  onClick={() => {
+                    setShowMDate(true);
+                    setIsDaily(false);
+                  }}
+                  size={25}
+                  style={{ cursor: "pointer", marginTop: "5px" }}
+                />
+                <CloseButton onClick={() => props.setShowModal(false)} />
+              </Col>
+            </Row>
+            <div
+              style={{
+                overflow: "auto",
+                overflowX: "hidden",
+                maxHeight: "80vh",
+              }}
+            >
+              {props.data.map((el, i) => (
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
@@ -140,27 +221,43 @@ export default function BasicTabs(props) {
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              )}
-              </div>
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-              <Row style={{ marginBottom: "20px" }}>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Username
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Rank
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <CloseButton onClick={() => props.setShowModal(false)} />
-                </Col>
-              </Row>
-              <div style={{overflow: "auto", overflowX: "hidden"}}>
-              {props.data.map((el, i) => 
+              ))}
+            </div>
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            <Row style={{ marginBottom: "20px" }}>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  Username
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  Rank
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                <CloseButton onClick={() => props.setShowModal(false)} />
+              </Col>
+            </Row>
+            <div
+              style={{
+                overflow: "auto",
+                overflowX: "hidden",
+                maxHeight: "80vh",
+              }}
+            >
+              {props.data.map((el, i) => (
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
@@ -172,27 +269,43 @@ export default function BasicTabs(props) {
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              )}
-              </div>
-            </TabPanel>
-            <TabPanel value={value} index={3}>
-              <Row style={{ marginBottom: "20px" }}>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Username
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "center" }}>
-                  <span style={{ fontWeight: "bold", fontSize: "22px" }}>
-                    Elo
-                  </span>
-                </Col>
-                <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <CloseButton onClick={() => props.setShowModal(false)} />
-                </Col>
-              </Row>
-              <div style={{overflow: "auto", overflowX: "hidden"}}>
-              {props.data.map((el, i) => 
+              ))}
+            </div>
+          </TabPanel>
+          <TabPanel value={value} index={3}>
+            <Row style={{ marginBottom: "20px" }}>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  Username
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "center" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${width < MOBILEWIDTH ? "16px" : "22px"}`,
+                  }}
+                >
+                  Elo
+                </span>
+              </Col>
+              <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+                <CloseButton onClick={() => props.setShowModal(false)} />
+              </Col>
+            </Row>
+            <div
+              style={{
+                overflow: "auto",
+                overflowX: "hidden",
+                maxHeight: "80vh",
+              }}
+            >
+              {props.data.map((el, i) => (
                 <Row style={{ marginBottom: "10px" }} key={i}>
                   <Col style={{ display: "flex", justifyContent: "center" }}>
                     <span>{el.username}</span>
@@ -204,11 +317,10 @@ export default function BasicTabs(props) {
                     style={{ display: "flex", justifyContent: "flex-end" }}
                   ></Col>
                 </Row>
-              )}
-              </div>
-            </TabPanel>
-          </>
-        
+              ))}
+            </div>
+          </TabPanel>
+        </>
       </div>
     </Box>
   );

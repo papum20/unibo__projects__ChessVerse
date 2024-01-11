@@ -1,6 +1,9 @@
 import { API } from "../const/const_api";
-import { parseCredentialsLogin, parseCredentialsSignup } from "../models/credentials";
-import { SERVER_ADDR } from '../const/const';
+import {
+  parseCredentialsLogin,
+  parseCredentialsSignup,
+} from "../models/credentials";
+import { SERVER_ADDR } from "../const/const";
 import { joinPaths } from "../utils/path";
 import { toast } from "react-toastify";
 

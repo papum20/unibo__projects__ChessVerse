@@ -26,9 +26,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    secrets:
-      - ssl_cert
-      - ssl_priv
 
   api:
     depends_on:
@@ -59,9 +56,3 @@ networks:
 
 volumes:
   db_data:
-
-secrets:
-  ssl_cert:
-    file: /etc/letsencrypt/live/chessverse.cloud-0003/fullchain.pem
-  ssl_priv:
-    file: /etc/letsencrypt/live/chessverse.cloud-0003/privkey.pem

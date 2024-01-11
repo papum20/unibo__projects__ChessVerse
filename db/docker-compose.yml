@@ -1,0 +1,65 @@
+version: '3.7'
+
+services:
+  mysql:
+    container_name: mysql
+    build:
+      context: ../code/database/
+      dockerfile: Dockerfile
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 160
+    volumes:
+       - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - cas-network
+      - chessverse 
+  game:
+      depends_on:
+        mysql:
+          condition: service_healthy
+      container_name: game
+      restart: always
+      build:
+        context: ../code/game
+        dockerfile: Dockerfile
+      ports:
+        - "8080:8080"
+      networks:
+        - chessverse 
+  api:
+      depends_on:
+        mysql:
+          condition: service_healthy
+      container_name: api
+      restart: always
+      build:
+        context: ../code/api
+        dockerfile: Dockerfile
+      ports:
+        - "8000:8000"
+      networks:
+        - chessverse 
+  app:
+      container_name: app
+      restart: always
+      build:
+        context: ../code/app
+        dockerfile: Dockerfile
+      env_file: ../env/app.env
+      ports:
+        - "3000:3000"
+      networks:
+        - chessverse 
+
+networks:
+  default:
+    name: chessverse
+  chessverse:
+  cas-network:
+    external: true

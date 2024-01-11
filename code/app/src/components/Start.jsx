@@ -10,6 +10,7 @@ import { Image, Nav, Modal, Form, CloseButton } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { joinPaths } from "../utils/path";
+import useWindowDimensions from "./useWindowDimensions.jsx";
 import {
   MAX_BOT_DIFF,
   MAX_GAME_IMB,
@@ -55,7 +56,9 @@ function Start({
   youAreLogged,
   setElo,
   setEnemyUsername,
+  setRank,
 }) {
+  const { width } = useWindowDimensions();
   const theme = createTheme({
     palette: {
       brown: {
@@ -88,12 +91,14 @@ function Start({
       socket.connect();
       socket.on("connect", () => {
         socket.on("config", (config) => {
-          setElo(config?.elo);
+          if (config?.elo !== undefined)
+            setElo(config?.elo);
           setEnemyUsername(config?.username || "Stockfish");
           setStartFen(config.fen);
           setColor(config.color);
           setRoomId(config.id);
           setIsLoadingGame(false);
+          if ("rank" in config) setRank(config.rank);
         });
 
         const tmpData = {
@@ -160,8 +165,8 @@ function Start({
                       setBotDiff(
                         Math.max(
                           MIN_BOT_DIFF,
-                          Math.min(MAX_BOT_DIFF, e.target.value)
-                        )
+                          Math.min(MAX_BOT_DIFF, e.target.value),
+                        ),
                       );
                     }}
                     valueLabelDisplay="auto"
@@ -189,8 +194,8 @@ function Start({
                     setGameImb(
                       Math.max(
                         MIN_GAME_IMB,
-                        Math.min(MAX_GAME_IMB, e.target.value)
-                      )
+                        Math.min(MAX_GAME_IMB, e.target.value),
+                      ),
                     );
                   }}
                   valueLabelDisplay="auto"
@@ -275,14 +280,22 @@ function Start({
           backgroundRepeat: "no-repeat",
           backgroundColor: `${getShowOptions() ? "#b99b69" : ""}`,
           width: "100vw",
-          height: "100vh",
+          minHeight: "100vh",
+          paddingBottom: "20px",
         }}
       >
         <ThemeProvider theme={theme}>
           <div style={{ paddingTop: `${!getShowOptions() ? "18vh" : ""}` }}>
             {!getShowOptions() ? (
               <>
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: `${width < 600 ? "column" : "row"}`,
+                  }}
+                >
                   <Image
                     src={`${ImageScacchi}`}
                     alt="immagine di scacchi"
@@ -293,12 +306,22 @@ function Start({
                       marginTop: "-5px",
                     }}
                   />
-                  <span style={{ color: "white", fontSize: "5rem" }}>
+                  <span
+                    style={{
+                      color: "white",
+                      fontSize: `${width < 600 ? "2rem" : "5rem"}`,
+                    }}
+                  >
                     ChessVerse
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <p style={{ color: "white", fontSize: "3rem" }}>
+                  <p
+                    style={{
+                      color: "white",
+                      fontSize: `${width < 600 ? "1.2rem" : "3rem"}`,
+                    }}
+                  >
                     Challenge yourself, Challenge the world
                   </p>
                 </div>
@@ -311,6 +334,7 @@ function Start({
                 >
                   <Nav.Link as={Link} to="/login">
                     <Button
+                      id="login"
                       color="brown"
                       style={{ fontSize: "1.5rem" }}
                       variant="contained"
@@ -327,6 +351,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="play-as-guest"
                     color="brown"
                     style={{ fontSize: "1.5rem" }}
                     onClick={async () => {
@@ -363,7 +388,12 @@ function Start({
                     marginTop: "-20px",
                   }}
                 >
-                  <p style={{ color: "white", fontSize: "4rem" }}>
+                  <p
+                    style={{
+                      color: "white",
+                      fontSize: `${width < 600 ? "2.5rem" : "4rem"}`,
+                    }}
+                  >
                     Choose an option:
                   </p>
                 </div>
@@ -375,15 +405,21 @@ function Start({
                   }}
                 >
                   <Button
+                    id="daily-board"
                     color="brown"
                     disabled={
                       sessionStorage.getItem("session_id") === "undefined"
                     }
                     onClick={async () => {
-                      console.log(API.checkStartDaily.endpoint)
-                      console.log(`${API.checkStartDaily.endpoint}?username=${user}`)
+                      console.log(API.checkStartDaily.endpoint);
+                      console.log(
+                        `${API.checkStartDaily.endpoint}?username=${user}`,
+                      );
                       const response = await fetch(
-                        joinPaths(SERVER_ADDR, `${API.checkStartDaily.endpoint}?username=${user}`)
+                        joinPaths(
+                          SERVER_ADDR,
+                          `${API.checkStartDaily.endpoint}?username=${user}`,
+                        ),
                       );
                       console.log("response status", response.status);
                       if (
@@ -406,7 +442,7 @@ function Start({
                       } else {
                         toast.error(
                           "unexpected error on server communication",
-                          { className: "toast-message" }
+                          { className: "toast-message" },
                         );
                       }
                     }}
@@ -434,6 +470,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="weekly-challenge"
                     color="brown"
                     disabled={
                       sessionStorage.getItem("session_id") === "undefined"
@@ -471,6 +508,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="ranked"
                     color="brown"
                     disabled={
                       sessionStorage.getItem("session_id") === "undefined"
@@ -508,6 +546,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="freeplay"
                     color="brown"
                     onClick={() => {
                       setMode(PVE);
@@ -547,6 +586,7 @@ function Start({
                   }}
                 >
                   <Button
+                    id="1v1"
                     color="brown"
                     onClick={() => {
                       setMode(PVP);
@@ -586,6 +626,7 @@ function Start({
                 >
                   <Button
                     color="brown"
+                    id="quit-button"
                     style={{ fontSize: "1.5rem", borderRadius: "20px" }}
                     onClick={async () => {
                       sessionStorage.setItem("session_id", undefined);
