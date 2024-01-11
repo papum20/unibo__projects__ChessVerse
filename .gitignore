@@ -45,3 +45,4 @@ code/game/test/unit/.coverage
 
 # certificates
 cert/
+code/app/cert/
